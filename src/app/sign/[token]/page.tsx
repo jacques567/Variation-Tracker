@@ -15,6 +15,8 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
 
   if (!variation) notFound()
 
+  const isTokenExpired = new Date(variation.signature_token_expires_at) < new Date()
+
   if (variation.status === 'signed') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -28,6 +30,24 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
           <p className="text-sm text-gray-500">
             This variation was signed by {variation.signature?.client_name} on{' '}
             {formatDate(variation.signature?.signed_at ?? '')}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isTokenExpired) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl border border-gray-200 p-8 max-w-md w-full text-center">
+          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h1 className="text-lg font-semibold text-gray-900 mb-2">Link expired</h1>
+          <p className="text-sm text-gray-500">
+            This signing link expired on {formatDate(variation.signature_token_expires_at)}. Please contact your contractor for a new link.
           </p>
         </div>
       </div>

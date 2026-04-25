@@ -29,9 +29,19 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
+    // Verify user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (!user || authError) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    // Verify variation exists
     const { data: variation, error: varError } = await supabase
       .from('variations')
-      .select('id')
+      .select('id, job_id')
       .eq('id', variationId)
       .single()
 
@@ -39,6 +49,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Variation not found' },
         { status: 404 }
+      )
+    }
+
+    // Verify user owns the job that contains this variation
+    const { data: job } = await supabase
+      .from('jobs')
+      .select('user_id')
+      .eq('id', variation.job_id)
+      .single()
+
+    if (!job || job.user_id !== user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
       )
     }
 

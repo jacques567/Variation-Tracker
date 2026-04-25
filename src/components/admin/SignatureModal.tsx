@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatDate, formatCurrency } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
 
 interface Signature {
   id: string
@@ -32,22 +31,45 @@ export default function SignatureModal({
   const [notes, setNotes] = useState(signature.admin_notes || '')
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [csrfToken, setCsrfToken] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchCsrfToken() {
+      try {
+        const res = await fetch('/api/csrf-token')
+        const data = await res.json()
+        setCsrfToken(data.csrfToken)
+      } catch (err) {
+        console.error('Failed to fetch CSRF token:', err)
+      }
+    }
+    fetchCsrfToken()
+  }, [])
 
   async function saveNotes() {
     if (notes === signature.admin_notes) return
+    if (!csrfToken) {
+      setSaveSuccess(false)
+      return
+    }
 
     setIsSaving(true)
-    const supabase = createClient()
 
-    const { error } = await supabase
-      .from('signatures')
-      .update({ admin_notes: notes })
-      .eq('id', signature.id)
+    try {
+      const res = await fetch(`/api/signatures/${signature.id}/notes`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes, csrfToken }),
+      })
 
-    setIsSaving(false)
-    if (!error) {
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 2000)
+      setIsSaving(false)
+      if (res.ok) {
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 2000)
+      }
+    } catch (err) {
+      setIsSaving(false)
+      console.error('Failed to save notes:', err)
     }
   }
 

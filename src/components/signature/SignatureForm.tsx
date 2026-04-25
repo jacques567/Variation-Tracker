@@ -1,8 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function SignatureForm({
@@ -18,6 +17,20 @@ export default function SignatureForm({
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [isEmpty, setIsEmpty] = useState(true)
+  const [csrfToken, setCsrfToken] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchCsrfToken() {
+      try {
+        const res = await fetch('/api/csrf-token')
+        const data = await res.json()
+        setCsrfToken(data.csrfToken)
+      } catch (err) {
+        console.error('Failed to fetch CSRF token:', err)
+      }
+    }
+    fetchCsrfToken()
+  }, [])
 
   function clearSignature() {
     sigRef.current?.clear()
@@ -28,33 +41,36 @@ export default function SignatureForm({
     e.preventDefault()
     if (!clientName.trim()) { setError('Please enter your name'); return }
     if (sigRef.current?.isEmpty()) { setError('Please sign before submitting'); return }
+    if (!csrfToken) { setError('Security token missing. Please refresh and try again.'); return }
     setError(null)
     setLoading(true)
 
     const signatureData = sigRef.current!.toDataURL('image/png')
 
-    const supabase = createClient()
+    try {
+      const res = await fetch('/api/signatures', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          variationId,
+          clientName: clientName.trim(),
+          signatureData,
+          csrfToken,
+        }),
+      })
 
-    // Insert signature
-    const { error: sigError } = await supabase.from('signatures').insert({
-      variation_id: variationId,
-      client_name: clientName.trim(),
-      signature_data: signatureData,
-    })
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || 'Failed to save signature. Please try again.')
+        setLoading(false)
+        return
+      }
 
-    if (sigError) {
+      router.refresh()
+    } catch (err) {
       setError('Failed to save signature. Please try again.')
       setLoading(false)
-      return
     }
-
-    // Update variation status to signed
-    await supabase
-      .from('variations')
-      .update({ status: 'signed' })
-      .eq('id', variationId)
-
-    router.refresh()
   }
 
   return (

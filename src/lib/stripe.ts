@@ -12,7 +12,7 @@ export function getStripe(): Stripe {
     const key = process.env.STRIPE_SECRET_KEY
     if (!key) {
       throw new Error(
-        'Missing STRIPE_SECRET_KEY — add it to your Netlify environment variables.'
+        'Missing STRIPE_SECRET_KEY — add it to your Vercel environment variables.'
       )
     }
     _stripe = new Stripe(key, { apiVersion: '2026-03-25.dahlia' })

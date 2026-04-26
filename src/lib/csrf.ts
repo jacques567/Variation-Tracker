@@ -1,6 +1,7 @@
 import Tokens from 'csrf'
 
 const tokens = new Tokens()
+const MAX_TOKENS = 10000
 
 // Track used tokens to prevent reuse (one-time use enforcement)
 // In production, use Redis or database for persistence across restarts
@@ -15,6 +16,9 @@ function getSecret(): string {
 }
 
 export async function generateCsrfToken(): Promise<string> {
+  if (usedTokens.size >= MAX_TOKENS) {
+    throw new Error('Too many active tokens. Please try again later.')
+  }
   const token = tokens.create(getSecret())
   // Token expires in 1 hour
   usedTokens.set(token, Date.now() + 3600000)

@@ -27,6 +27,7 @@ export default function SignatureForm({
         setCsrfToken(data.csrfToken)
       } catch (err) {
         console.error('Failed to fetch CSRF token:', err)
+        setError('Failed to load security token. Please refresh the page.')
       }
     }
     fetchCsrfToken()

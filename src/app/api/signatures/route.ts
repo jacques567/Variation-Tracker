@@ -52,6 +52,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!variation.job_id) {
+      return NextResponse.json(
+        { error: 'Variation has no associated job' },
+        { status: 500 }
+      )
+    }
+
     // Verify user owns the job that contains this variation
     const { data: job } = await supabase
       .from('jobs')

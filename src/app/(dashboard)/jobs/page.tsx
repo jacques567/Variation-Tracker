@@ -18,10 +18,6 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(true)
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
 
-  useEffect(() => {
-    loadData()
-  }, [])
-
   async function loadData() {
     try {
       setLoading(true)
@@ -53,6 +49,10 @@ export default function JobsPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadData()
+  }, [])
 
   // Filter jobs based on selected category
   const filteredJobs = selectedCategory

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import ExitAdminButton from '@/components/admin/ExitAdminButton'
 
 export default async function AdminLayout({
   children,
@@ -40,9 +41,7 @@ export default async function AdminLayout({
               Contractors
             </Link>
           </nav>
-          <Link href="/jobs" className="text-sm text-gray-500 hover:text-gray-900">
-            Exit Admin
-          </Link>
+          <ExitAdminButton />
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-4 py-8">

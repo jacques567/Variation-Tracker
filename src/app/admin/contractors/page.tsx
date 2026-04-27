@@ -16,10 +16,6 @@ export default function ContractorsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
 
-  useEffect(() => {
-    loadContractors()
-  }, [])
-
   async function loadContractors() {
     try {
       setLoading(true)
@@ -56,6 +52,10 @@ export default function ContractorsPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    loadContractors()
+  }, [])
 
   // Filter and search
   const filtered = useMemo(() => {

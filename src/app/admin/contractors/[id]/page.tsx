@@ -49,13 +49,6 @@ export default function ContractorDetailPage({ params }: { params: Promise<{ id:
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
 
-  useEffect(() => {
-    params.then(p => {
-      setContractorId(p.id)
-      loadData(p.id)
-    })
-  }, [params])
-
   async function loadData(id: string) {
     try {
       setLoading(true)
@@ -96,6 +89,13 @@ export default function ContractorDetailPage({ params }: { params: Promise<{ id:
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    params.then(p => {
+      setContractorId(p.id)
+      loadData(p.id)
+    })
+  }, [params])
 
   // Build event timeline
   const events = useMemo(() => {

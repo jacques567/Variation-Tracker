@@ -13,10 +13,6 @@ export default function NewJobPage() {
   const [loading, setLoading] = useState(false)
   const [categories, setCategories] = useState<JobCategory[]>([])
 
-  useEffect(() => {
-    loadCategories()
-  }, [])
-
   async function loadCategories() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -30,6 +26,10 @@ export default function NewJobPage() {
 
     setCategories(data || [])
   }
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()

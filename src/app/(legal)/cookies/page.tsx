@@ -14,7 +14,7 @@ export default function CookiesPage() {
 
       {cookiePolicy.sections.map((section) => {
         // The "Cookies we use" section gets a table treatment
-        if (section.cookies) {
+        if ('cookies' in section) {
           return (
             <section key={section.heading} className="mb-8">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">{section.heading}</h2>

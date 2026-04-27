@@ -5,17 +5,49 @@ export const COMPANY_NAME = "Variation Tracker";
 export const COMPANY_EMAIL = "hello@variationtracker.co.uk";
 export const LAST_UPDATED = "April 2026";
 
+type PolicySection = {
+  heading: string;
+  body: string;
+};
+
+type CookieEntry = {
+  name: string;
+  type: string;
+  purpose: string;
+  duration: string;
+  note?: string;
+};
+
+type CookiePolicySection =
+  | PolicySection
+  | { heading: string; body: null; cookies: CookieEntry[] };
+
+type Policy = {
+  title: string;
+  lastUpdated: string;
+  sections: PolicySection[];
+};
+
+type PolicyWithIntro = Policy & { intro: string };
+
+type CookiePolicy = {
+  title: string;
+  lastUpdated: string;
+  intro: string;
+  sections: CookiePolicySection[];
+};
+
 // ---------------------------------------------------------------------------
 // PRIVACY POLICY
 // ---------------------------------------------------------------------------
 
-export const privacyPolicy = {
+export const privacyPolicy: Policy = {
   title: "Privacy Policy",
   lastUpdated: LAST_UPDATED,
   sections: [
     {
       heading: "Who we are",
-      body: `Variation Tracker is a web application built for UK contractors and small construction businesses to log variations, obtain client sign-off, and export invoices. We are the data controller for the personal data you provide when using this service. If you have any questions about how we handle your data, contact us at ${COMPANY_EMAIL}.`,
+      body: `${COMPANY_NAME} is a web application built for UK contractors and small construction businesses to log variations, obtain client sign-off, and export invoices. We are the data controller for the personal data you provide when using this service. If you have any questions about how we handle your data, contact us at ${COMPANY_EMAIL}.`,
     },
     {
       heading: "What data we collect",
@@ -89,14 +121,14 @@ To exercise any of these rights, email us at ${COMPANY_EMAIL}. We will respond w
 // TERMS AND CONDITIONS
 // ---------------------------------------------------------------------------
 
-export const termsAndConditions = {
+export const termsAndConditions: PolicyWithIntro = {
   title: "Terms and Conditions",
   lastUpdated: LAST_UPDATED,
-  intro: `These Terms and Conditions ("Terms") govern your use of Variation Tracker (the "Service"). By creating an account you agree to these Terms. Please read them carefully.`,
+  intro: `These Terms and Conditions ("Terms") govern your use of ${COMPANY_NAME} (the "Service"). By creating an account you agree to these Terms. Please read them carefully.`,
   sections: [
     {
       heading: "1. The Service",
-      body: `Variation Tracker is a software-as-a-service (SaaS) tool that allows contractors and construction businesses to record variations, request client sign-off, and generate documentation. We provide the Service on a subscription basis.`,
+      body: `${COMPANY_NAME} is a software-as-a-service (SaaS) tool that allows contractors and construction businesses to record variations, request client sign-off, and generate documentation. We provide the Service on a subscription basis.`,
     },
     {
       heading: "2. Your account",
@@ -137,7 +169,7 @@ Our total liability to you in any 12-month period shall not exceed the fees you 
     },
     {
       heading: "8. Intellectual property",
-      body: `The Variation Tracker software, design, and branding are our intellectual property. We grant you a non-exclusive, non-transferable licence to use the Service for your business purposes. You may not copy, modify, or distribute any part of the Service without our written consent.`,
+      body: `The ${COMPANY_NAME} software, design, and branding are our intellectual property. We grant you a non-exclusive, non-transferable licence to use the Service for your business purposes. You may not copy, modify, or distribute any part of the Service without our written consent.`,
     },
     {
       heading: "9. Termination",
@@ -158,7 +190,7 @@ Our total liability to you in any 12-month period shall not exceed the fees you 
 // COOKIE POLICY
 // ---------------------------------------------------------------------------
 
-export const cookiePolicy = {
+export const cookiePolicy: CookiePolicy = {
   title: "Cookie Policy",
   lastUpdated: LAST_UPDATED,
   intro: `This Cookie Policy explains what cookies Variation Tracker uses, why we use them, and how you can control them.`,
@@ -197,7 +229,7 @@ export const cookiePolicy = {
     },
     {
       heading: "Your choices",
-      body: `When you first visit Variation Tracker you will see a consent banner. You can choose:
+      body: `When you first visit ${COMPANY_NAME} you will see a consent banner. You can choose:
 
 • Accept all — we set any optional cookies in addition to necessary ones.
 • Necessary only — we only set the cookies required for the app to work.

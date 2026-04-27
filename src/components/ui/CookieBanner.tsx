@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-type ConsentValue = 'accepted' | 'declined';
+type ConsentValue = 'all' | 'necessary';
 
 const CONSENT_KEY = 'cookie_consent';
 
@@ -21,9 +21,7 @@ export default function CookieBanner() {
   }, []);
 
   const handleConsent = (value: ConsentValue) => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(CONSENT_KEY, value);
-    }
+    localStorage.setItem(CONSENT_KEY, value);
     setVisible(false);
   };
 
@@ -31,7 +29,7 @@ export default function CookieBanner() {
 
   return (
     <div
-      role="dialog"
+      role="region"
       aria-label="Cookie consent"
       className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg"
     >
@@ -49,13 +47,13 @@ export default function CookieBanner() {
 
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => handleConsent('declined')}
+              onClick={() => handleConsent('necessary')}
               className="px-3 py-1.5 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors whitespace-nowrap"
             >
               Necessary only
             </button>
             <button
-              onClick={() => handleConsent('accepted')}
+              onClick={() => handleConsent('all')}
               className="px-3 py-1.5 text-sm text-white bg-gray-900 rounded-md hover:bg-gray-700 transition-colors whitespace-nowrap"
             >
               Accept all

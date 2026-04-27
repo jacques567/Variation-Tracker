@@ -49,11 +49,12 @@ export default function SignatureForm({
     const signatureData = sigRef.current!.toDataURL('image/png')
 
     try {
-      const res = await fetch('/api/signatures', {
+      const res = await fetch('/api/sign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           variationId,
+          token,
           clientName: clientName.trim(),
           signatureData,
           csrfToken,
@@ -69,6 +70,7 @@ export default function SignatureForm({
 
       router.refresh()
     } catch (err) {
+      console.error('Signature submission error:', err)
       setError('Failed to save signature. Please try again.')
       setLoading(false)
     }
@@ -115,7 +117,7 @@ export default function SignatureForm({
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || !csrfToken}
         className="w-full bg-blue-600 text-white rounded-lg px-4 py-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
         {loading ? 'Submitting...' : 'Sign and agree'}

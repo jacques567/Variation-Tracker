@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import NavBar from '@/components/ui/NavBar'
+import Footer from '@/components/ui/Footer'
 
 const ACTIVE_STATUSES = ['active', 'trialing']
 
@@ -24,11 +25,12 @@ export default async function DashboardLayout({
   const isSubscribePage = false // layout doesn't know the path, gate is below
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <NavBar contractor={contractor} hasSubscription={hasSubscription} />
-      <main className="max-w-4xl mx-auto px-4 py-6">
+      <main className="flex-1 max-w-4xl mx-auto px-4 py-6 w-full">
         {children}
       </main>
+      <Footer />
     </div>
   )
 }

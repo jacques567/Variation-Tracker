@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import Footer from "@/components/ui/Footer";
 import CookieBanner from "@/components/ui/CookieBanner";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VarTrack — Variation & Change Order Tracker",
+  title: "VarTracker — Variation & Change Order Tracker",
   description: "Log variations, get client sign-off, export invoices. Built for UK contractors.",
 };
 
@@ -30,6 +31,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
+        <Footer />
         <CookieBanner />
       </body>
     </html>

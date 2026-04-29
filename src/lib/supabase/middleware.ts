@@ -28,7 +28,10 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/register')
   const isPublicRoute = request.nextUrl.pathname.startsWith('/sign') ||
-    request.nextUrl.pathname.startsWith('/api')
+    request.nextUrl.pathname.startsWith('/api') ||
+    request.nextUrl.pathname.startsWith('/terms') ||
+    request.nextUrl.pathname.startsWith('/privacy') ||
+    request.nextUrl.pathname.startsWith('/cookies')
   const isRootRoute = request.nextUrl.pathname === '/'
 
   if (!user && !isAuthRoute && !isPublicRoute && !isRootRoute) {

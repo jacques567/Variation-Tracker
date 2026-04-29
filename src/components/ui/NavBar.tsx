@@ -38,7 +38,7 @@ export default function NavBar({ contractor, hasSubscription }: { contractor: Co
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/jobs" className="flex items-center gap-2 font-semibold text-gray-900">
           <Briefcase className="w-5 h-5 text-blue-600" />
-          VarTrack
+          VarTracker
         </Link>
 
         <div className="flex items-center gap-6">

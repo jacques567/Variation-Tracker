@@ -2,13 +2,14 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
-  webServer: process.env.CI ? undefined : {
+  webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
   },
   use: {
-    baseURL: process.env.CI ? 'http://localhost:3000' : 'http://localhost:3000',
+    baseURL: 'http://localhost:3000',
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

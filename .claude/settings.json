@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command' | grep -qE '^git\\s+commit' && git rev-parse --abbrev-ref HEAD | grep -qx 'main' && echo '{\"continue\": false, \"stopReason\": \"❌ Cannot commit directly to main. Create a feature branch first: git checkout -b feature/description\"}' || echo '{\"continue\": true}'",
+            "statusMessage": "Checking branch protection..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -56,7 +56,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-4">
           <p className="text-xs text-gray-500">Signed variations</p>
-          <p className="text-lg font-semibold text-green-600 mt-1">+{formatCurrency(signedTotal)}</p>
+          <p className={`text-lg font-semibold mt-1 ${signedTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {signedTotal >= 0 ? '+' : ''}{formatCurrency(signedTotal)}
+          </p>
         </div>
         <div className="bg-blue-600 rounded-xl p-4">
           <p className="text-xs text-blue-100">Running total</p>

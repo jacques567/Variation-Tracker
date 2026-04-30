@@ -27,7 +27,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run tests (excluding visual regression)
-        run: npm run test:e2e -- --grep -v "Visual Regression"
+        run: npm run test:e2e -- --grep "^(?!.*Visual Regression)"
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

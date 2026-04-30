@@ -2,7 +2,7 @@
 // Pages import from here so content is managed in one place.
 
 export const COMPANY_NAME = "Variation Tracker";
-export const COMPANY_EMAIL = "hello@variationtracker.co.uk";
+export const COMPANY_EMAIL = "admin@vartracker.com";
 export const LAST_UPDATED = "April 2026";
 
 type PolicySection = {

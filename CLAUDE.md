@@ -6,11 +6,19 @@
 
 1. **Create feature branch** — `git checkout -b feature/description`
 2. **Make changes** — write code, commit frequently
-3. **Test locally** — ensure changes work before submitting
-4. **Create PR** — `gh pr create` to propose merge to main
-5. **Review & merge** — verify nothing breaks, then merge
+3. **Test locally** — run `npm run test:e2e` to verify all tests pass
+4. **Push to GitHub** — `git push origin feature-branch`
+5. **Create PR** — `gh pr create` to propose merge to main
+6. **Review & merge** — GitHub Actions verifies tests pass, then merge
 
-**Why:** Keeps bad code off main. Every commit to main is safe and reviewed.
+**Before pushing, always run:**
+```bash
+npm run test:e2e
+```
+
+If all tests pass locally ✅, push to GitHub. GitHub Actions will run tests again as backup verification.
+
+**Why:** Catches bugs early. Saves time by not pushing broken code to GitHub.
 
 ---
 

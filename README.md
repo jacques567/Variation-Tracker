@@ -34,4 +34,28 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# Test push for CI/CD
+
+## Health Check Endpoint
+
+Before deployment, verify the app is healthy:
+
+```bash
+curl https://vartracker.com/api/health | jq
+```
+
+This endpoint checks:
+- Environment variables configured
+- Database connectivity
+- Stripe integration
+- Security configuration
+- Dependencies loaded
+
+Returns `200 OK` if healthy, `503 Service Unavailable` if degraded.
+
+## CI/CD Pipeline
+
+Automated workflow on every push to `main`:
+1. Lint & build check
+2. E2E tests + health check
+3. Deploy to staging preview
+4. Deploy to production (requires approval)

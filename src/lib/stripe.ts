@@ -15,7 +15,7 @@ export function getStripe(): Stripe {
         'Missing STRIPE_SECRET_KEY — add it to your Vercel environment variables.'
       )
     }
-    _stripe = new Stripe(key, { apiVersion: '2026-03-25.dahlia' })
+    _stripe = new Stripe(key, { apiVersion: '2026-04-22.dahlia' })
   }
   return _stripe
 }

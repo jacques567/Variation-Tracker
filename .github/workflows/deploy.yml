@@ -22,8 +22,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run E2E Tests
-        run: npm run test:e2e
+      - name: Run E2E Tests (excluding visual regression — OS-specific)
+        run: npm run test:e2e -- --grep "^(?!.*Visual Regression)"
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

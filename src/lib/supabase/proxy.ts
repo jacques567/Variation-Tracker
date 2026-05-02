@@ -23,7 +23,10 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // Optimistic cookie check only — no network call. Actual auth verification
+  // happens in server components and route handlers via getUser().
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
 
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/register')

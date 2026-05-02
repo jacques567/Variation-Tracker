@@ -23,6 +23,14 @@ async function updateSubscription(
 }
 
 export async function POST(request: NextRequest) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!secret) {
+    return NextResponse.json(
+      { error: 'Webhook secret not configured' },
+      { status: 500 }
+    )
+  }
+
   const body = await request.text()
   const sig = request.headers.get('stripe-signature')!
 
@@ -30,7 +38,7 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = stripe.webhooks.constructEvent(body, sig, secret)
   } catch {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }

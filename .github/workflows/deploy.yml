@@ -109,7 +109,7 @@ jobs:
       - name: Deploy to Vercel Staging
         id: staging
         run: |
-          npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} > deployment-url.txt
+          npx vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} > deployment-url.txt
           echo "url=$(cat deployment-url.txt)" >> $GITHUB_OUTPUT
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -155,7 +155,7 @@ jobs:
       - run: npm ci
 
       - name: Deploy to Vercel Production
-        run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}

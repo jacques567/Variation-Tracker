@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write  # needed to create commit comments and push release tags
+
 jobs:
   # Step 1: Lint
   lint:

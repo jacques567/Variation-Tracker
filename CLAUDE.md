@@ -32,6 +32,17 @@ If all tests pass locally ✅, push to GitHub. GitHub Actions will run tests aga
 
 **Why:** Catches bugs early. Saves time by not pushing broken code to GitHub.
 
+### Visual Regression Tests
+
+This project includes visual regression tests (Playwright screenshots). Important notes:
+
+- **Local dev**: Run full tests — visual regression catches UI breakage
+- **CI/CD (GitHub Actions)**: Visual regression tests are **skipped** because snapshots are OS-specific
+  - macOS and Linux render pages differently
+  - This prevents flaky CI failures
+  - Functional tests (104) still run and pass
+- **If visual regression fails locally**: Review the diff, update snapshots if intentional (`npm run test:e2e -- --update-snapshots`), commit them
+
 ---
 
 @AGENTS.md

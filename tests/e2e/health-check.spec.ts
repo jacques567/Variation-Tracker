@@ -4,8 +4,9 @@ test.describe('Health Check — Last Line of Defense', () => {
   test('health endpoint should respond and be structured correctly', async ({ request }) => {
     const response = await request.get('/api/health');
 
-    // Should respond (not 404 or 500 internal error)
-    expect(response.status()).toBeLessThan(500);
+    // Should respond with 200 (healthy), 503 (degraded), or 500 (error)
+    // We accept 200 and 503, reject 500 or higher
+    expect([200, 503]).toContain(response.status());
 
     const json = await response.json();
 
@@ -70,11 +71,11 @@ test.describe('Health Check — Last Line of Defense', () => {
 
   test('health check should not be completely broken', async ({ request }) => {
     // On production deploy, this endpoint must be accessible
-    // In CI, we just verify it doesn't crash or return 500
+    // In CI, we accept 200 (healthy) or 503 (degraded)
     const response = await request.get('/api/health');
 
-    // Critical: should not be 500 Internal Server Error
-    expect(response.status()).not.toBe(500);
+    // Accept 200 or 503, reject 500+ errors
+    expect([200, 503]).toContain(response.status());
 
     // Should be valid JSON
     const json = await response.json();

@@ -1,14 +1,48 @@
-name: Deploy
+name: Main
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  # Step 1: Run Tests
-  test:
+  # Step 1: Lint
+  lint:
     runs-on: ubuntu-latest
-    name: "1️⃣ Run E2E Tests"
+    name: "1️⃣ Lint & Build Check"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build (with placeholder env vars)
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+          NEXT_PUBLIC_APP_URL: https://vartracker.com
+          SUPABASE_SERVICE_ROLE_KEY: placeholder
+          STRIPE_SECRET_KEY: sk_test_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_placeholder
+          STRIPE_PRICE_ID: price_placeholder
+          CSRF_SECRET: placeholder_csrf_secret_32chars_xx
+
+      - name: Lint
+        run: npm run lint
+
+  # Step 2: E2E Tests
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    name: "2️⃣ E2E Tests"
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -22,7 +56,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Run E2E Tests (excluding visual regression — OS-specific)
+      - name: Run tests (excluding visual regression)
         run: npm run test:e2e -- --grep "^(?!.*Visual Regression)"
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -32,67 +66,23 @@ jobs:
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
           STRIPE_PRICE_ID: ${{ secrets.STRIPE_PRICE_ID }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
           CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
-          LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
-          LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
-          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
 
-  # Step 2: Security Checks (Lint + Dependency Scan)
-  security:
-    runs-on: ubuntu-latest
-    name: "2️⃣ Security Checks"
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          node-version: 20
-          cache: npm
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
-      - run: npm ci
-
-      - name: Lint Code
-        run: npm run lint
-
-      - name: Check for Vulnerable Dependencies
-        run: npm audit --audit-level=moderate || true
-
-  # Step 3: Build the App
-  build:
-    needs: [test, security]
-    runs-on: ubuntu-latest
-    name: "3️⃣ Build Production Bundle"
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - run: npm ci
-
-      - name: Build Next.js App
-        run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
-          STRIPE_PRICE_ID: ${{ secrets.STRIPE_PRICE_ID }}
-          CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
-          LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
-          LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
-          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
-          NEXT_PUBLIC_APP_URL: https://vartracker.com
-
-  # Step 4: Deploy to Staging (Preview)
+  # Step 3: Deploy to Staging (only on main push, not on PRs)
   deploy-staging:
-    needs: build
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    name: "4️⃣ Deploy to Staging"
+    name: "3️⃣ Deploy to Staging"
     environment:
       name: staging
       url: https://${{ steps.staging.outputs.url }}
@@ -111,6 +101,7 @@ jobs:
         run: |
           npx vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }} > deployment-url.txt
           echo "url=$(cat deployment-url.txt)" >> $GITHUB_OUTPUT
+        env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -132,14 +123,14 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: '✅ Staging deployment ready: ${{ steps.staging.outputs.url }}'
+              body: '✅ Staging preview: ${{ steps.staging.outputs.url }}'
             })
 
-  # Step 5: Deploy to Production (with approval)
+  # Step 4: Deploy to Production (only on main push, requires approval)
   deploy-production:
     needs: deploy-staging
     runs-on: ubuntu-latest
-    name: "5️⃣ Deploy to Production"
+    name: "4️⃣ Deploy to Production"
     environment:
       name: production
       url: https://vartracker.com
@@ -155,6 +146,7 @@ jobs:
 
       - name: Deploy to Vercel Production
         run: npx vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

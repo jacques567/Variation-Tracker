@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f7f3ef" />
+  <title>Privacy Policy — Variation Tracker</title>
+  <meta name="description" content="Variation Tracker privacy policy — how we collect, use, and protect your personal data." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:   oklch(52% 0.16 250);
+      --coal:    oklch(20% 0.008 60);
+      --mid:     oklch(42% 0.006 60);
+      --muted:   oklch(55% 0.005 60);
+      --border:  oklch(84% 0.006 60);
+      --surface: oklch(97.5% 0.004 60);
+      --page:    oklch(99.5% 0.003 60);
+      --font:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--page);
+      color: var(--coal);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      width: 100%;
+      padding: 2rem 2.5rem;
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--brand);
+      text-decoration: none;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 4rem 2.5rem 5rem;
+    }
+
+    .page-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--brand);
+      margin-bottom: 0.75rem;
+    }
+
+    .page-rule {
+      width: 36px; height: 2px;
+      background: var(--brand);
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 3vw, 2.25rem);
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--coal);
+      margin-bottom: 0.5rem;
+    }
+
+    .page-meta {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--coal);
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      padding-top: 2.5rem;
+      border-top: 0.5px solid var(--border);
+    }
+
+    h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+    h3 {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--coal);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: var(--mid);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+      max-width: 65ch;
+    }
+
+    ul {
+      margin: 0.5rem 0 1rem 1.25rem;
+    }
+
+    ul li {
+      font-size: 0.9rem;
+      color: var(--mid);
+      line-height: 1.75;
+      margin-bottom: 0.4rem;
+      max-width: 65ch;
+    }
+
+    a { color: var(--brand); }
+    a:focus-visible {
+      outline: 2px solid var(--brand);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
+    .highlight {
+      background: oklch(95% 0.03 250);
+      border: 0.5px solid oklch(85% 0.07 250);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .highlight p {
+      font-size: 0.85rem;
+      color: oklch(35% 0.1 250);
+      margin: 0;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-weight: 500;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0.5rem 1rem 0.5rem 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 0.75rem 1rem 0.75rem 0;
+      border-bottom: 0.5px solid var(--border);
+      color: var(--mid);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    .data-table td:first-child { color: var(--coal); font-weight: 500; }
+
+    footer {
+      width: 100%;
+      flex-shrink: 0;
+      padding: 1.25rem 2.5rem 2rem;
+      border-top: 0.5px solid var(--border);
+      display: flex;
+      justify-content: center;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 520px;
+      width: 100%;
+    }
+
+    footer a {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: color 0.18s ease-out;
+      padding: 12px 0;
+      display: inline-block;
+    }
+
+    footer a:hover { color: var(--coal); }
+
+    @media (max-width: 480px) {
+      header { padding: 1.5rem; }
+      main { padding: 3rem 1.5rem 4rem; }
+      footer { padding: 1rem 1.5rem 1.75rem; }
+      .data-table { font-size: 0.8rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="/" class="logo">Variation Tracker</a>
+  </header>
+
+  <main>
+    <p class="page-label">Legal</p>
+    <div class="page-rule"></div>
+    <h1>Privacy Policy</h1>
+    <p class="page-meta">Last updated: 27 April 2026 &nbsp;·&nbsp; Effective immediately</p>
+
+    <div class="highlight">
+      <p>Variation Tracker is operated by WildFireCo (trading as WildFire), a UK-registered company. This policy explains how we collect, use, and protect personal data in connection with the Variation Tracker service at vartracker.com.</p>
+    </div>
+
+    <h2>Who we are</h2>
+    <p>Variation Tracker is a trading name of WildFireCo (company number 17181791), registered in England and Wales with Companies House. We are the data controller for all personal data processed through vartracker.com.</p>
+    <p>You can contact us about privacy matters at <a href="mailto:admin@vartracker.com">admin@vartracker.com</a>.</p>
+
+    <h2>Who this policy covers</h2>
+    <p>This policy covers two groups of people whose personal data we process:</p>
+    <ul>
+      <li><strong>Contractors</strong> — individuals and sole traders who register for a Variation Tracker account to manage their jobs and variations.</li>
+      <li><strong>Clients</strong> — individuals whose details contractors enter into the platform (name, email, phone, address) and who may be sent a variation notice for e-signature. Clients do not have accounts with us.</li>
+    </ul>
+
+    <h2>What data we collect and why</h2>
+
+    <h3>Contractor account data</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Purpose</th>
+          <th>Lawful basis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Full name, email address</td>
+          <td>Account creation and identification</td>
+          <td>Contract</td>
+        </tr>
+        <tr>
+          <td>Company name, phone number</td>
+          <td>Profile information (optional)</td>
+          <td>Contract</td>
+        </tr>
+        <tr>
+          <td>Stripe customer ID, subscription ID, subscription status</td>
+          <td>Managing your paid subscription and billing</td>
+          <td>Contract</td>
+        </tr>
+        <tr>
+          <td>Account creation date, login activity</td>
+          <td>Security and account management</td>
+          <td>Legitimate interests</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Job and variation data</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Purpose</th>
+          <th>Lawful basis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Job name, address, original value, status</td>
+          <td>Core service — tracking jobs and variations</td>
+          <td>Contract (contractor); Legitimate interests (client data entered by contractor)</td>
+        </tr>
+        <tr>
+          <td>Client name, email, phone number</td>
+          <td>Identifying the client for each job and sending variation notices</td>
+          <td>Legitimate interests</td>
+        </tr>
+        <tr>
+          <td>Variation description, cost, date, photos</td>
+          <td>Recording variation details; generating PDF notices and invoices</td>
+          <td>Contract</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Signature data (clients)</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Purpose</th>
+          <th>Lawful basis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Client name (as entered at signing)</td>
+          <td>Identifying the signatory on the variation notice</td>
+          <td>Legitimate interests — creating a valid contractual record</td>
+        </tr>
+        <tr>
+          <td>Electronic signature (drawn image)</td>
+          <td>Recording the client's approval of the variation</td>
+          <td>Legitimate interests — creating a valid contractual record</td>
+        </tr>
+        <tr>
+          <td>IP address at time of signing</td>
+          <td>Creating an audit trail for the e-signature — records that the signature was submitted from a specific network location at a specific time</td>
+          <td>Legitimate interests — protecting the legal validity of the signed record</td>
+        </tr>
+        <tr>
+          <td>Timestamp of signing</td>
+          <td>Recording when the variation was approved</td>
+          <td>Legitimate interests</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>How long we keep your data</h2>
+    <ul>
+      <li><strong>Account data</strong> — deleted within 90 days of account cancellation, unless a longer retention period is required by law.</li>
+      <li><strong>Job, variation, and invoice records</strong> — retained for 6 years from the date of the last transaction, in line with the UK Limitation Act 1980 and standard financial record-keeping requirements.</li>
+      <li><strong>Signature records (including IP address)</strong> — retained for 6 years from the date of signing, as they form part of the contractual record for the variation.</li>
+      <li><strong>Photos</strong> — retained for the same period as the associated variation record. Deleted when the parent job is deleted by the contractor.</li>
+    </ul>
+
+    <h2>Who we share your data with</h2>
+    <p>We do not sell personal data. We share data only with the following third-party processors, each under a Data Processing Agreement:</p>
+    <ul>
+      <li><strong>Supabase</strong> — our database, authentication, and file storage provider. See <a href="https://supabase.com/privacy" target="_blank" rel="noopener">supabase.com/privacy</a>.</li>
+      <li><strong>Stripe</strong> — our payment processor. We do not store card details. See <a href="https://stripe.com/gb/privacy" target="_blank" rel="noopener">stripe.com/gb/privacy</a>.</li>
+    </ul>
+    <p>We may also disclose personal data where required to do so by law, court order, or regulatory authority.</p>
+
+    <h2>International data transfers</h2>
+    <p>Supabase and Stripe may process data outside the UK or European Economic Area. Where this occurs, we rely on appropriate transfer mechanisms — including Standard Contractual Clauses and UK International Data Transfer Agreements — to ensure your data receives equivalent protection.</p>
+    <p>You can request details of the specific transfer mechanisms in place by contacting us at <a href="mailto:admin@vartracker.com">admin@vartracker.com</a>.</p>
+
+    <h2>Security</h2>
+    <p>We implement appropriate technical and organisational measures to protect personal data, including row-level security on all database tables, private access-controlled file storage, secure session management via Supabase Auth, and HTTPS enforced across all pages.</p>
+    <p>In the event of a personal data breach, we will notify the Information Commissioner's Office within 72 hours where required, and affected individuals without undue delay where the breach poses a high risk to their rights and freedoms.</p>
+
+    <h2>Your rights</h2>
+    <p>Under UK GDPR, you have the right to access, rectify, erase, restrict, port, and object to the processing of your personal data. To exercise any of these rights, contact us at <a href="mailto:admin@vartracker.com">admin@vartracker.com</a>. We will respond within 30 days. You also have the right to lodge a complaint with the Information Commissioner's Office at <a href="https://ico.org.uk" target="_blank" rel="noopener">ico.org.uk</a>.</p>
+
+    <h2>Note for clients (non-account holders)</h2>
+    <p>If you have received a variation notice from a contractor who uses Variation Tracker, your name, contact details, and signature have been processed by us as part of providing the service to that contractor. You have the same rights as described above. Contact us at <a href="mailto:admin@vartracker.com">admin@vartracker.com</a> with details of the contractor or job, and we will assist you.</p>
+
+    <h2>Cookies</h2>
+    <p>We use cookies to operate the service. See our <a href="cookies.html">Cookies Policy</a> for details.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>We may update this policy from time to time. Material changes will be notified to registered users by email. The date at the top of this page will always reflect the most recent version.</p>
+
+    <h2>Contact us</h2>
+    <p>For any privacy-related questions, requests, or concerns, contact us at <a href="mailto:admin@vartracker.com">admin@vartracker.com</a>.</p>
+  </main>
+
+  <footer>
+    <nav class="footer-links" aria-label="Legal">
+      <a href="cookies.html">Cookies Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="privacy.html">Privacy Policy</a>
+    </nav>
+  </footer>
+
+</body>
+</html>

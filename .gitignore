@@ -43,3 +43,18 @@ next-env.d.ts
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# Local task tracking (not synced to repo)
+TASKS.md
+
+# Test results and snapshots
+test-results/
+tests/e2e/visual-regression.spec.ts-snapshots/
+
+# Stage-specific folders (local workspace only, not synced to repo)
+building/
+research/
+planning/
+testing/
+design/
+delivery/

@@ -1,5 +1,17 @@
 # Variation Tracker – SOP & Project Notes
 
+## CRITICAL: Before Any Code Changes
+
+**ALWAYS do this first:**
+1. Run `git status` to verify current branch
+2. Confirm you are NOT on main — main is protected
+3. Create a feature branch: `git checkout -b feature/description`
+4. Reference this SOP before touching any files
+
+Do not proceed with edits until feature branch is created.
+
+---
+
 ## Git Workflow (SOP)
 
 **Main branch is protected.** All code changes follow this process:

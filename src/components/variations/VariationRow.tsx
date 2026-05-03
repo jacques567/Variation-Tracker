@@ -19,7 +19,9 @@ const statusStyles = {
 export default function VariationRow({ variation, jobId }: Props) {
   const [copied, setCopied] = useState(false)
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== 'undefined')
+    ? process.env.NEXT_PUBLIC_APP_URL
+    : (typeof window !== 'undefined' ? window.location.origin : '')
   const signLink = `${appUrl}/sign/${variation.signature_token}`
 
   async function copyLink() {

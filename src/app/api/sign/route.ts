@@ -32,35 +32,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 403 })
     }
 
-    if (variation.status === 'signed') {
-      return NextResponse.json({ error: 'Already signed' }, { status: 409 })
-    }
-
     const clientIp = extractClientIp(
       request.headers.get('x-forwarded-for'),
       request.headers.get('x-real-ip')
     )
 
-    const { error: sigError } = await supabase.from('signatures').insert({
-      variation_id: variationId,
-      client_name: clientName.trim(),
-      signature_data: signatureData,
-      client_ip: clientIp,
+    const { data, error } = await supabase.rpc('sign_variation', {
+      p_variation_id: variationId,
+      p_client_name: clientName.trim(),
+      p_signature_data: signatureData,
+      p_client_ip: clientIp,
     })
 
-    if (sigError) {
-      console.error('Signature insert error:', sigError)
-      return NextResponse.json({ error: 'Failed to save signature' }, { status: 500 })
+    if (error) {
+      console.error('RPC error:', error)
+      return NextResponse.json({ error: 'Failed to sign variation' }, { status: 500 })
     }
 
-    const { error: updateError } = await supabase
-      .from('variations')
-      .update({ status: 'signed' })
-      .eq('id', variationId)
-
-    if (updateError) {
-      console.error('Variation update error:', updateError)
-      return NextResponse.json({ error: 'Failed to update variation status' }, { status: 500 })
+    if (data?.error) {
+      if (data.code === 'already_signed') {
+        return NextResponse.json({ error: 'Already signed' }, { status: 409 })
+      }
+      if (data.code === 'not_found') {
+        return NextResponse.json({ error: 'Variation not found' }, { status: 404 })
+      }
+      return NextResponse.json({ error: data.error }, { status: 400 })
     }
 
     return NextResponse.json({ success: true })

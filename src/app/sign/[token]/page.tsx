@@ -15,7 +15,8 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
 
   if (!variation) notFound()
 
-  const isTokenExpired = new Date(variation.signature_token_expires_at) < new Date()
+  const expiresAt = variation.signature_token_expires_at ? new Date(variation.signature_token_expires_at) : null
+  const isTokenExpired = !expiresAt || expiresAt < new Date()
 
   if (variation.status === 'signed') {
     return (
@@ -47,7 +48,7 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
           </div>
           <h1 className="text-lg font-semibold text-gray-900 mb-2">Link expired</h1>
           <p className="text-sm text-gray-500">
-            This signing link expired on {formatDate(variation.signature_token_expires_at)}. Please contact your contractor for a new link.
+            This signing link expired on {expiresAt ? formatDate(variation.signature_token_expires_at) : 'an unknown date'}. Please contact your contractor for a new link.
           </p>
         </div>
       </div>

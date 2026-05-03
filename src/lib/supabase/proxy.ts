@@ -23,10 +23,16 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Optimistic cookie check only — no network call. Actual auth verification
-  // happens in server components and route handlers via getUser().
+  // Check session and validate token expiry early (prevent unnecessary downstream processing)
   const { data: { session } } = await supabase.auth.getSession()
   const user = session?.user
+
+  // Early reject if token is expired
+  if (session?.expires_at && new Date(session.expires_at * 1000).getTime() < Date.now()) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    return NextResponse.redirect(url)
+  }
 
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/register')

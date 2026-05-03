@@ -19,14 +19,6 @@ export async function POST(request: NextRequest) {
 
     const { variationId, clientName, signatureData, csrfToken } = SignatureSchema.parse(body)
 
-    const isValidToken = await verifyCsrfToken(csrfToken)
-    if (!isValidToken) {
-      return NextResponse.json(
-        { error: 'Invalid CSRF token' },
-        { status: 403 }
-      )
-    }
-
     const supabase = await createClient()
 
     // Verify user is authenticated
@@ -35,6 +27,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    const isValidToken = await verifyCsrfToken(supabase, csrfToken, user.id)
+    if (!isValidToken) {
+      return NextResponse.json(
+        { error: 'Invalid CSRF token' },
+        { status: 403 }
       )
     }
 

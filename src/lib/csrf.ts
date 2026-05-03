@@ -1,11 +1,7 @@
 import Tokens from 'csrf'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 const tokens = new Tokens()
-const MAX_TOKENS = 10000
-
-// Track used tokens to prevent reuse (one-time use enforcement)
-// In production, use Redis or database for persistence across restarts
-const usedTokens = new Map<string, number>()
 
 function getSecret(): string {
   const secret = process.env.CSRF_SECRET
@@ -15,47 +11,56 @@ function getSecret(): string {
   return secret
 }
 
-export async function generateCsrfToken(): Promise<string> {
-  if (usedTokens.size >= MAX_TOKENS) {
-    throw new Error('Too many active tokens. Please try again later.')
+export function extractClientIp(xForwardedFor?: string | null, xRealIp?: string | null): string | null {
+  if (xForwardedFor) {
+    return xForwardedFor.split(',')[0]?.trim() ?? null
   }
+  return xRealIp ?? null
+}
+
+export async function generateCsrfToken(
+  supabaseClient: SupabaseClient,
+  userId?: string,
+  clientIp?: string
+): Promise<string> {
   const token = tokens.create(getSecret())
-  // Token expires in 1 hour
-  usedTokens.set(token, Date.now() + 3600000)
+  const expiresAt = new Date(Date.now() + 3600000).toISOString() // 1 hour
+
+  const { error } = await supabaseClient.from('csrf_tokens').insert({
+    token,
+    user_id: userId || null,
+    expires_at: expiresAt,
+    client_ip: clientIp || null,
+  })
+
+  if (error) {
+    throw new Error(`Failed to store CSRF token: ${error.message}`)
+  }
+
   return token
 }
 
-export async function verifyCsrfToken(token: string): Promise<boolean> {
-  // Check if token has been used before (prevent replay)
-  if (!usedTokens.has(token)) {
+export async function verifyCsrfToken(
+  supabaseClient: SupabaseClient,
+  token: string,
+  userId?: string
+): Promise<boolean> {
+  // Atomic verification via RPC: prevents race condition where token could be used twice
+  const { data, error } = await supabaseClient.rpc('verify_and_mark_csrf_token', {
+    p_token: token,
+    p_user_id: userId || null,
+  })
+
+  if (error) {
     return false
   }
 
-  const expiryTime = usedTokens.get(token)!
-
-  // Check if token has expired
-  if (Date.now() > expiryTime) {
-    usedTokens.delete(token)
+  if (!data?.is_valid) {
     return false
   }
 
-  // Verify signature
+  // Verify signature with CSRF library (library-level validation)
   const isValid = tokens.verify(getSecret(), token)
-
-  // Mark token as consumed (one-time use)
-  if (isValid) {
-    usedTokens.delete(token)
-  }
 
   return isValid
 }
-
-// Cleanup expired tokens every 10 minutes
-setInterval(() => {
-  const now = Date.now()
-  for (const [token, expiryTime] of usedTokens.entries()) {
-    if (now > expiryTime) {
-      usedTokens.delete(token)
-    }
-  }
-}, 600000)

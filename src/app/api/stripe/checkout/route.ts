@@ -31,18 +31,23 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
   }
 
-  const session = await stripe.checkout.sessions.create({
-    customer: customerId,
-    payment_method_types: ['card'],
-    mode: 'subscription',
-    line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/jobs?subscribed=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe`,
-    subscription_data: {
-      trial_period_days: 14,
-      metadata: { supabase_user_id: user.id },
+  const session = await stripe.checkout.sessions.create(
+    {
+      customer: customerId,
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/jobs?subscribed=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe`,
+      subscription_data: {
+        trial_period_days: 14,
+        metadata: { supabase_user_id: user.id },
+      },
     },
-  })
+    {
+      idempotencyKey: `checkout_${user.id}_${Date.now()}`,
+    }
+  )
 
   return NextResponse.json({ url: session.url })
 }

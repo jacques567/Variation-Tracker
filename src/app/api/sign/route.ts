@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { verifyCsrfToken } from '@/lib/csrf'
+import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
 
 export async function POST(request: NextRequest) {
   const { variationId, token, clientName, signatureData, csrfToken } = await request.json()
@@ -9,15 +9,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const isValidCsrf = await verifyCsrfToken(csrfToken)
-  if (!isValidCsrf) {
-    return NextResponse.json({ error: 'Invalid security token' }, { status: 403 })
-  }
-
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
+
+  const isValidCsrf = await verifyCsrfToken(supabase, csrfToken)
+  if (!isValidCsrf) {
+    return NextResponse.json({ error: 'Invalid security token' }, { status: 403 })
+  }
 
   const { data: variation } = await supabase
     .from('variations')
@@ -35,11 +35,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Already signed' }, { status: 409 })
   }
 
+  const clientIp = extractClientIp(
+    request.headers.get('x-forwarded-for'),
+    request.headers.get('x-real-ip')
+  )
+
   const { error: sigError } = await supabase.from('signatures').insert({
     variation_id: variationId,
     client_name: clientName.trim(),
     signature_data: signatureData,
-    client_ip: request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? null,
+    client_ip: clientIp,
   })
 
   if (sigError) {

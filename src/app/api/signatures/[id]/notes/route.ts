@@ -17,14 +17,6 @@ export async function PATCH(
     const body = await request.json()
     const { notes, csrfToken } = NotesSchema.parse(body)
 
-    const isValidToken = await verifyCsrfToken(csrfToken)
-    if (!isValidToken) {
-      return NextResponse.json(
-        { error: 'Invalid CSRF token' },
-        { status: 403 }
-      )
-    }
-
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -32,6 +24,14 @@ export async function PATCH(
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    const isValidToken = await verifyCsrfToken(supabase, csrfToken, user.id)
+    if (!isValidToken) {
+      return NextResponse.json(
+        { error: 'Invalid CSRF token' },
+        { status: 403 }
       )
     }
 

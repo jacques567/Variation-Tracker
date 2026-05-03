@@ -1,17 +1,29 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { JobCategory } from '@/types'
 
+const STORAGE_KEY = 'job_form_draft'
+
 export default function NewJobPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [categories, setCategories] = useState<JobCategory[]>([])
+  const [formData, setFormData] = useState({
+    job_name: '',
+    address: '',
+    original_value: '',
+    category: '',
+    client_name: '',
+    client_email: '',
+    client_phone: ''
+  })
+  const formRef = useRef<HTMLFormElement>(null)
 
   async function loadCategories() {
     const supabase = createClient()
@@ -29,29 +41,39 @@ export default function NewJobPage() {
 
   useEffect(() => {
     loadCategories()
+    const saved = sessionStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      setFormData(JSON.parse(saved))
+    }
   }, [])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    const newData = { ...formData, [name]: value }
+    setFormData(newData)
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newData))
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
-    const form = new FormData(e.currentTarget)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) { router.push('/login'); return }
 
-    const originalValuePounds = parseFloat(form.get('original_value') as string) || 0
-    const categoryValue = form.get('category') as string || null
+    const originalValuePounds = parseFloat(formData.original_value) || 0
+    const categoryValue = formData.category || null
 
     const { data, error } = await supabase.from('jobs').insert({
       contractor_id: user.id,
-      job_name: form.get('job_name') as string,
-      client_name: form.get('client_name') as string,
-      client_email: form.get('client_email') as string,
-      client_phone: form.get('client_phone') as string || null,
-      address: form.get('address') as string,
+      job_name: formData.job_name,
+      client_name: formData.client_name,
+      client_email: formData.client_email,
+      client_phone: formData.client_phone || null,
+      address: formData.address,
       original_value: Math.round(originalValuePounds * 100),
       category: categoryValue,
     }).select().single()
@@ -62,6 +84,7 @@ export default function NewJobPage() {
       return
     }
 
+    sessionStorage.removeItem(STORAGE_KEY)
     router.push(`/jobs/${data.id}`)
   }
 
@@ -74,31 +97,31 @@ export default function NewJobPage() {
       <h1 className="text-xl font-semibold text-gray-900 mb-6">New job</h1>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Job name</label>
-            <input name="job_name" type="text" required
+            <input name="job_name" type="text" required value={formData.job_name} onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. Kitchen extension – 14 Maple St" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Site address</label>
-            <input name="address" type="text" required
+            <input name="address" type="text" required value={formData.address} onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="14 Maple Street, Manchester, M1 1AB" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Original contract value (£)</label>
-            <input name="original_value" type="number" min="0" step="0.01" required
+            <input name="original_value" type="number" min="0" step="0.01" required value={formData.original_value} onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="5000.00" />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <select name="category"
+            <select name="category" value={formData.category} onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">-- No category --</option>
               {categories.map(cat => (
@@ -115,7 +138,7 @@ export default function NewJobPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Client name</label>
-            <input name="client_name" type="text" required
+            <input name="client_name" type="text" required value={formData.client_name} onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="John Smith" />
           </div>
@@ -123,13 +146,13 @@ export default function NewJobPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Client email</label>
-              <input name="client_email" type="email" required
+              <input name="client_email" type="email" required value={formData.client_email} onChange={handleInputChange}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="john@example.com" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Client phone</label>
-              <input name="client_phone" type="tel"
+              <input name="client_phone" type="tel" value={formData.client_phone} onChange={handleInputChange}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="07700 900000" />
             </div>

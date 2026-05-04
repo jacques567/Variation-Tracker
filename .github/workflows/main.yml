@@ -20,6 +20,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Type check
+        run: npx tsc --noEmit
+
       - name: Build (with placeholder env vars)
         run: npm run build
         env:

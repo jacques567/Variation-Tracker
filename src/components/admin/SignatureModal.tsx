@@ -8,9 +8,9 @@ interface Signature {
   variation_id: string
   client_name: string
   signature_data: string
-  created_at: string
-  signed_at?: string
-  admin_notes?: string
+  signed_at: string
+  client_ip?: string | null
+  admin_notes?: string | null
 }
 
 interface Variation {
@@ -105,7 +105,7 @@ export default function SignatureModal({
               {/* Date */}
               <div>
                 <p className="text-sm text-gray-500 mb-1">Signed on</p>
-                <p className="text-gray-900">{formatDate(signature.signed_at || signature.created_at)}</p>
+                <p className="text-gray-900">{formatDate(signature.signed_at)}</p>
               </div>
 
               {/* Variation Details */}

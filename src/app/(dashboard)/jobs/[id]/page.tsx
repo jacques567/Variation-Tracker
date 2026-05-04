@@ -90,8 +90,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         </div>
       ) : (
         <div className="space-y-2">
-          {variations.map((variation: Parameters<typeof VariationRow>[0]['variation']) => (
-            <VariationRow key={variation.id} variation={variation} jobId={id} />
+          {variations.map((v: any) => (
+            <VariationRow key={v.id} variation={v} jobId={id} />
           ))}
         </div>
       )}

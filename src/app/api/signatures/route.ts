@@ -62,11 +62,11 @@ export async function POST(request: NextRequest) {
     // Verify user owns the job that contains this variation
     const { data: job } = await supabase
       .from('jobs')
-      .select('user_id')
+      .select('contractor_id')
       .eq('id', variation.job_id)
       .single()
 
-    if (!job || job.user_id !== user.id) {
+    if (!job || job.contractor_id !== user.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

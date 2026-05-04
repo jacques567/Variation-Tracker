@@ -11,9 +11,10 @@ export interface Contractor {
   company_name: string | null
   phone: string | null
   stripe_customer_id: string | null
-  subscription_status: SubscriptionStatus | null
+  subscription_status: string | null
   subscription_id: string | null
   created_at: string
+  role?: string | null
 }
 
 export interface Job {
@@ -36,7 +37,7 @@ export interface JobCategory {
   id: string
   contractor_id: string
   name: string
-  created_at: string
+  created_at: string | null
 }
 
 export interface Variation {
@@ -46,10 +47,11 @@ export interface Variation {
   cost: number
   date: string
   photo_url: string | null
-  status: VariationStatus
+  status: string
   signature_token: string
   created_at: string
   updated_at: string
+  signature_token_expires_at?: string | null
   signature?: Signature
   job?: Job
 }
@@ -61,6 +63,7 @@ export interface Signature {
   signature_data: string
   signed_at: string
   client_ip: string | null
+  admin_notes?: string | null
 }
 
 export interface JobWithTotals extends Job {

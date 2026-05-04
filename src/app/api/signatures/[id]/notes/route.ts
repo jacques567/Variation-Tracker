@@ -20,7 +20,7 @@ export async function PATCH(
     const supabase = await createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (!user || authError) {
+    if (!user || !user.email || authError) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

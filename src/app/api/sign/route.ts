@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
+import { Errors } from '@/lib/errors'
+
+function errorResponse(err: unknown) {
+  if (err instanceof Error && 'statusCode' in err && typeof err.statusCode === 'number') {
+    return NextResponse.json((err as any).toJSON(), { status: err.statusCode })
+  }
+  return NextResponse.json(Errors.internalError().toJSON(), { status: 500 })
+}
 
 export async function POST(request: NextRequest) {
   try {
     const { variationId, token, clientName, signatureData, csrfToken } = await request.json()
 
     if (!variationId || !token || !clientName || !signatureData || !csrfToken) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      const err = Errors.missingFields(['variationId', 'token', 'clientName', 'signatureData', 'csrfToken'])
+      return errorResponse(err)
     }
 
     const supabase = createClient(
@@ -17,7 +26,8 @@ export async function POST(request: NextRequest) {
 
     const isValidCsrf = await verifyCsrfToken(supabase, csrfToken)
     if (!isValidCsrf) {
-      return NextResponse.json({ error: 'Invalid security token' }, { status: 403 })
+      const err = Errors.invalidToken()
+      return errorResponse(err)
     }
 
     const { data: variation } = await supabase
@@ -29,7 +39,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!variation) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 403 })
+      const err = Errors.expiredToken('Variation link has expired')
+      return errorResponse(err)
     }
 
     const clientIp = extractClientIp(
@@ -46,22 +57,26 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error('RPC error:', error)
-      return NextResponse.json({ error: 'Failed to sign variation' }, { status: 500 })
+      const err = Errors.databaseError()
+      return errorResponse(err)
     }
 
     if (data?.error) {
       if (data.code === 'already_signed') {
-        return NextResponse.json({ error: 'Already signed' }, { status: 409 })
+        const err = Errors.conflict('Variation has already been signed')
+        return errorResponse(err)
       }
       if (data.code === 'not_found') {
-        return NextResponse.json({ error: 'Variation not found' }, { status: 404 })
+        const err = Errors.notFound('Variation')
+        return errorResponse(err)
       }
-      return NextResponse.json({ error: data.error }, { status: 400 })
+      const err = Errors.invalidInput(data.error)
+      return errorResponse(err)
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Signature submission error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return errorResponse(error)
   }
 }

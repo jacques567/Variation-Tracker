@@ -1,7 +1,10 @@
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
+import { generateCorrelationId, setCorrelationId } from '@/lib/correlation-id'
 
 export async function proxy(request: NextRequest) {
+  const correlationId = request.headers.get('x-correlation-id') || generateCorrelationId()
+  setCorrelationId(correlationId)
   return await updateSession(request)
 }
 

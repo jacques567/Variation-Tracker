@@ -53,7 +53,7 @@ export default function CategoriesPage() {
       const jobCounts = new Map<string, number>()
       const uncategorized: UncategorizedJob[] = []
 
-      jobs?.forEach(job => {
+      jobs?.forEach((job: any) => {
         if (job.category) {
           jobCounts.set(job.category, (jobCounts.get(job.category) || 0) + 1)
         } else {
@@ -65,7 +65,7 @@ export default function CategoriesPage() {
         }
       })
 
-      const categoriesWithCounts = (cats || []).map(cat => ({
+      const categoriesWithCounts = (cats || []).map((cat: any) => ({
         ...cat,
         job_count: jobCounts.get(cat.name) || 0,
       }))

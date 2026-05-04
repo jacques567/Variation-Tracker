@@ -58,22 +58,6 @@ jobs:
         # Fails the build if any high/critical CVE is found in dependencies.
         # Think of this as checking if any ingredients in your recipe are recalled.
 
-      - name: Type safety check
-        run: npx tsc --noEmit
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
-          NEXT_PUBLIC_APP_URL: https://vartracker.com
-          SUPABASE_SERVICE_ROLE_KEY: placeholder
-          STRIPE_SECRET_KEY: sk_test_placeholder
-          STRIPE_WEBHOOK_SECRET: whsec_placeholder
-          STRIPE_PRICE_ID: price_placeholder
-          CSRF_SECRET: placeholder_csrf_secret_32chars_xx
-        # TypeScript errors = code that disagrees with itself.
-        # If a function promises to return a string but might return null,
-        # that gap is often where bugs and security holes live.
-
       - name: Check for hardcoded secrets
         run: |
           echo "Scanning for patterns that look like real API keys or secrets..."

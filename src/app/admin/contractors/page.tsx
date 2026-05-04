@@ -38,11 +38,11 @@ export default function ContractorsPage() {
         .select('contractor_id')
 
       const jobCounts = new Map<string, number>()
-      jobs?.forEach(job => {
+      jobs?.forEach((job: any) => {
         jobCounts.set(job.contractor_id, (jobCounts.get(job.contractor_id) || 0) + 1)
       })
 
-      const contractorsWithStats = allContractors.map(c => ({
+      const contractorsWithStats = allContractors.map((c: any) => ({
         ...c,
         job_count: jobCounts.get(c.id) || 0,
       }))

@@ -43,7 +43,7 @@ export default function JobsPage() {
       setCategories(cats || [])
 
       // Count uncategorized
-      const uncatCount = (allJobs || []).filter(j => !j.category).length
+      const uncatCount = (allJobs || []).filter((j: any) => !j.category).length
       setUncategorizedCount(uncatCount)
     } finally {
       setLoading(false)

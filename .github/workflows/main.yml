@@ -39,10 +39,76 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  test:
+  security:
     needs: lint
     runs-on: ubuntu-latest
-    name: "2️⃣ E2E Tests"
+    name: "2️⃣ Security Audit"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Dependency vulnerability scan
+        run: npm audit --audit-level=high
+        # Fails the build if any high/critical CVE is found in dependencies.
+        # Think of this as checking if any ingredients in your recipe are recalled.
+
+      - name: Type safety check
+        run: npx tsc --noEmit
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+          NEXT_PUBLIC_APP_URL: https://vartracker.com
+          SUPABASE_SERVICE_ROLE_KEY: placeholder
+          STRIPE_SECRET_KEY: sk_test_placeholder
+          STRIPE_WEBHOOK_SECRET: whsec_placeholder
+          STRIPE_PRICE_ID: price_placeholder
+          CSRF_SECRET: placeholder_csrf_secret_32chars_xx
+        # TypeScript errors = code that disagrees with itself.
+        # If a function promises to return a string but might return null,
+        # that gap is often where bugs and security holes live.
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Scanning for patterns that look like real API keys or secrets..."
+          if grep -rE "(sk_live_|pk_live_)" --include="*.ts" --include="*.tsx" --include="*.js" src/; then
+            echo "❌ Found what looks like a live Stripe key in source code. Remove it immediately."
+            exit 1
+          fi
+          if grep -rE "service_role" --include="*.ts" --include="*.tsx" src/ | grep -v "process\.env" | grep -v "//"; then
+            echo "❌ Found a hardcoded service_role reference (not from env). This is a god-mode key — never hardcode it."
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets found."
+        # ELI5: This is like making sure nobody wrote their password on a sticky note
+        # and stuck it to the front door. Scans source files, not env vars.
+
+      - name: Check for unsafe code patterns
+        run: |
+          echo "Scanning for patterns that are almost always dangerous..."
+          if grep -rn "dangerouslySetInnerHTML" --include="*.tsx" --include="*.ts" src/; then
+            echo "❌ dangerouslySetInnerHTML found. This injects raw HTML — a direct XSS risk."
+            echo "   If intentional, sanitize input with DOMPurify first, then add a comment explaining why."
+            exit 1
+          fi
+          if grep -rn "eval(" --include="*.ts" --include="*.tsx" src/ | grep -v "//"; then
+            echo "❌ eval() found. Executes arbitrary code — almost never the right tool."
+            exit 1
+          fi
+          echo "✅ No unsafe patterns found."
+        # ELI5: eval() is like having a sign that says "say any magic word and I'll do it."
+        # dangerouslySetInnerHTML is like printing whatever a stranger hands you on a billboard.
+
+  test:
+    needs: security
+    runs-on: ubuntu-latest
+    name: "3️⃣ E2E Tests"
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4

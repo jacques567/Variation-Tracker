@@ -21,9 +21,18 @@ export default function SignatureForm({
 
   useEffect(() => {
     async function fetchCsrfToken() {
+      const cached = typeof window !== 'undefined' ? sessionStorage.getItem('csrfToken') : null
+      if (cached) {
+        setCsrfToken(cached)
+        return
+      }
+
       try {
         const res = await fetch('/api/csrf-token')
         const data = await res.json()
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('csrfToken', data.csrfToken)
+        }
         setCsrfToken(data.csrfToken)
       } catch (err) {
         console.error('Failed to fetch CSRF token:', err)

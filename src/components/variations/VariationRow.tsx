@@ -10,7 +10,7 @@ interface Props {
   jobId: string
 }
 
-const statusStyles = {
+const statusStyles: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
   pending: 'bg-amber-50 text-amber-700',
   signed: 'bg-green-50 text-green-700',

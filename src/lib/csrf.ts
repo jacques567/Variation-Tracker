@@ -13,9 +13,14 @@ function getSecret(): string {
 
 export function extractClientIp(xForwardedFor?: string | null, xRealIp?: string | null): string | null {
   if (xForwardedFor) {
-    return xForwardedFor.split(',')[0]?.trim() ?? null
+    const firstIp = xForwardedFor.split(',')[0]?.trim()
+    if (firstIp) return firstIp
   }
-  return xRealIp ?? null
+  if (xRealIp) {
+    const trimmedIp = xRealIp.trim()
+    if (trimmedIp) return trimmedIp
+  }
+  return null
 }
 
 export async function generateCsrfToken(

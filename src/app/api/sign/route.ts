@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
 import { Errors } from '@/lib/errors'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function errorResponse(err: unknown) {
   if (err instanceof Error && 'statusCode' in err && typeof err.statusCode === 'number') {
@@ -11,6 +12,12 @@ function errorResponse(err: unknown) {
 }
 
 export async function POST(request: NextRequest) {
+  const ip = extractClientIp(request.headers.get('x-forwarded-for'), request.headers.get('x-real-ip')) ?? 'unknown'
+  if (!checkRateLimit(`sign:${ip}`, 10, 60_000)) {
+    const err = Errors.rateLimited()
+    return NextResponse.json(err.toJSON(), { status: err.statusCode })
+  }
+
   try {
     const { variationId, token, clientName, signatureData, csrfToken } = await request.json()
 

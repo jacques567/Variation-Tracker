@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { verifyCsrfToken } from '@/lib/csrf'
+import { Errors } from '@/lib/errors'
 
 const NotesSchema = z.object({
   notes: z.string().max(2000, 'Notes too long'),
   csrfToken: z.string().min(1, 'CSRF token missing'),
 })
+
+function errorResponse(err: unknown) {
+  if (err instanceof Error && 'statusCode' in err && typeof err.statusCode === 'number') {
+    return NextResponse.json((err as Error & { statusCode: number; toJSON(): object }).toJSON(), { status: (err as Error & { statusCode: number }).statusCode })
+  }
+  return NextResponse.json(Errors.internalError().toJSON(), { status: 500 })
+}
 
 export async function PATCH(
   request: NextRequest,
@@ -21,18 +29,12 @@ export async function PATCH(
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (!user || !user.email || authError) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return errorResponse(Errors.unauthorized())
     }
 
     const isValidToken = await verifyCsrfToken(supabase, csrfToken, user.id)
     if (!isValidToken) {
-      return NextResponse.json(
-        { error: 'Invalid CSRF token' },
-        { status: 403 }
-      )
+      return errorResponse(Errors.invalidToken())
     }
 
     const { data: adminCheck } = await supabase
@@ -42,10 +44,7 @@ export async function PATCH(
       .single()
 
     if (!adminCheck) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      )
+      return errorResponse(Errors.forbidden())
     }
 
     const { error } = await supabase
@@ -54,25 +53,16 @@ export async function PATCH(
       .eq('id', id)
 
     if (error) {
-      return NextResponse.json(
-        { error: 'Failed to update notes' },
-        { status: 500 }
-      )
+      return errorResponse(Errors.databaseError())
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     if (error instanceof z.ZodError) {
       const message = error.issues[0]?.message || 'Invalid input'
-      return NextResponse.json(
-        { error: message },
-        { status: 400 }
-      )
+      return errorResponse(Errors.invalidInput(message))
     }
     console.error('Notes update error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return errorResponse(error)
   }
 }

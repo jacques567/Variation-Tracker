@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-import { verifyCsrfToken } from '@/lib/csrf'
+import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
+import { Errors } from '@/lib/errors'
 
 const SignatureSchema = z.object({
   variationId: z.string().uuid('Invalid variation ID format'),
@@ -13,32 +14,30 @@ const SignatureSchema = z.object({
   csrfToken: z.string().min(1, 'CSRF token missing'),
 })
 
+function errorResponse(err: unknown) {
+  if (err instanceof Error && 'statusCode' in err && typeof err.statusCode === 'number') {
+    return NextResponse.json((err as Error & { statusCode: number; toJSON(): object }).toJSON(), { status: (err as Error & { statusCode: number }).statusCode })
+  }
+  return NextResponse.json(Errors.internalError().toJSON(), { status: 500 })
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-
     const { variationId, clientName, signatureData, csrfToken } = SignatureSchema.parse(body)
 
     const supabase = await createClient()
 
-    // Verify user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (!user || authError) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return errorResponse(Errors.unauthorized())
     }
 
     const isValidToken = await verifyCsrfToken(supabase, csrfToken, user.id)
     if (!isValidToken) {
-      return NextResponse.json(
-        { error: 'Invalid CSRF token' },
-        { status: 403 }
-      )
+      return errorResponse(Errors.invalidToken())
     }
 
-    // Verify variation exists
     const { data: variation, error: varError } = await supabase
       .from('variations')
       .select('id, job_id')
@@ -46,20 +45,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!variation || varError) {
-      return NextResponse.json(
-        { error: 'Variation not found' },
-        { status: 404 }
-      )
+      return errorResponse(Errors.notFound('Variation'))
     }
 
     if (!variation.job_id) {
-      return NextResponse.json(
-        { error: 'Variation has no associated job' },
-        { status: 500 }
-      )
+      return errorResponse(Errors.internalError('Variation has no associated job', false))
     }
 
-    // Verify user owns the job that contains this variation
     const { data: job } = await supabase
       .from('jobs')
       .select('contractor_id')
@@ -67,50 +59,43 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!job || job.contractor_id !== user.id) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      )
+      return errorResponse(Errors.forbidden())
     }
 
-    const { error: sigError } = await supabase.from('signatures').insert({
-      variation_id: variationId,
-      client_name: clientName,
-      signature_data: signatureData,
+    const clientIp = extractClientIp(
+      request.headers.get('x-forwarded-for'),
+      request.headers.get('x-real-ip')
+    )
+
+    const { data, error } = await supabase.rpc('sign_variation', {
+      p_variation_id: variationId,
+      p_client_name: clientName.trim(),
+      p_signature_data: signatureData,
+      p_client_ip: clientIp,
     })
 
-    if (sigError) {
-      return NextResponse.json(
-        { error: 'Failed to save signature' },
-        { status: 500 }
-      )
+    if (error) {
+      console.error('RPC error:', error)
+      return errorResponse(Errors.databaseError())
     }
 
-    const { error: updateError } = await supabase
-      .from('variations')
-      .update({ status: 'signed' })
-      .eq('id', variationId)
-
-    if (updateError) {
-      return NextResponse.json(
-        { error: 'Failed to update variation status' },
-        { status: 500 }
-      )
+    if (data?.error) {
+      if (data.code === 'already_signed') {
+        return errorResponse(Errors.conflict('Variation has already been signed'))
+      }
+      if (data.code === 'not_found') {
+        return errorResponse(Errors.notFound('Variation'))
+      }
+      return errorResponse(Errors.invalidInput(data.error))
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     if (error instanceof z.ZodError) {
       const message = error.issues[0]?.message || 'Invalid input'
-      return NextResponse.json(
-        { error: message },
-        { status: 400 }
-      )
+      return errorResponse(Errors.invalidInput(message))
     }
     console.error('Signature submission error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return errorResponse(error)
   }
 }

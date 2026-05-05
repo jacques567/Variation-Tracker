@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       },
     },
     {
-      idempotencyKey: `checkout_${user.id}_${Date.now()}`,
+      idempotencyKey: `checkout_${user.id}_${process.env.STRIPE_PRICE_ID}`,
     }
   )
 

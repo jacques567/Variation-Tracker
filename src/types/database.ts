@@ -245,6 +245,19 @@ export type Database = {
     Functions: {
       is_admin: { Args: { email: string }; Returns: boolean }
       verify_signature_token: { Args: { token: string }; Returns: boolean }
+      verify_and_mark_csrf_token: {
+        Args: { p_token: string; p_user_id: string | null }
+        Returns: { is_valid: boolean }
+      }
+      sign_variation: {
+        Args: {
+          p_variation_id: string
+          p_client_name: string
+          p_signature_data: string
+          p_client_ip: string | null
+        }
+        Returns: { success?: boolean; error?: string; code?: string }
+      }
     }
     Enums: {
       [_ in never]: never

@@ -46,6 +46,7 @@ export const ErrorCodes = {
   CONFLICT: 'conflict',
   INTERNAL_ERROR: 'internal_error',
   SERVICE_UNAVAILABLE: 'service_unavailable',
+  RATE_LIMITED: 'rate_limited',
   MISSING_FIELDS: 'missing_fields',
   INVALID_TOKEN: 'invalid_token',
   EXPIRED_TOKEN: 'expired_token',
@@ -109,6 +110,14 @@ export const Errors = {
       ErrorCodes.SERVICE_UNAVAILABLE,
       'Service temporarily unavailable',
       503,
+      true
+    ),
+
+  rateLimited: () =>
+    new ApiErrorResponse(
+      ErrorCodes.RATE_LIMITED,
+      'Too many requests. Please try again later.',
+      429,
       true
     ),
 }

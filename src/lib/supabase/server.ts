@@ -2,16 +2,10 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
-let cachedServerClient: ReturnType<typeof createServerClient<Database>> | null = null
-
 export async function createClient() {
-  if (cachedServerClient) {
-    return cachedServerClient
-  }
-
   const cookieStore = await cookies()
 
-  cachedServerClient = createServerClient<Database>(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -25,16 +19,10 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             )
           } catch {
-            // Server component — cookie writes ignored
+            // Server Component — cookie writes are handled by middleware
           }
         },
       },
     }
   )
-
-  return cachedServerClient
-}
-
-export function resetClient() {
-  cachedServerClient = null
 }

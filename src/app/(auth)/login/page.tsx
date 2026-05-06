@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -20,7 +21,7 @@ export default function LoginPage() {
     const password = form.get('password') as string
 
     const supabase = createClient()
-    const { error, data: authData } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError('Invalid email or password')
@@ -28,7 +29,7 @@ export default function LoginPage() {
       return
     }
 
-    // Check if user is admin using the email from the form (the one we just logged in with)
+    // Check if user is admin
     const { data: adminData } = await supabase
       .from('admin_emails')
       .select('email')
@@ -37,15 +38,26 @@ export default function LoginPage() {
 
     if (adminData) {
       router.push('/admin')
-    } else {
-      router.push('/jobs')
+      return
     }
-    router.refresh()
+
+    // Honour the ?next= param set by middleware, fall back to /jobs
+    const next = searchParams.get('next')
+    const redirectTo = next && next.startsWith('/') && !next.startsWith('//') ? next : '/jobs'
+    router.push(redirectTo)
   }
+
+  const callbackError = searchParams.get('error')
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
       <h2 className="text-xl font-semibold text-gray-900 mb-6">Sign in</h2>
+
+      {callbackError === 'auth_callback_failed' && (
+        <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
+          The confirmation link is invalid or has expired. Please try again.
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -95,5 +107,13 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

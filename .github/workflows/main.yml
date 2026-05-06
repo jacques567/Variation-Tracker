@@ -90,7 +90,7 @@ jobs:
         # dangerouslySetInnerHTML is like printing whatever a stranger hands you on a billboard.
 
   test:
-    needs: security
+    needs: lint
     runs-on: ubuntu-latest
     name: "3️⃣ E2E Tests"
     timeout-minutes: 60

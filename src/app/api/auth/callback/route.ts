@@ -21,22 +21,26 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
       if (type === 'recovery') {
-        return NextResponse.redirect(new URL('/auth/reset-password', origin))
+        return NextResponse.redirect(new URL('/reset-password', origin))
       }
       return NextResponse.redirect(redirectTo)
     }
     console.error('Auth callback: code exchange failed')
+    return NextResponse.redirect(new URL('/login?error=auth_callback_failed', origin))
   }
 
+  const ALLOWED_OTP_TYPES = ['signup', 'email', 'recovery', 'magiclink'] as const
+  type OtpType = typeof ALLOWED_OTP_TYPES[number]
+
   // Legacy token_hash flow — email confirmation, magic link
-  if (tokenHash && type) {
+  if (tokenHash && type && ALLOWED_OTP_TYPES.includes(type as OtpType)) {
     const { error } = await supabase.auth.verifyOtp({
-      type: type as 'signup' | 'email' | 'recovery' | 'magiclink',
+      type: type as OtpType,
       token_hash: tokenHash,
     })
     if (!error) {
       if (type === 'recovery') {
-        return NextResponse.redirect(new URL('/auth/reset-password', origin))
+        return NextResponse.redirect(new URL('/reset-password', origin))
       }
       return NextResponse.redirect(redirectTo)
     }

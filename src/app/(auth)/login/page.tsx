@@ -40,7 +40,6 @@ export default function LoginPage() {
     } else {
       router.push('/jobs')
     }
-    router.refresh()
   }
 
   return (

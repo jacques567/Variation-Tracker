@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import NavBar from '@/components/ui/NavBar'
-import Footer from '@/components/ui/Footer'
 
 const ACTIVE_STATUSES = ['active', 'trialing']
 
@@ -30,7 +29,6 @@ export default async function DashboardLayout({
       <main className="flex-1 max-w-4xl mx-auto px-4 py-6 w-full">
         {children}
       </main>
-      <Footer />
     </div>
   )
 }

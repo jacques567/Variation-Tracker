@@ -12,10 +12,10 @@ export async function GET(request: NextRequest) {
   if (type === 'email' && code) {
     try {
       // Exchange code for session using verifyOtp
+      // Note: Email is embedded in the token by Supabase, don't pass from URL
       const { data, error } = await supabase.auth.verifyOtp({
         type: 'email',
         token: code,
-        email: searchParams.get('email') || '',
       })
 
       if (error || !data.session) {

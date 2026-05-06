@@ -12,6 +12,8 @@ export async function GET(request: NextRequest) {
   if (type === 'email' && code) {
     try {
       // Exchange code for session using verifyOtp
+      // Note: Email is required by Supabase API and is validated server-side
+      // against the code to prevent mismatched verifications
       const { data, error } = await supabase.auth.verifyOtp({
         type: 'email',
         token: code,

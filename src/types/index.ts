@@ -52,7 +52,7 @@ export interface Variation {
   created_at: string
   updated_at: string
   signature_token_expires_at?: string | null
-  signature?: Signature
+  signature?: Signature | null
   job?: Job
 }
 

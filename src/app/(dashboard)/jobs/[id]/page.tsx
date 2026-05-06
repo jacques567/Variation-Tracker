@@ -2,9 +2,10 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, FileText } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency } from '@/lib/utils'
 import VariationRow from '@/components/variations/VariationRow'
 import ExportInvoiceButton from '@/components/variations/ExportInvoiceButton'
+import type { Variation, Signature } from '@/types'
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -90,7 +91,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         </div>
       ) : (
         <div className="space-y-2">
-          {variations.map((v: any) => (
+          {variations.map((v: Variation & { signature: Signature | null }) => (
             <VariationRow key={v.id} variation={v} jobId={id} />
           ))}
         </div>

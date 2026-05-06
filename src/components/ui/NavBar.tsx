@@ -37,7 +37,7 @@ export default function NavBar({ contractor, hasSubscription }: { contractor: Co
     <header className="bg-white border-b border-gray-200">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/jobs" className="flex items-center gap-2 font-semibold text-gray-900">
-          <Briefcase className="w-5 h-5 text-blue-600" />
+          <Briefcase className="w-5 h-5 text-blue-600" aria-hidden="true" />
           VarTracker
         </Link>
 
@@ -62,9 +62,10 @@ export default function NavBar({ contractor, hasSubscription }: { contractor: Co
             </span>
             <button
               onClick={handleSignOut}
+              aria-label="Sign out"
               className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">Sign out</span>
             </button>
           </div>

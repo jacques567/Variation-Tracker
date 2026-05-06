@@ -24,36 +24,40 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Check session and validate token expiry early (prevent unnecessary downstream processing)
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  // IMPORTANT: Do not add any logic between createServerClient and getUser().
+  // getUser() validates the JWT server-side and refreshes the session if needed.
+  // getSession() only trusts the client-supplied token — do not use it here.
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // Early reject if token is expired
-  if (session?.expires_at && new Date(session.expires_at * 1000).getTime() < Date.now()) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
+  const { pathname, search } = request.nextUrl
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/register')
-  const isPublicRoute = request.nextUrl.pathname.startsWith('/sign') ||
-    request.nextUrl.pathname.startsWith('/api') ||
-    request.nextUrl.pathname.startsWith('/terms') ||
-    request.nextUrl.pathname.startsWith('/privacy') ||
-    request.nextUrl.pathname.startsWith('/cookies')
-  const isRootRoute = request.nextUrl.pathname === '/'
+  const isAuthRoute =
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/reset-password'
+
+  const isPublicRoute =
+    pathname.startsWith('/sign') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/cookies')
+
+  const isRootRoute = pathname === '/'
 
   if (!user && !isAuthRoute && !isPublicRoute && !isRootRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    const loginUrl = new URL('/login', request.url)
+    // Preserve the intended destination (including query string) so the user
+    // lands where they were going after authenticating.
+    loginUrl.searchParams.set('next', pathname + search)
+    return NextResponse.redirect(loginUrl)
   }
 
   if (user && isAuthRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/jobs'
-    return NextResponse.redirect(url)
+    const next = request.nextUrl.searchParams.get('next')
+    const redirectTo =
+      next && next.startsWith('/') && !next.startsWith('//') ? next : '/jobs'
+    return NextResponse.redirect(new URL(redirectTo, request.url))
   }
 
   return supabaseResponse

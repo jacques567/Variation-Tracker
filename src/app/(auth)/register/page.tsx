@@ -63,7 +63,7 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Verify your email</h2>
           <p className="text-sm text-gray-600 mb-4">
-            We've sent a confirmation link to <span className="font-medium">{registeredEmail}</span>
+            We&apos;ve sent a confirmation link to <span className="font-medium">{registeredEmail}</span>
           </p>
           <p className="text-sm text-gray-600 mb-6">
             Click the link in your email to verify your account and sign in.

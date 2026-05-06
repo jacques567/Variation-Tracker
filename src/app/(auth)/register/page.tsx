@@ -9,6 +9,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -21,7 +22,7 @@ export default function RegisterPage() {
     const fullName = form.get('full_name') as string
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -36,7 +37,32 @@ export default function RegisterPage() {
       return
     }
 
-    router.push('/login')
+    // Session present means auto-confirm is on — go straight to app
+    if (data.session) {
+      router.push('/jobs')
+      return
+    }
+
+    // No session means email confirmation is required
+    setEmailSent(true)
+    setLoading(false)
+  }
+
+  if (emailSent) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Check your email</h2>
+        <p className="text-sm text-gray-500 mt-2">
+          We sent a confirmation link to your email address. Click it to activate your account.
+        </p>
+        <p className="text-sm text-gray-400 mt-4">
+          Already confirmed?{' '}
+          <Link href="/login" className="text-blue-600 font-medium hover:underline">
+            Sign in
+          </Link>
+        </p>
+      </div>
+    )
   }
 
   return (

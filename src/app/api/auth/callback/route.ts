@@ -2,49 +2,46 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams
+  const { searchParams, origin } = request.nextUrl
   const code = searchParams.get('code')
+  const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type')
+  const next = searchParams.get('next') ?? '/jobs'
+
+  // Sanitise the redirect destination to prevent open redirects
+  const redirectTo = new URL(
+    next.startsWith('/') && !next.startsWith('//') ? next : '/jobs',
+    origin
+  )
 
   const supabase = await createClient()
 
-  // Handle email confirmation callback
-  if (type === 'email' && code) {
-    try {
-      // Exchange code for session using verifyOtp
-      // Note: Email is required by Supabase API and is validated server-side
-      // against the code to prevent mismatched verifications
-      const { data, error } = await supabase.auth.verifyOtp({
-        type: 'email',
-        token: code,
-        email: searchParams.get('email') || '',
-      })
-
-      if (error || !data.session) {
-        console.error('Email verification failed:', error?.message)
-        return NextResponse.redirect(
-          new URL('/login?error=invalid_verification_code', request.url)
-        )
+  // PKCE flow — preferred by newer Supabase clients
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error) {
+      if (type === 'recovery') {
+        return NextResponse.redirect(new URL('/auth/reset-password', origin))
       }
-
-      // Session is now established in cookies via Supabase
-      // Redirect to jobs page on successful verification
-      return NextResponse.redirect(new URL('/jobs', request.url))
-    } catch (err) {
-      console.error('Auth callback error:', err)
-      return NextResponse.redirect(
-        new URL('/login?error=verification_failed', request.url)
-      )
+      return NextResponse.redirect(redirectTo)
     }
+    console.error('Auth callback: code exchange failed')
   }
 
-  // Handle password recovery callback (future implementation)
-  if (type === 'recovery' && code) {
-    return NextResponse.redirect(
-      new URL(`/auth/reset-password?code=${code}`, request.url)
-    )
+  // Legacy token_hash flow — email confirmation, magic link
+  if (tokenHash && type) {
+    const { error } = await supabase.auth.verifyOtp({
+      type: type as 'signup' | 'email' | 'recovery' | 'magiclink',
+      token_hash: tokenHash,
+    })
+    if (!error) {
+      if (type === 'recovery') {
+        return NextResponse.redirect(new URL('/auth/reset-password', origin))
+      }
+      return NextResponse.redirect(redirectTo)
+    }
+    console.error('Auth callback: token_hash verification failed')
   }
 
-  // No valid callback type
-  return NextResponse.redirect(new URL('/login', request.url))
+  return NextResponse.redirect(new URL('/login?error=auth_callback_failed', origin))
 }

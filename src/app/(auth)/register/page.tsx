@@ -9,6 +9,8 @@ export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [verificationPending, setVerificationPending] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -24,7 +26,10 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+      },
     })
 
     if (error) {
@@ -33,8 +38,48 @@ export default function RegisterPage() {
       return
     }
 
-    router.push('/jobs')
-    router.refresh()
+    setVerificationPending(true)
+    setRegisteredEmail(email)
+  }
+
+  if (verificationPending) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
+            <svg
+              className="w-6 h-6 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Verify your email</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            We've sent a confirmation link to <span className="font-medium">{registeredEmail}</span>
+          </p>
+          <p className="text-sm text-gray-600 mb-6">
+            Click the link in your email to verify your account and sign in.
+          </p>
+          <button
+            onClick={() => {
+              setVerificationPending(false)
+              setRegisteredEmail(null)
+            }}
+            className="text-sm text-blue-600 font-medium hover:underline"
+          >
+            Back to register
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

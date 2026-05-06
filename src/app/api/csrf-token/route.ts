@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generateCsrfToken, extractClientIp } from '@/lib/csrf'
+import { Errors } from '@/lib/errors'
 
 export async function GET(request: NextRequest) {
   const supabase = createClient(
@@ -8,7 +9,6 @@ export async function GET(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
-  // Get user session if available (for user-bound tokens)
   const { data: { session } } = await supabase.auth.getSession()
   const userId = session?.user?.id
 
@@ -21,13 +21,7 @@ export async function GET(request: NextRequest) {
     const token = await generateCsrfToken(supabase, userId || undefined, clientIp || undefined)
     return NextResponse.json({ csrfToken: token })
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: 'token_generation_failed',
-        message: 'Failed to generate security token. Please try again.',
-        retryable: true,
-      },
-      { status: 500 }
-    )
+    const err = Errors.databaseError(true)
+    return NextResponse.json(err.toJSON(), { status: err.statusCode })
   }
 }

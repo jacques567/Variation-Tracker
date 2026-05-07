@@ -1,8 +1,8 @@
 import { cookiePolicy } from '@/lib/legal-content';
 
 export const metadata = {
-  title: 'Cookie Policy — Variation Tracker',
-  description: 'What cookies Variation Tracker uses and how to control them.',
+  title: 'Cookie Policy — VarTracker',
+  description: 'What cookies VarTracker uses and how to control them.',
 };
 
 export default function CookiesPage() {

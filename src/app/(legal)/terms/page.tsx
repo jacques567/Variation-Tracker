@@ -1,8 +1,8 @@
 import { termsAndConditions } from '@/lib/legal-content';
 
 export const metadata = {
-  title: 'Terms and Conditions — Variation Tracker',
-  description: 'Terms and Conditions governing use of the Variation Tracker service.',
+  title: 'Terms and Conditions — VarTracker',
+  description: 'Terms and Conditions governing use of the VarTracker service.',
 };
 
 export default function TermsPage() {

@@ -1,8 +1,8 @@
 import { privacyPolicy } from '@/lib/legal-content';
 
 export const metadata = {
-  title: 'Privacy Policy — Variation Tracker',
-  description: 'How Variation Tracker collects, uses, and protects your personal data.',
+  title: 'Privacy Policy — VarTracker',
+  description: 'How VarTracker collects, uses, and protects your personal data.',
 };
 
 export default function PrivacyPage() {

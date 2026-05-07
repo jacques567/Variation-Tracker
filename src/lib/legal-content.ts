@@ -1,7 +1,7 @@
-// legal-content.ts — Source of truth for all policy text in Variation Tracker.
+// legal-content.ts — Source of truth for all policy text in VarTracker.
 // Pages import from here so content is managed in one place.
 
-export const COMPANY_NAME = "Variation Tracker";
+export const COMPANY_NAME = "VarTracker";
 export const COMPANY_EMAIL = "admin@vartracker.com";
 export const LAST_UPDATED = "April 2026";
 
@@ -64,7 +64,7 @@ We do not collect payment card details. Any billing is handled by a third-party 
       heading: "How we use your data",
       body: `We use your data to:
 
-• Provide the Variation Tracker service — authenticating you, storing your jobs and variations, and generating exports.
+• Provide the VarTracker service — authenticating you, storing your jobs and variations, and generating exports.
 • Communicate with you — sending account-related emails (e.g. password reset, sign-off notifications).
 • Improve the product — analysing usage patterns to understand what works and what needs fixing.
 • Meet legal obligations — retaining records as required by UK law.
@@ -147,7 +147,7 @@ We reserve the right to suspend or terminate accounts that breach these rules.`,
     },
     {
       heading: "4. Your data",
-      body: `You own the data you enter into Variation Tracker. We process it on your behalf to provide the Service. You are responsible for ensuring that any personal data you upload (for example, client contact details) is handled lawfully under UK GDPR. See our Privacy Policy for how we handle your data.`,
+      body: `You own the data you enter into VarTracker. We process it on your behalf to provide the Service. You are responsible for ensuring that any personal data you upload (for example, client contact details) is handled lawfully under UK GDPR. See our Privacy Policy for how we handle your data.`,
     },
     {
       heading: "5. Subscription and billing",
@@ -159,7 +159,7 @@ We reserve the right to suspend or terminate accounts that breach these rules.`,
     },
     {
       heading: "7. Limitation of liability",
-      body: `To the fullest extent permitted by law, Variation Tracker is not liable for:
+      body: `To the fullest extent permitted by law, VarTracker is not liable for:
 
 • Loss of profits, contracts, or business opportunities.
 • Loss or corruption of data caused by your actions or third-party failures.
@@ -193,7 +193,7 @@ Our total liability to you in any 12-month period shall not exceed the fees you 
 export const cookiePolicy: CookiePolicy = {
   title: "Cookie Policy",
   lastUpdated: LAST_UPDATED,
-  intro: `This Cookie Policy explains what cookies Variation Tracker uses, why we use them, and how you can control them.`,
+  intro: `This Cookie Policy explains what cookies VarTracker uses, why we use them, and how you can control them.`,
   sections: [
     {
       heading: "What are cookies?",

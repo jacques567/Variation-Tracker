@@ -56,6 +56,15 @@ export async function POST(request: NextRequest) {
       request.headers.get('x-real-ip')
     )
 
+    // IP should always be present on Vercel (x-forwarded-for is injected by the
+    // CDN). Log a warning if missing so missing IPs are visible in logs.
+    if (!clientIp) {
+      console.warn('[sign] client IP not captured — x-forwarded-for and x-real-ip both absent', {
+        variationId,
+        userAgent: request.headers.get('user-agent'),
+      })
+    }
+
     const { data, error } = await supabase.rpc('sign_variation', {
       p_variation_id: variationId,
       p_client_name: clientName.trim(),

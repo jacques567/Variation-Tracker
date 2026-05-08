@@ -2,6 +2,16 @@ import { Resend } from 'resend'
 
 const FROM_ADDRESS = 'noreply@vartracker.com'
 
+/** Escapes HTML special characters to prevent injection in email templates. */
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
+
 function getResendClient(): Resend {
   const key = process.env.RESEND_API_KEY
   if (!key) {
@@ -36,39 +46,47 @@ export async function sendSignatureConfirmation(params: SignatureConfirmationPar
   const { clientEmail, clientName, jobName, address, description, cost, signedAt } = params
 
   const resend = getResendClient()
+  // Escape all dynamic values before HTML interpolation to prevent email injection.
+  const safeJobName     = escapeHtml(jobName)
+  const safeClientName  = escapeHtml(clientName)
+  const safeDescription = escapeHtml(description)
+  const safeAddress     = escapeHtml(address)
+  const safeCost        = escapeHtml(formatCurrency(cost))
+  const safeSignedAt    = escapeHtml(formatDate(signedAt))
+
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: clientEmail,
-    subject: `Variation authorised — ${jobName}`,
+    subject: `Variation authorised — ${safeJobName}`,
     html: `
       <!DOCTYPE html>
       <html>
         <head><meta charset="utf-8"></head>
         <body style="font-family: sans-serif; color: #111; max-width: 560px; margin: 0 auto; padding: 32px 16px;">
           <p style="font-size: 14px; color: #555; margin-bottom: 4px;">Variation confirmation</p>
-          <h1 style="font-size: 20px; margin: 0 0 24px;">${jobName}</h1>
+          <h1 style="font-size: 20px; margin: 0 0 24px;">${safeJobName}</h1>
 
-          <p style="font-size: 15px;">Hi ${clientName},</p>
+          <p style="font-size: 15px;">Hi ${safeClientName},</p>
           <p style="font-size: 15px;">This is a confirmation that you have authorised the following variation:</p>
 
           <div style="background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 8px; padding: 20px; margin: 24px 0;">
             <p style="margin: 0 0 8px; font-size: 13px; color: #666;">Description of work</p>
-            <p style="margin: 0 0 16px; font-size: 15px; font-weight: 500;">${description}</p>
+            <p style="margin: 0 0 16px; font-size: 15px; font-weight: 500;">${safeDescription}</p>
 
             <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 16px 0;">
 
             <table style="width: 100%; font-size: 14px;">
               <tr>
                 <td style="color: #666;">Site address</td>
-                <td style="text-align: right;">${address}</td>
+                <td style="text-align: right;">${safeAddress}</td>
               </tr>
               <tr>
                 <td style="color: #666; padding-top: 8px;">Additional cost</td>
-                <td style="text-align: right; padding-top: 8px; font-weight: 700; font-size: 18px;">${formatCurrency(cost)}</td>
+                <td style="text-align: right; padding-top: 8px; font-weight: 700; font-size: 18px;">${safeCost}</td>
               </tr>
               <tr>
                 <td style="color: #666; padding-top: 8px;">Signed at</td>
-                <td style="text-align: right; padding-top: 8px;">${formatDate(signedAt)}</td>
+                <td style="text-align: right; padding-top: 8px;">${safeSignedAt}</td>
               </tr>
             </table>
           </div>

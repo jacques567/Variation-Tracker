@@ -115,6 +115,11 @@ export default function SignatureForm({
             }}
             backgroundColor="transparent"
             onBegin={() => setIsEmpty(false)}
+            onEnd={() => {
+              if (sigRef.current && !sigRef.current.isEmpty()) {
+                setIsEmpty(false)
+              }
+            }}
           />
         </div>
         <p className="text-xs text-gray-400 mt-1">Draw your signature above</p>
@@ -126,7 +131,7 @@ export default function SignatureForm({
 
       <button
         type="submit"
-        disabled={loading || !csrfToken}
+        disabled={loading || !csrfToken || isEmpty}
         className="w-full bg-blue-600 text-white rounded-lg px-4 py-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
         {loading ? 'Submitting...' : 'Sign and agree'}

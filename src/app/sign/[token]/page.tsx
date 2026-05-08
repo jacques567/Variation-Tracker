@@ -36,7 +36,7 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
           <h1 className="text-lg font-semibold text-gray-900 mb-2">Already signed</h1>
           <p className="text-sm text-gray-500">
             This variation was signed by {variation.signer_name} on{' '}
-            {formatDate(variation.signed_at ?? '')}
+            {variation.signed_at ? formatDate(variation.signed_at) : 'an unknown date'}
           </p>
         </div>
       </div>

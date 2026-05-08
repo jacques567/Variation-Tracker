@@ -57,7 +57,7 @@ export async function sendSignatureConfirmation(params: SignatureConfirmationPar
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: clientEmail,
-    subject: `Variation authorised — ${safeJobName}`,
+    subject: `Variation authorised — ${jobName}`, // plain text — do not HTML-escape
     html: `
       <!DOCTYPE html>
       <html>

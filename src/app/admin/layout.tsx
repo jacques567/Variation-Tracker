@@ -19,7 +19,11 @@ export default async function AdminLayout({
   // Use SECURITY DEFINER RPC — admin_emails SELECT is blocked by RLS (USING false),
   // so the session client cannot query it directly. is_admin() reads auth.email()
   // from the JWT internally and bypasses the RLS restriction safely.
-  const { data: isAdmin } = await supabase.rpc('is_admin')
+  const { data: isAdmin, error: adminError } = await supabase.rpc('is_admin')
+
+  if (adminError) {
+    console.error('[admin] is_admin() RPC failed:', adminError)
+  }
 
   if (!isAdmin) {
     redirect('/jobs')

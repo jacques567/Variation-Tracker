@@ -89,12 +89,7 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
           )}
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4 text-xs text-amber-800">
-          By signing below you agree to this variation and the additional cost of{' '}
-          <strong>{formatCurrency(variation.cost)}</strong>.
-        </div>
-
-        <SignatureForm variationId={variation.id} token={token} />
+        <SignatureForm variationId={variation.id} token={token} cost={variation.cost} />
       </div>
     </div>
   )

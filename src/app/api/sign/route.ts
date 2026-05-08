@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
 import { Errors } from '@/lib/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { sendSignatureConfirmation } from '@/lib/email'
 
 function errorResponse(err: unknown) {
   if (err instanceof Error && 'statusCode' in err && typeof err.statusCode === 'number') {
@@ -79,6 +80,31 @@ export async function POST(request: NextRequest) {
       }
       const err = Errors.invalidInput(data.error)
       return errorResponse(err)
+    }
+
+    // Send confirmation email to client (best-effort — don't fail the request if email fails)
+    try {
+      const { data: variationDetails } = await supabase
+        .from('variations')
+        .select('description, cost, date, job:jobs(job_name, address, client_email, client_name)')
+        .eq('id', variationId)
+        .single()
+
+      const job = variationDetails?.job as unknown as { job_name: string; address: string; client_email: string; client_name: string } | null
+
+      if (variationDetails && job?.client_email) {
+        await sendSignatureConfirmation({
+          clientEmail: job.client_email,
+          clientName: clientName.trim(),
+          jobName: job.job_name,
+          address: job.address,
+          description: variationDetails.description,
+          cost: variationDetails.cost,
+          signedAt: new Date().toISOString(),
+        })
+      }
+    } catch (emailError) {
+      console.error('Signature confirmation email failed:', emailError)
     }
 
     return NextResponse.json({ success: true })

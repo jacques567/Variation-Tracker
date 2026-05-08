@@ -4,12 +4,18 @@ import { useRef, useState, useEffect } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { useRouter } from 'next/navigation'
 
+function formatCurrency(pence: number): string {
+  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(pence / 100)
+}
+
 export default function SignatureForm({
   variationId,
   token,
+  cost,
 }: {
   variationId: string
   token: string
+  cost: number // in pence
 }) {
   const router = useRouter()
   const sigRef = useRef<SignatureCanvas>(null)
@@ -128,6 +134,20 @@ export default function SignatureForm({
       {error && (
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
       )}
+
+      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        {clientName.trim() ? (
+          <>
+            By signing, I <strong>{clientName.trim()}</strong> confirm I authorise this variation
+            and the additional cost of <strong>{formatCurrency(cost)}</strong>.
+          </>
+        ) : (
+          <>
+            By signing, I confirm I authorise this variation and the additional cost of{' '}
+            <strong>{formatCurrency(cost)}</strong>.
+          </>
+        )}
+      </div>
 
       <button
         type="submit"

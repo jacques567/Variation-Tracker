@@ -60,6 +60,9 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
 
     const costPounds = parseFloat(form.get('cost') as string) || 0
 
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + 7)
+
     const { error: insertError } = await supabase.from('variations').insert({
       job_id: jobId,
       description: form.get('description') as string,
@@ -67,6 +70,7 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
       date: form.get('date') as string,
       photo_url: photoUrl,
       status: 'draft',
+      signature_token_expires_at: expiresAt.toISOString(),
     })
 
     if (insertError) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
+import { checkSubscription } from '@/lib/subscription-guard'
 import { Errors } from '@/lib/errors'
 
 const SignatureSchema = z.object({
@@ -31,6 +32,11 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (!user || authError) {
       return errorResponse(Errors.unauthorized())
+    }
+
+    const { isValid, reason } = await checkSubscription(user.id)
+    if (!isValid) {
+      return errorResponse(Errors.forbidden(reason))
     }
 
     const isValidToken = await verifyCsrfToken(supabase, csrfToken, user.id)

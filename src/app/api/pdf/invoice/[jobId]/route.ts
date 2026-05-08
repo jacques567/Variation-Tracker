@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { InvoicePDF } from '@/components/pdf/InvoicePDF'
+import { checkSubscription } from '@/lib/subscription-guard'
 import { Errors } from '@/lib/errors'
 import React from 'react'
 
@@ -15,6 +16,12 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       const err = Errors.unauthorized()
+      return NextResponse.json(err.toJSON(), { status: err.statusCode })
+    }
+
+    const { isValid, reason } = await checkSubscription(user.id)
+    if (!isValid) {
+      const err = Errors.forbidden(reason)
       return NextResponse.json(err.toJSON(), { status: err.statusCode })
     }
 

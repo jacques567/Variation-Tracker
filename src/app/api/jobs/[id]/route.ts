@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
+import { checkSubscription } from '@/lib/subscription-guard'
 import { Errors } from '@/lib/errors'
 
 function errorResponse(err: unknown) {
@@ -33,6 +34,12 @@ export async function DELETE(
 
     if (authError || !user) {
       return NextResponse.json(Errors.unauthorized().toJSON(), { status: 401 })
+    }
+
+    const { isValid, reason } = await checkSubscription(user.id)
+    if (!isValid) {
+      const err = Errors.forbidden(reason)
+      return NextResponse.json(err.toJSON(), { status: err.statusCode })
     }
 
     // Service client for storage operations (bypasses RLS)

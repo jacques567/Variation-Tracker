@@ -14,7 +14,8 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
 
   // Use SECURITY DEFINER RPC — returns only the fields the sign page needs.
   // No contractor_id, no job_id, no client_email exposed to the public client.
-  const { data: rows } = await supabase.rpc('get_variation_by_token', { p_token: token })
+  const { data: rows, error: rpcError } = await supabase.rpc('get_variation_by_token', { p_token: token })
+  if (rpcError) console.error('[sign page] get_variation_by_token error:', rpcError.message)
   const variation = rows?.[0] ?? null
 
   if (!variation) notFound()

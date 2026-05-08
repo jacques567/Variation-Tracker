@@ -43,6 +43,7 @@ jobs:
           STRIPE_WEBHOOK_SECRET: whsec_placeholder
           STRIPE_PRICE_ID: price_placeholder
           CSRF_SECRET: placeholder_csrf_secret_32chars_xx
+          RESEND_API_KEY: re_placeholder
 
       - name: Lint
         run: npm run lint

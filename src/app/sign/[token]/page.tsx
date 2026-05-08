@@ -5,17 +5,23 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 
 export default async function SignPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
+
+  // Validate token is a UUID before hitting the DB
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  if (!uuidPattern.test(token)) notFound()
+
   const supabase = await createClient()
 
-  const { data: variation } = await supabase
-    .from('variations')
-    .select('*, job:jobs(job_name, client_name, address, contractor_id), signature:signatures(*)')
-    .eq('signature_token', token)
-    .single()
+  // Use SECURITY DEFINER RPC — returns only the fields the sign page needs.
+  // No contractor_id, no job_id, no client_email exposed to the public client.
+  const { data: rows } = await supabase.rpc('get_variation_by_token', { p_token: token })
+  const variation = rows?.[0] ?? null
 
   if (!variation) notFound()
 
-  const expiresAt = variation.signature_token_expires_at ? new Date(variation.signature_token_expires_at) : null
+  const expiresAt = variation.signature_token_expires_at
+    ? new Date(variation.signature_token_expires_at)
+    : null
   const isTokenExpired = !expiresAt || expiresAt < new Date()
 
   if (variation.status === 'signed') {
@@ -29,8 +35,8 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
           </div>
           <h1 className="text-lg font-semibold text-gray-900 mb-2">Already signed</h1>
           <p className="text-sm text-gray-500">
-            This variation was signed by {variation.signature?.client_name} on{' '}
-            {formatDate(variation.signature?.signed_at ?? '')}
+            This variation was signed by {variation.signer_name} on{' '}
+            {variation.signed_at ? formatDate(variation.signed_at) : 'an unknown date'}
           </p>
         </div>
       </div>
@@ -48,7 +54,9 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
           </div>
           <h1 className="text-lg font-semibold text-gray-900 mb-2">Link expired</h1>
           <p className="text-sm text-gray-500">
-            This signing link expired on {expiresAt ? formatDate(expiresAt.toISOString()) : 'an unknown date'}. Please contact your contractor for a new link.
+            This signing link expired on{' '}
+            {expiresAt ? formatDate(expiresAt.toISOString()) : 'an unknown date'}. Please contact
+            your contractor for a new link.
           </p>
         </div>
       </div>
@@ -60,8 +68,8 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
       <div className="max-w-md mx-auto pt-8">
         <div className="text-center mb-6">
           <p className="text-sm text-gray-500">Variation notice for</p>
-          <h1 className="text-lg font-semibold text-gray-900">{variation.job?.job_name}</h1>
-          <p className="text-sm text-gray-400">{variation.job?.address}</p>
+          <h1 className="text-lg font-semibold text-gray-900">{variation.job_name}</h1>
+          <p className="text-sm text-gray-400">{variation.address}</p>
         </div>
 
         {/* Variation details */}
@@ -84,7 +92,11 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-xs text-gray-500 mb-2">Photo evidence</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={variation.photo_url} alt="Variation photo" className="w-full rounded-lg object-cover max-h-48" />
+              <img
+                src={variation.photo_url}
+                alt="Variation photo"
+                className="w-full rounded-lg object-cover max-h-48"
+              />
             </div>
           )}
         </div>

@@ -243,7 +243,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin: { Args: { email: string }; Returns: boolean }
+      // No-arg form — reads auth.email() from calling JWT internally.
+      is_admin: { Args: Record<PropertyKey, never>; Returns: boolean }
       verify_signature_token: { Args: { token: string }; Returns: boolean }
       verify_and_mark_csrf_token: {
         Args: { p_token: string; p_user_id: string | null }
@@ -257,6 +258,23 @@ export type Database = {
           p_client_ip: string | null
         }
         Returns: { success?: boolean; error?: string; code?: string }
+      }
+      get_variation_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          id: string
+          description: string
+          cost: number
+          date: string
+          photo_url: string | null
+          status: string
+          signature_token_expires_at: string | null
+          job_name: string
+          client_name: string
+          address: string
+          signer_name: string | null
+          signed_at: string | null
+        }[]
       }
     }
     Enums: {

@@ -37,13 +37,9 @@ export async function PATCH(
       return errorResponse(Errors.invalidToken())
     }
 
-    const { data: adminCheck } = await supabase
-      .from('admin_emails')
-      .select('email')
-      .eq('email', user.email)
-      .single()
-
-    if (!adminCheck) {
+    // Use SECURITY DEFINER RPC — admin_emails SELECT is blocked by RLS (USING false).
+    const { data: isAdmin } = await supabase.rpc('is_admin')
+    if (!isAdmin) {
       return errorResponse(Errors.forbidden())
     }
 

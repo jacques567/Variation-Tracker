@@ -1,8 +1,14 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 const FROM_ADDRESS = 'noreply@vartracker.com'
+
+function getResendClient(): Resend {
+  const key = process.env.RESEND_API_KEY
+  if (!key) {
+    throw new Error('RESEND_API_KEY is not configured')
+  }
+  return new Resend(key)
+}
 
 export interface SignatureConfirmationParams {
   clientEmail: string
@@ -29,6 +35,7 @@ function formatDate(iso: string): string {
 export async function sendSignatureConfirmation(params: SignatureConfirmationParams) {
   const { clientEmail, clientName, jobName, address, description, cost, signedAt } = params
 
+  const resend = getResendClient()
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: clientEmail,

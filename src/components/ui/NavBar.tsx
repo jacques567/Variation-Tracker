@@ -51,6 +51,12 @@ export default function NavBar({ contractor, hasSubscription }: { contractor: Co
             </Link>
           )}
           <div className="flex items-center gap-4">
+            {!hasSubscription && (
+              <Link href="/subscribe"
+                className="text-xs bg-blue-600 text-white rounded-full px-3 py-1 font-medium hover:bg-blue-700 transition-colors">
+                Start free trial
+              </Link>
+            )}
             <span className="text-sm text-gray-500 hidden sm:block">
               {contractor?.full_name}
             </span>

@@ -39,7 +39,7 @@ export default function ContractorsPage() {
         .select('contractor_id')
 
       const jobCounts = new Map<string, number>()
-      jobs?.forEach((job: any) => {
+      jobs?.forEach((job) => {
         jobCounts.set(job.contractor_id, (jobCounts.get(job.contractor_id) || 0) + 1)
       })
 

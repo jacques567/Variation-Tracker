@@ -32,8 +32,9 @@ export default function RegisterPage() {
     })
 
     if (error) {
-      // Check if it's a "user already exists" error
-      if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+      // 400 typically means email already registered or validation error
+      // Check for user already exists based on error status/code
+      if (error.status === 400 || error.code === 'user_already_exists') {
         setError('This email is already registered. Try logging in instead.')
       } else {
         setError(error.message || 'Sign up failed')

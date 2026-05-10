@@ -18,6 +18,3 @@ ALTER TABLE contractors ADD COLUMN login_attempt_reset_at timestamptz DEFAULT NU
 
 -- Index for failed login rate limiting queries
 CREATE INDEX contractors_login_attempt_reset_idx ON contractors(login_attempt_reset_at);
-
--- Grant permissions for authenticated users
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;

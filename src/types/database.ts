@@ -36,6 +36,9 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          last_login_at: string | null
+          login_attempt_count: number
+          login_attempt_reset_at: string | null
           phone: string | null
           role: string | null
           stripe_customer_id: string | null
@@ -48,6 +51,9 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          last_login_at?: string | null
+          login_attempt_count?: number
+          login_attempt_reset_at?: string | null
           phone?: string | null
           role?: string | null
           stripe_customer_id?: string | null
@@ -60,6 +66,9 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          last_login_at?: string | null
+          login_attempt_count?: number
+          login_attempt_reset_at?: string | null
           phone?: string | null
           role?: string | null
           stripe_customer_id?: string | null

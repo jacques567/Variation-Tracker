@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -21,37 +20,39 @@ export default function RegisterPage() {
     const password = form.get('password') as string
     const fullName = form.get('full_name') as string
 
-    const supabase = createClient()
-    const { error, data } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-      },
-    })
+    try {
+      // Call server-side signup endpoint for auth + contractor creation
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, full_name: fullName }),
+      })
 
-    if (error) {
-      // 400 typically means email already registered or validation error
-      // Check for user already exists based on error status/code
-      if (error.status === 400 || error.code === 'user_already_exists') {
-        setError('This email is already registered. Try logging in instead.')
-      } else {
-        setError(error.message || 'Sign up failed')
+      if (!res.ok) {
+        const { error: apiError } = await res.json()
+        if (res.status === 400) {
+          setError('This email is already registered. Try logging in instead.')
+        } else {
+          setError(apiError || 'Sign up failed')
+        }
+        setLoading(false)
+        return
       }
+
+      const { session } = await res.json()
+
+      // If we get a session, we're auto-confirmed — go to jobs
+      if (session) {
+        router.push('/jobs')
+      } else {
+        // Otherwise show email confirmation message
+        setEmailSent(true)
+      }
+    } catch (err) {
+      console.error('Signup error:', err)
+      setError('An error occurred. Please try again.')
       setLoading(false)
-      return
     }
-
-    // Session present means auto-confirm is on — go straight to app
-    if (data.session) {
-      router.push('/jobs')
-      return
-    }
-
-    // No session means email confirmation is required
-    setEmailSent(true)
-    setLoading(false)
   }
 
   if (emailSent) {

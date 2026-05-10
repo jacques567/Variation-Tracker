@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 const MAX_LOGIN_ATTEMPTS = 5
 const LOCKOUT_DURATION_MINUTES = 15
@@ -16,20 +16,37 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
+    const rateLimitDb = await createServiceRoleClient()
 
-    // Check if contractor exists and if they're rate-limited
-    const { data: contractor, error: fetchError } = await supabase
+    // Check if contractor exists and if they're rate-limited (use service role to bypass RLS)
+    const { data: contractor, error: fetchError } = await rateLimitDb
       .from('contractors')
       .select('id, login_attempt_count, login_attempt_reset_at')
       .eq('email', email)
       .maybeSingle()
 
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      console.error('Error fetching contractor:', fetchError)
-      return NextResponse.json(
-        { error: 'Database error' },
-        { status: 500 }
-      )
+    if (fetchError) {
+      console.error('Contractor fetch error:', {
+        code: fetchError.code,
+        message: fetchError.message,
+        status: (fetchError as any).status,
+      })
+      if (fetchError.code !== 'PGRST116') {
+        return NextResponse.json(
+          { error: 'Database error' },
+          { status: 500 }
+        )
+      }
+    }
+
+    if (!contractor) {
+      console.log('No contractor found for email:', email)
+    } else {
+      console.log('Contractor found:', {
+        id: contractor.id,
+        login_attempt_count: contractor.login_attempt_count,
+        login_attempt_reset_at: contractor.login_attempt_reset_at,
+      })
     }
 
     // Check if account is rate-limited
@@ -57,7 +74,7 @@ export async function POST(request: NextRequest) {
 
       // Reset counter if lockout period has expired
       if (resetAt && resetAt <= new Date()) {
-        await supabase
+        await rateLimitDb
           .from('contractors')
           .update({
             login_attempt_count: 0,
@@ -80,7 +97,7 @@ export async function POST(request: NextRequest) {
         const resetAt = new Date()
         resetAt.setMinutes(resetAt.getMinutes() + LOCKOUT_DURATION_MINUTES)
 
-        await supabase
+        await rateLimitDb
           .from('contractors')
           .update({
             login_attempt_count: newAttemptCount,
@@ -97,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     // Auth succeeded — record login and reset attempt counter
     if (contractor) {
-      await supabase
+      await rateLimitDb
         .from('contractors')
         .update({
           last_login_at: new Date().toISOString(),

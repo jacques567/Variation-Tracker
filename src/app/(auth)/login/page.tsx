@@ -3,7 +3,6 @@
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 
 function LoginForm() {
   const router = useRouter()
@@ -20,31 +19,47 @@ function LoginForm() {
     const email = form.get('email') as string
     const password = form.get('password') as string
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      // Call server-side login endpoint for auth + rate limiting + tracking
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
 
-    if (error) {
-      setError('Invalid email or password')
+      if (!res.ok) {
+        const { error: apiError } = await res.json()
+        setError(apiError || 'Login failed')
+        setLoading(false)
+        return
+      }
+
+      const { session } = await res.json()
+
+      // Check if user is admin
+      const adminRes = await fetch('/api/admin/check-admin', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      const isAdmin = adminRes.ok
+
+      // Honour the ?next= param set by middleware, fall back to /jobs or /admin
+      const next = searchParams.get('next')
+      const redirectTo =
+        next && next.startsWith('/') && !next.startsWith('//')
+          ? next
+          : isAdmin
+            ? '/admin'
+            : '/jobs'
+
+      router.push(redirectTo)
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('An error occurred. Please try again.')
       setLoading(false)
-      return
     }
-
-    // Check if user is admin
-    const { data: adminData } = await supabase
-      .from('admin_emails')
-      .select('email')
-      .eq('email', email)
-      .maybeSingle()
-
-    if (adminData) {
-      router.push('/admin')
-      return
-    }
-
-    // Honour the ?next= param set by middleware, fall back to /jobs
-    const next = searchParams.get('next')
-    const redirectTo = next && next.startsWith('/') && !next.startsWith('//') ? next : '/jobs'
-    router.push(redirectTo)
   }
 
   const callbackError = searchParams.get('error')
@@ -71,6 +86,7 @@ function LoginForm() {
             required
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="joe@example.com"
+            disabled={loading}
           />
         </div>
 
@@ -84,6 +100,7 @@ function LoginForm() {
             type="password"
             required
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
           />
         </div>
 

@@ -8,6 +8,7 @@ import type { Contractor } from '@/types'
 
 interface ContractorWithStats extends Contractor {
   job_count: number
+  last_login_at: string | null
 }
 
 export default function ContractorsPage() {
@@ -21,11 +22,11 @@ export default function ContractorsPage() {
       setLoading(true)
       const supabase = createClient()
 
-      // Fetch all contractors
+      // Fetch all contractors with login tracking
       const { data: allContractors } = await supabase
         .from('contractors')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('last_login_at', { ascending: false, nullsFirst: false })
 
       if (!allContractors) {
         setContractors([])
@@ -38,7 +39,7 @@ export default function ContractorsPage() {
         .select('contractor_id')
 
       const jobCounts = new Map<string, number>()
-      jobs?.forEach((job: any) => {
+      jobs?.forEach((job: { contractor_id: string }) => {
         jobCounts.set(job.contractor_id, (jobCounts.get(job.contractor_id) || 0) + 1)
       })
 
@@ -125,12 +126,11 @@ export default function ContractorsPage() {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-6 py-3 text-left font-semibold text-gray-900">Name</th>
               <th className="px-6 py-3 text-left font-semibold text-gray-900">Email</th>
               <th className="px-6 py-3 text-left font-semibold text-gray-900">Company</th>
               <th className="px-6 py-3 text-left font-semibold text-gray-900">Status</th>
               <th className="px-6 py-3 text-left font-semibold text-gray-900">Jobs</th>
-              <th className="px-6 py-3 text-left font-semibold text-gray-900">Joined</th>
+              <th className="px-6 py-3 text-left font-semibold text-gray-900">Last Login</th>
               <th className="px-6 py-3 text-left font-semibold text-gray-900">Action</th>
             </tr>
           </thead>
@@ -138,9 +138,8 @@ export default function ContractorsPage() {
             {filtered.map(contractor => (
               <tr key={contractor.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 text-gray-900 font-medium">
-                  {contractor.full_name || '—'}
+                  {contractor.email}
                 </td>
-                <td className="px-6 py-4 text-gray-600">{contractor.email}</td>
                 <td className="px-6 py-4 text-gray-600">
                   {contractor.company_name || '—'}
                 </td>
@@ -159,7 +158,7 @@ export default function ContractorsPage() {
                 </td>
                 <td className="px-6 py-4 text-gray-900">{contractor.job_count}</td>
                 <td className="px-6 py-4 text-gray-600 text-xs">
-                  {formatDate(contractor.created_at)}
+                  {contractor.last_login_at ? formatDate(contractor.last_login_at) : 'Never'}
                 </td>
                 <td className="px-6 py-4">
                   <Link

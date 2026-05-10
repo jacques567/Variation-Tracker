@@ -29,7 +29,7 @@ export default function SubscribePage() {
           <Zap className="w-6 h-6 text-blue-600" />
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Start your free trial</h1>
-        <p className="text-gray-500 mt-2 text-sm">14 days free, then £15/month. Cancel any time.</p>
+        <p className="text-gray-500 mt-2 text-sm">7 days free, then £15/month. Cancel any time.</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
@@ -53,11 +53,11 @@ export default function SubscribePage() {
         disabled={loading}
         className="w-full bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
-        {loading ? 'Redirecting...' : 'Start 14-day free trial'}
+        {loading ? 'Redirecting...' : 'Start 7-day free trial'}
       </button>
 
       <p className="text-xs text-gray-400 text-center mt-4">
-        No credit card required for trial · Cancel any time
+        Card required to start trial · Cancel any time
       </p>
     </div>
   )

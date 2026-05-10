@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import JobCard from '@/components/jobs/JobCard'
 import type { JobCategory } from '@/types'
@@ -17,6 +17,7 @@ export default function JobsPage() {
   const [categories, setCategories] = useState<JobCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
+  const [showSubscribedBanner, setShowSubscribedBanner] = useState(searchParams.get('subscribed') === 'true')
 
   async function loadData() {
     try {
@@ -67,6 +68,20 @@ export default function JobsPage() {
 
   return (
     <div>
+      {showSubscribedBanner && (
+        <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-6">
+          <CheckCircle className="w-5 h-5 text-green-600 shrink-0" aria-hidden="true" />
+          <p className="text-sm text-green-800 font-medium">You&apos;re all set — your 7-day free trial has started.</p>
+          <button
+            onClick={() => setShowSubscribedBanner(false)}
+            className="ml-auto text-green-600 hover:text-green-800 text-sm"
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Jobs</h1>

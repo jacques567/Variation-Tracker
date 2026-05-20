@@ -13,6 +13,8 @@ export interface Contractor {
   stripe_customer_id: string | null
   subscription_status: string | null
   subscription_id: string | null
+  trial_ends_at: string | null
+  grace_period_expires_at: string | null
   created_at: string
   role?: string | null
 }

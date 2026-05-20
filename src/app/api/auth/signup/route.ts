@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,14 +45,26 @@ export async function POST(request: NextRequest) {
 
     console.log('User created successfully:', { userId: data.user.id, email })
 
-    // Create contractor record
-    const { error: createError } = await supabase
+    // Auto-enroll a 7-day trial. Stripe webhooks override this if the user pays.
+    // Use service-role client + upsert: subscription/trial columns are read-only to the
+    // authenticated role (migration 014), and the handle_new_user trigger may have
+    // already inserted a row with default values that we need to update.
+    const trialEndsAt = new Date()
+    trialEndsAt.setDate(trialEndsAt.getDate() + 7)
+
+    const supabaseService = await createServiceRoleClient()
+    const { error: createError } = await supabaseService
       .from('contractors')
-      .insert({
-        id: data.user.id,
-        email,
-        full_name,
-      })
+      .upsert(
+        {
+          id: data.user.id,
+          email,
+          full_name,
+          subscription_status: 'trialing',
+          trial_ends_at: trialEndsAt.toISOString(),
+        },
+        { onConflict: 'id' }
+      )
 
     if (createError) {
       console.error('Error creating contractor record:', {

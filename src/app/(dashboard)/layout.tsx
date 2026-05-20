@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import NavBar from '@/components/ui/NavBar'
-
-const ACTIVE_STATUSES = ['active', 'trialing']
+import TrialExpiryBanner from '@/components/ui/TrialExpiryBanner'
+import PaymentWarning from '@/components/ui/PaymentWarning'
+import { evaluateSubscription } from '@/lib/subscription-guard'
 
 export default async function DashboardLayout({
   children,
@@ -20,12 +21,19 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
-  const hasSubscription = ACTIVE_STATUSES.includes(contractor?.subscription_status ?? '')
-  const isSubscribePage = false // layout doesn't know the path, gate is below
+  const { isValid } = evaluateSubscription(contractor)
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <NavBar contractor={contractor} hasSubscription={hasSubscription} />
+      <NavBar contractor={contractor} hasSubscription={isValid} />
+      <PaymentWarning
+        subscriptionStatus={contractor?.subscription_status ?? null}
+        gracePeriodExpiresAt={contractor?.grace_period_expires_at ?? null}
+      />
+      <TrialExpiryBanner
+        trialEndsAt={contractor?.trial_ends_at ?? null}
+        subscriptionStatus={contractor?.subscription_status ?? null}
+      />
       <main className="flex-1 max-w-4xl mx-auto px-4 py-6 w-full">
         {children}
       </main>

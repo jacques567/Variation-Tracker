@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/database'
+import { evaluateSubscription } from '@/lib/subscription-guard'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -58,6 +59,36 @@ export async function updateSession(request: NextRequest) {
     const redirectTo =
       next && next.startsWith('/') && !next.startsWith('//') ? next : '/jobs'
     return NextResponse.redirect(new URL(redirectTo, request.url))
+  }
+
+  // Subscription paywall — gate dashboard pages when the user has no valid sub.
+  // /subscribe and /admin are exempt (subscribe lets them pay; admin is a separate gate).
+  if (
+    user &&
+    !isAuthRoute &&
+    !isPublicRoute &&
+    !isRootRoute &&
+    !pathname.startsWith('/subscribe') &&
+    !pathname.startsWith('/admin')
+  ) {
+    const { data: contractor, error: contractorError } = await supabase
+      .from('contractors')
+      .select('subscription_status, trial_ends_at, grace_period_expires_at')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (contractorError) {
+      // Transport/connection error — fail open. API routes still enforce subscription
+      // via checkSubscription(), so this isn't a security hole. Avoids kicking paying
+      // users to /subscribe on a flaky DB read.
+      console.error('[proxy] contractor lookup failed, allowing request through:', contractorError.message)
+      return supabaseResponse
+    }
+
+    const { isValid } = evaluateSubscription(contractor)
+    if (!isValid) {
+      return NextResponse.redirect(new URL('/subscribe', request.url))
+    }
   }
 
   return supabaseResponse

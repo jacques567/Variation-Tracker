@@ -4,23 +4,14 @@ import Link from 'next/link'
 import { Clock } from 'lucide-react'
 
 interface TrialExpiryBannerProps {
-  trialEndsAt: string | null
-  subscriptionStatus: string | null
+  // Days until trial ends. Negative = already expired. Computed server-side
+  // (dashboard layout) to keep this component pure for React 19's purity rules.
+  daysRemaining: number | null
 }
 
-export default function TrialExpiryBanner({
-  trialEndsAt,
-  subscriptionStatus,
-}: TrialExpiryBannerProps) {
-  if (subscriptionStatus !== 'trialing' || !trialEndsAt) return null
-
-  const endsAt = new Date(trialEndsAt)
-  const now = new Date()
-  const msPerDay = 1000 * 60 * 60 * 24
-  const daysRemaining = Math.ceil((endsAt.getTime() - now.getTime()) / msPerDay)
-
-  // Only show in the final 2 days.
-  if (daysRemaining > 2 || daysRemaining < 0) return null
+export default function TrialExpiryBanner({ daysRemaining }: TrialExpiryBannerProps) {
+  // Only show in the final 2 days, and not after expiry (the middleware redirects in that case).
+  if (daysRemaining === null || daysRemaining > 2 || daysRemaining < 0) return null
 
   const label =
     daysRemaining <= 0

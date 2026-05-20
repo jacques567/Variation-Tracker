@@ -5,6 +5,13 @@ import TrialExpiryBanner from '@/components/ui/TrialExpiryBanner'
 import PaymentWarning from '@/components/ui/PaymentWarning'
 import { evaluateSubscription } from '@/lib/subscription-guard'
 
+const MS_PER_DAY = 1000 * 60 * 60 * 24
+
+function daysUntil(iso: string | null | undefined): number | null {
+  if (!iso) return null
+  return Math.ceil((new Date(iso).getTime() - Date.now()) / MS_PER_DAY)
+}
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -22,18 +29,23 @@ export default async function DashboardLayout({
     .single()
 
   const { isValid } = evaluateSubscription(contractor)
+  const trialDaysRemaining =
+    contractor?.subscription_status === 'trialing'
+      ? daysUntil(contractor.trial_ends_at)
+      : null
+  const graceDaysRemaining =
+    contractor?.subscription_status === 'past_due'
+      ? daysUntil(contractor.grace_period_expires_at)
+      : null
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <NavBar contractor={contractor} hasSubscription={isValid} />
       <PaymentWarning
         subscriptionStatus={contractor?.subscription_status ?? null}
-        gracePeriodExpiresAt={contractor?.grace_period_expires_at ?? null}
+        daysRemaining={graceDaysRemaining}
       />
-      <TrialExpiryBanner
-        trialEndsAt={contractor?.trial_ends_at ?? null}
-        subscriptionStatus={contractor?.subscription_status ?? null}
-      />
+      <TrialExpiryBanner daysRemaining={trialDaysRemaining} />
       <main className="flex-1 max-w-4xl mx-auto px-4 py-6 w-full">
         {children}
       </main>

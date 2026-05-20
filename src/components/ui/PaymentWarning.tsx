@@ -5,24 +5,19 @@ import { AlertTriangle } from 'lucide-react'
 
 interface PaymentWarningProps {
   subscriptionStatus: string | null
-  gracePeriodExpiresAt: string | null
+  // Days until grace period ends. null = no grace period set. Negative = expired.
+  // Computed server-side (dashboard layout) to keep this component pure.
+  daysRemaining: number | null
 }
 
 export default function PaymentWarning({
   subscriptionStatus,
-  gracePeriodExpiresAt,
+  daysRemaining,
 }: PaymentWarningProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   if (subscriptionStatus !== 'past_due') return null
-
-  let daysRemaining: number | null = null
-  if (gracePeriodExpiresAt) {
-    const msPerDay = 1000 * 60 * 60 * 24
-    const diff = new Date(gracePeriodExpiresAt).getTime() - Date.now()
-    daysRemaining = Math.ceil(diff / msPerDay)
-  }
 
   const message =
     daysRemaining === null

@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 const MAX_LOGIN_ATTEMPTS = 5
 const LOCKOUT_DURATION_MINUTES = 15
 
+const LoginSchema = z.object({
+  email: z.string().email('Invalid email format').toLowerCase(),
+  password: z.string().min(1, 'Password required').max(128, 'Invalid password'),
+})
+
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password required' },
-        { status: 400 }
-      )
-    }
+    const body = await request.json()
+    const { email, password } = LoginSchema.parse(body)
 
     const supabase = await createClient()
     const rateLimitDb = await createServiceRoleClient()
@@ -130,6 +130,13 @@ export async function POST(request: NextRequest) {
       user: data.user,
     })
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      const fieldErrors = error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+      return NextResponse.json(
+        { error: fieldErrors[0] || 'Validation failed' },
+        { status: 400 }
+      )
+    }
     console.error('Login endpoint error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

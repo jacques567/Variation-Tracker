@@ -14,7 +14,7 @@ function errorResponse(err: unknown) {
 
 export async function POST(request: NextRequest) {
   const ip = extractClientIp(request.headers.get('x-forwarded-for'), request.headers.get('x-real-ip')) ?? 'unknown'
-  if (!checkRateLimit(`sign:${ip}`, 10, 60_000)) {
+  if (!(await checkRateLimit(`sign:${ip}`, 10, 60_000))) {
     const err = Errors.rateLimited()
     return NextResponse.json(err.toJSON(), { status: err.statusCode })
   }

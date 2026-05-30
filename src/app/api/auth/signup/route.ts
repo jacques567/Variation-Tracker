@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const fieldErrors = error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+      const fieldErrors = error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
       return NextResponse.json(
         { error: fieldErrors[0] || 'Validation failed' },
         { status: 400 }

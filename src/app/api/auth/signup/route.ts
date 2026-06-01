@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('User created successfully:', { userId: data.user.id, email })
+    console.log('User created successfully:', { userId: data.user.id })
 
     // Auto-enroll a 7-day trial. Stripe webhooks override this if the user pays.
     // Use service-role client + upsert: subscription/trial columns are read-only to the
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Contractor record created:', { userId: data.user.id, email })
+    console.log('Contractor record created:', { userId: data.user.id })
 
     return NextResponse.json({
       success: true,
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    console.error('Signup endpoint error:', error)
+    console.error('Signup endpoint error (check logs for details)')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

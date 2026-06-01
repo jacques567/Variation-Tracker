@@ -39,16 +39,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!contractor) {
-      console.log('No contractor found for email:', email)
-    } else {
-      console.log('Contractor found:', {
-        id: contractor.id,
-        login_attempt_count: contractor.login_attempt_count,
-        login_attempt_reset_at: contractor.login_attempt_reset_at,
-      })
-    }
-
     // Check if account is rate-limited
     if (contractor) {
       const resetAt = contractor.login_attempt_reset_at

@@ -51,7 +51,16 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  const contentLength = request.headers.get('content-length')
+  if (contentLength && parseInt(contentLength) > 1_048_576) {
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
+  }
+
   const body = await request.text()
+  if (body.length > 1_048_576) {
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
+  }
+
   const sig = request.headers.get('stripe-signature')!
 
   const stripe = getStripe()

@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    console.error('Signup endpoint error:', error)
+    console.error('Signup endpoint error (check logs for details)')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

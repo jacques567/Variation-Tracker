@@ -51,13 +51,9 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const contentLength = request.headers.get('content-length')
-  if (contentLength && parseInt(contentLength) > 1_048_576) {
-    return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
-  }
-
   const body = await request.text()
-  if (body.length > 1_048_576) {
+  if (Buffer.byteLength(body, 'utf-8') > 1_048_576) {
+    console.warn('Stripe webhook rejected: payload exceeds 1MB limit')
     return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
   }
 

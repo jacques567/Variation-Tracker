@@ -52,6 +52,11 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.text()
+  if (Buffer.byteLength(body, 'utf-8') > 1_048_576) {
+    console.warn('Stripe webhook rejected: payload exceeds 1MB limit')
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
+  }
+
   const sig = request.headers.get('stripe-signature')!
 
   const stripe = getStripe()

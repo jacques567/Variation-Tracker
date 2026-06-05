@@ -1,29 +1,43 @@
-const windows = new Map<string, number[]>()
+import { createServiceRoleClient } from './supabase/server'
 
-// Prune keys older than 2x the window to bound memory growth
-const PRUNE_MULTIPLIER = 2
+export async function checkRateLimit(key: string, maxRequests: number, windowMs: number): Promise<boolean> {
+  const supabase = await createServiceRoleClient()
+  const now = new Date()
+  const windowStart = new Date(now.getTime() - windowMs)
 
-export function checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
-  const now = Date.now()
-  const windowStart = now - windowMs
+  // Count attempts within the rate limit window
+  const { count, error: countError } = await (supabase as any)
+    .from('rate_limit_attempts')
+    .select('*', { count: 'exact', head: true })
+    .eq('endpoint_key', key)
+    .gt('attempted_at', windowStart.toISOString())
 
-  const timestamps = (windows.get(key) ?? []).filter(t => t > windowStart)
-
-  if (timestamps.length >= maxRequests) {
-    windows.set(key, timestamps)
-    return false
+  if (countError) {
+    console.error('Rate limit check failed:', countError)
+    throw new Error('Rate limit check unavailable')
   }
 
-  timestamps.push(now)
-  windows.set(key, timestamps)
-
-  // Periodic cleanup: remove keys with no recent activity
-  if (Math.random() < 0.01) {
-    const pruneThreshold = now - windowMs * PRUNE_MULTIPLIER
-    for (const [k, ts] of windows.entries()) {
-      if (ts.every(t => t < pruneThreshold)) windows.delete(k)
-    }
+  if ((count ?? 0) >= maxRequests) {
+    return false // Rate limited
   }
+
+  // Record this attempt
+  const { error: insertError } = await (supabase as any)
+    .from('rate_limit_attempts')
+    .insert({ endpoint_key: key, attempted_at: now.toISOString() })
+
+  if (insertError) {
+    console.error('Failed to record rate limit attempt:', insertError)
+    throw new Error('Rate limit recording failed')
+  }
+
+  // Cleanup old attempts async (non-blocking)
+  void (supabase as any)
+    .from('rate_limit_attempts')
+    .delete()
+    .lt('attempted_at', windowStart.toISOString())
+    .then(() => {})
+    .catch((err: Error) => console.error('Rate limit cleanup failed:', err))
 
   return true
 }

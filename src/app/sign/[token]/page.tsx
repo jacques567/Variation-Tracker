@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import SignatureForm from '@/components/signature/SignatureForm'
+import SignaturePrivacyNotice from '@/components/legal/SignaturePrivacyNotice'
 import { formatCurrency, formatDate } from '@/lib/utils'
 
 export default async function SignPage({ params }: { params: Promise<{ token: string }> }) {
@@ -103,6 +104,7 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
         </div>
 
         <SignatureForm variationId={variation.id} token={token} cost={variation.cost} />
+        <SignaturePrivacyNotice />
       </div>
     </div>
   )

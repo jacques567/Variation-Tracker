@@ -1,16 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { extractClientIp } from '@/lib/csrf'
+
+const SignupSchema = z.object({
+  email: z.string().email('Invalid email format').toLowerCase(),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(128, 'Password must be less than 128 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
+  full_name: z.string().trim().min(1, 'Full name required').max(255, 'Full name too long'),
+})
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, full_name } = await request.json()
-
-    if (!email || !password || !full_name) {
+    const ip = extractClientIp(request.headers.get('x-forwarded-for'), request.headers.get('x-real-ip')) ?? 'unknown'
+    if (!(await checkRateLimit(`signup:${ip}`, 5, 3600_000))) {
       return NextResponse.json(
-        { error: 'Email, password, and full name required' },
-        { status: 400 }
+        { error: 'Too many signup attempts. Try again later.' },
+        { status: 429 }
       )
     }
+
+    const body = await request.json()
+    const { email, password, full_name } = SignupSchema.parse(body)
 
     const supabase = await createClient()
 
@@ -58,7 +75,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('User created successfully:', { userId: data.user.id, email })
+    console.log('User created successfully:', { userId: data.user.id })
 
     // Auto-enroll a 7-day trial. Stripe webhooks override this if the user pays.
     // Use service-role client + upsert: subscription/trial columns are read-only to the
@@ -93,7 +110,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Contractor record created:', { userId: data.user.id, email })
+    console.log('Contractor record created:', { userId: data.user.id })
 
     return NextResponse.json({
       success: true,
@@ -101,7 +118,14 @@ export async function POST(request: NextRequest) {
       user: data.user,
     })
   } catch (error) {
-    console.error('Signup endpoint error:', error)
+    if (error instanceof z.ZodError) {
+      const fieldErrors = error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+      return NextResponse.json(
+        { error: fieldErrors[0] || 'Validation failed' },
+        { status: 400 }
+      )
+    }
+    console.error('Signup endpoint error (check logs for details)')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

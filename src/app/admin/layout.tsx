@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import Footer from '@/components/ui/Footer'
 import ExitAdminButton from '@/components/admin/ExitAdminButton'
 
 export default async function AdminLayout({
@@ -50,7 +49,6 @@ export default async function AdminLayout({
       <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
         {children}
       </main>
-      <Footer />
     </div>
   )
 }

@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 
 const MAX_LOGIN_ATTEMPTS = 5
 const LOCKOUT_DURATION_MINUTES = 15
 
+const LoginSchema = z.object({
+  email: z.string().email('Invalid email format').toLowerCase(),
+  password: z.string().min(1, 'Password required').max(128, 'Invalid password'),
+})
+
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json()
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password required' },
-        { status: 400 }
-      )
-    }
+    const body = await request.json()
+    const { email, password } = LoginSchema.parse(body)
 
     const supabase = await createClient()
     const rateLimitDb = await createServiceRoleClient()
@@ -37,16 +37,6 @@ export async function POST(request: NextRequest) {
           { status: 500 }
         )
       }
-    }
-
-    if (!contractor) {
-      console.log('No contractor found for email:', email)
-    } else {
-      console.log('Contractor found:', {
-        id: contractor.id,
-        login_attempt_count: contractor.login_attempt_count,
-        login_attempt_reset_at: contractor.login_attempt_reset_at,
-      })
     }
 
     // Check if account is rate-limited
@@ -130,7 +120,14 @@ export async function POST(request: NextRequest) {
       user: data.user,
     })
   } catch (error) {
-    console.error('Login endpoint error:', error)
+    if (error instanceof z.ZodError) {
+      const fieldErrors = error.issues.map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
+      return NextResponse.json(
+        { error: fieldErrors[0] || 'Validation failed' },
+        { status: 400 }
+      )
+    }
+    console.error('Login endpoint error (check logs for details)')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

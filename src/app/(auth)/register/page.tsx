@@ -4,11 +4,59 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+/** Clean up Supabase's "field: Message" format and map known errors to user-friendly copy. */
+function parseSignupError(apiError: string | undefined, status: number): string {
+  if (!apiError) return 'Sign up failed. Please try again.'
+
+  if (status === 500) {
+    if (apiError.includes('contractor record')) {
+      return 'Your account was created but profile setup failed. Please contact support.'
+    }
+    return 'Something went wrong on our end. Please try again.'
+  }
+
+  if (status === 409) {
+    return 'An account with this email already exists. Try signing in instead.'
+  }
+
+  if (status === 429) {
+    return 'Too many sign up attempts. Please wait a moment before trying again.'
+  }
+
+  // Strip Supabase "field: " prefix (e.g. "password: Password must contain...")
+  const cleaned = apiError.replace(/^\w+:\s*/, '')
+
+  // Map remaining known patterns
+  if (cleaned.toLowerCase().includes('already registered') || cleaned.toLowerCase().includes('already exists')) {
+    return 'An account with this email already exists. Try signing in instead.'
+  }
+  if (cleaned.toLowerCase().includes('unable to validate email') || cleaned.toLowerCase().includes('invalid email')) {
+    return 'Please enter a valid email address.'
+  }
+  if (cleaned.toLowerCase().includes('signup') && cleaned.toLowerCase().includes('disabled')) {
+    return 'Sign up is currently unavailable. Please try again later.'
+  }
+  if (cleaned.toLowerCase().includes('rate limit') || cleaned.toLowerCase().includes('too many')) {
+    return 'Too many sign up attempts. Please wait a moment before trying again.'
+  }
+
+  return cleaned || 'Sign up failed. Please try again.'
+}
+
+const PASSWORD_REQUIREMENTS = [
+  { label: 'At least 8 characters', test: (pw: string) => pw.length >= 8 },
+  { label: 'At least one uppercase letter', test: (pw: string) => /[A-Z]/.test(pw) },
+]
+
 export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+  const [passwordValue, setPasswordValue] = useState('')
+  const [passwordTouched, setPasswordTouched] = useState(false)
+
+  const requirementsMet = PASSWORD_REQUIREMENTS.every(r => r.test(passwordValue))
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -21,7 +69,6 @@ export default function RegisterPage() {
     const fullName = form.get('full_name') as string
 
     try {
-      // Call server-side signup endpoint for auth + contractor creation
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,28 +76,22 @@ export default function RegisterPage() {
       })
 
       if (!res.ok) {
-        const { error: apiError } = await res.json()
-        if (res.status === 400) {
-          setError('This email is already registered. Try logging in instead.')
-        } else {
-          setError(apiError || 'Sign up failed')
-        }
+        const body = await res.json().catch(() => ({}))
+        setError(parseSignupError(body.error, res.status))
         setLoading(false)
         return
       }
 
       const { session } = await res.json()
 
-      // If we get a session, we're auto-confirmed — go to jobs
       if (session) {
         router.push('/jobs')
       } else {
-        // Otherwise show email confirmation message
         setEmailSent(true)
       }
     } catch (err) {
       console.error('Signup error:', err)
-      setError('An error occurred. Please try again.')
+      setError('A network error occurred. Please check your connection and try again.')
       setLoading(false)
     }
   }
@@ -116,11 +157,31 @@ export default function RegisterPage() {
             name="password"
             type="password"
             required
-            minLength={8}
             disabled={loading}
+            value={passwordValue}
+            onChange={e => setPasswordValue(e.target.value)}
+            onBlur={() => setPasswordTouched(true)}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            placeholder="Minimum 8 characters"
+            placeholder="Create a password"
           />
+
+          {/* Requirements — shown once user starts typing */}
+          {(passwordTouched || passwordValue.length > 0) && (
+            <ul className="mt-2 space-y-1">
+              {PASSWORD_REQUIREMENTS.map(req => {
+                const met = req.test(passwordValue)
+                return (
+                  <li
+                    key={req.label}
+                    className={`flex items-center gap-1.5 text-xs ${met ? 'text-green-600' : 'text-gray-400'}`}
+                  >
+                    <span>{met ? '✓' : '○'}</span>
+                    {req.label}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </div>
 
         {error && (
@@ -129,7 +190,7 @@ export default function RegisterPage() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || (passwordValue.length > 0 && !requirementsMet)}
           className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? 'Creating account...' : 'Create account'}

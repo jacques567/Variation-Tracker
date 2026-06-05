@@ -24,13 +24,28 @@ export async function POST(request: NextRequest) {
     })
 
     if (signUpError) {
+      const errCode = (signUpError as any).code as string | undefined
+      const errStatus = (signUpError as any).status as number | undefined
       console.error('SignUp error:', {
         message: signUpError.message,
-        status: (signUpError as any).status,
-        code: (signUpError as any).code,
+        status: errStatus,
+        code: errCode,
       })
+
+      // Duplicate email — return 409 so the frontend can distinguish it
+      if (
+        errCode === 'user_already_exists' ||
+        errStatus === 422 ||
+        signUpError.message?.toLowerCase().includes('already registered')
+      ) {
+        return NextResponse.json(
+          { error: 'An account with this email already exists.', errorCode: 'user_already_exists' },
+          { status: 409 }
+        )
+      }
+
       return NextResponse.json(
-        { error: signUpError.message || 'Sign up failed' },
+        { error: signUpError.message || 'Sign up failed', errorCode: errCode },
         { status: 400 }
       )
     }

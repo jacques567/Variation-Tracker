@@ -13,9 +13,10 @@ test.describe('Authentication', () => {
     await expect(page.locator('text=Create your account')).toBeVisible();
   });
 
-  test('unauthenticated user redirects to login', async ({ page }) => {
+  test('root shows landing page', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL('/');
+    await expect(page.locator('text=Coming Soon')).toBeVisible();
   });
 
   test('login form has required fields', async ({ page }) => {

@@ -36,7 +36,7 @@ function parseSignupError(apiError: string | undefined, status: number): string 
   if (cleaned.toLowerCase().includes('signup') && cleaned.toLowerCase().includes('disabled')) {
     return 'Sign up is currently unavailable. Please try again later.'
   }
-  if (cleaned.toLowerCase().includes('rate limit') || cleaned.toLowerCase().includes('too many')) {
+  if (cleaned.toLowerCase().includes('rate limit') || cleaned.toLowerCase().includes('too many signup')) {
     return 'Too many sign up attempts. Please wait a moment before trying again.'
   }
 

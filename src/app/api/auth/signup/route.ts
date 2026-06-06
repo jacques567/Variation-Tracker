@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
       // Duplicate email — return 409 so the frontend can distinguish it
       if (
         errCode === 'user_already_exists' ||
-        errStatus === 422 ||
         signUpError.message?.toLowerCase().includes('already registered')
       ) {
         return NextResponse.json(

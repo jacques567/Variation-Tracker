@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { getStripe } from '@/lib/stripe'
 import { Errors } from '@/lib/errors'
 
 export async function POST(request: NextRequest) {
   try {
+    // Use session client only for auth — all contractor writes use service role
+    // because migration 014 restricts the authenticated role to profile columns only.
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -14,7 +16,10 @@ export async function POST(request: NextRequest) {
 
     const stripe = getStripe()
 
-    const { data: contractor } = await supabase
+    // Service role client bypasses column-level grants — required for stripe_customer_id.
+    const serviceSupabase = await createServiceRoleClient()
+
+    const { data: contractor } = await serviceSupabase
       .from('contractors')
       .select('stripe_customer_id, email, full_name')
       .eq('id', user.id)
@@ -30,12 +35,24 @@ export async function POST(request: NextRequest) {
       })
       customerId = customer.id
 
-      await supabase
+      // Persist the Stripe customer ID. Must use service role — the authenticated role
+      // cannot write stripe_customer_id after migration 014_lockdown_contractor_columns.
+      const { error: updateError } = await serviceSupabase
         .from('contractors')
         .update({ stripe_customer_id: customerId })
         .eq('id', user.id)
+
+      if (updateError) {
+        // Stripe customer was created but ID couldn't be saved — log and continue.
+        // The checkout session will still work; on next visit we'll create a new customer.
+        // A future cleanup job can deduplicate orphaned Stripe customers by email.
+        console.error('Failed to persist stripe_customer_id:', updateError.message)
+      }
     }
 
+    // No trial_period_days — users receive a 7-day trial at signup (app-managed,
+    // no card required). Adding a second Stripe trial would give users 14 free days
+    // total and is unintentional. The Stripe subscription starts immediately on payment.
     const session = await stripe.checkout.sessions.create(
       {
         customer: customerId,
@@ -45,7 +62,6 @@ export async function POST(request: NextRequest) {
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/jobs?subscribed=true`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe`,
         subscription_data: {
-          trial_period_days: 7,
           metadata: { supabase_user_id: user.id },
         },
       },

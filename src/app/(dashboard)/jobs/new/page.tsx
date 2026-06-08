@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { evaluateSubscription } from '@/lib/subscription-guard'
+import { evaluateSubscription } from '@/lib/subscription-evaluation'
 import type { JobCategory } from '@/types'
 
 const STORAGE_KEY = 'job_form_draft'
@@ -74,7 +74,7 @@ export default function NewJobPage() {
       .eq('id', user.id)
       .single()
 
-    const { isValid, reason } = evaluateSubscription(contractor ?? null)
+    const { isValid, reason } = evaluateSubscription(contractor)
     if (!isValid) {
       setError(reason ?? 'Your subscription has expired. Please subscribe to continue.')
       setLoading(false)

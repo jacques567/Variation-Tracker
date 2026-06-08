@@ -11,7 +11,7 @@
 --
 -- The has_active_subscription() function is the single source of truth for
 -- "is this user allowed to write?" at the database layer. It mirrors the TypeScript
--- evaluateSubscription() logic in src/lib/subscription-guard.ts. Any change to
+-- evaluateSubscription() logic in src/lib/subscription-evaluation.ts. Any change to
 -- the trial/grace-period rules must be reflected in both places.
 
 
@@ -66,7 +66,8 @@ create policy "Contractors can select own jobs"
 
 create policy "Contractors can update own jobs"
   on public.jobs for update
-  using (auth.uid() = contractor_id);
+  using  (auth.uid() = contractor_id)
+  with check (auth.uid() = contractor_id); -- prevents contractor_id reassignment via UPDATE
 
 create policy "Contractors can delete own jobs"
   on public.jobs for delete
@@ -98,7 +99,12 @@ create policy "Contractors can update own variations"
   on public.variations for update
   using (
     auth.uid() = (
-      select contractor_id from public.jobs where id = job_id
+      select contractor_id from public.jobs where id = job_id -- relies on jobs(id) PK index
+    )
+  )
+  with check (
+    auth.uid() = (
+      select contractor_id from public.jobs where id = job_id -- prevents job_id reassignment via UPDATE
     )
   );
 

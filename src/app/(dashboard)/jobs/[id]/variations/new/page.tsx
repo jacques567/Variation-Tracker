@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Upload, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { evaluateSubscription } from '@/lib/subscription-guard'
+import { evaluateSubscription } from '@/lib/subscription-evaluation'
 import { use } from 'react'
 
 export default function NewVariationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -47,7 +47,7 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
       .eq('id', user.id)
       .single()
 
-    const { isValid, reason } = evaluateSubscription(contractor ?? null)
+    const { isValid, reason } = evaluateSubscription(contractor)
     if (!isValid) {
       setError(reason ?? 'Your subscription has expired. Please subscribe to continue.')
       setLoading(false)

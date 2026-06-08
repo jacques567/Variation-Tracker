@@ -187,9 +187,9 @@ test.describe('POST /api/webhooks/stripe', () => {
   // Functional behavior is covered via the pure evaluateSubscription tests.
 
   test.describe('signed event scenarios', () => {
-    test.skip('customer.subscription.deleted → 200 received:true')
-    test.skip('customer.subscription.updated with past_due → 200 received:true')
-    test.skip('customer.subscription.updated with active → 200 received:true')
-    test.skip('unknown event type → 200 received:true (logged but not processed)')
+    test.skip('customer.subscription.deleted → 200 received:true', async () => {})
+    test.skip('customer.subscription.updated with past_due → 200 received:true', async () => {})
+    test.skip('customer.subscription.updated with active → 200 received:true', async () => {})
+    test.skip('unknown event type → 200 received:true (logged but not processed)', async () => {})
   })
 })

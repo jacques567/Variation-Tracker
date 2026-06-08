@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Upload, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { evaluateSubscription } from '@/lib/subscription-evaluation'
 import { use } from 'react'
 
 export default function NewVariationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,6 +37,22 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
+
+    // Subscription check — client-side UX guard. RLS enforces this at the DB
+    // layer regardless (migration 016), but checking here gives the user a clear
+    // error message before any storage upload is attempted.
+    const { data: contractor } = await supabase
+      .from('contractors')
+      .select('subscription_status, trial_ends_at, grace_period_expires_at')
+      .eq('id', user.id)
+      .single()
+
+    const { isValid, reason } = evaluateSubscription(contractor)
+    if (!isValid) {
+      setError(reason ?? 'Your subscription has expired. Please subscribe to continue.')
+      setLoading(false)
+      return
+    }
 
     let photoUrl: string | null = null
 

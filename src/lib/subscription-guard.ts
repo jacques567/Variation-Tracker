@@ -1,54 +1,22 @@
+/**
+ * Server-side subscription enforcement — uses service role, Node.js only.
+ * Do NOT import this in 'use client' components. Use subscription-evaluation.ts instead.
+ *
+ * The evaluation logic (evaluateSubscription) lives in subscription-evaluation.ts and is
+ * re-exported here for server-side callers. The DB-layer equivalent is has_active_subscription()
+ * in supabase/migrations/016_rls_subscription_enforcement.sql — any rule change must update both.
+ */
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { Errors } from './errors'
+import {
+  evaluateSubscription,
+  type ContractorSubscriptionRow,
+  type SubscriptionStatus,
+} from './subscription-evaluation'
 
-const ACTIVE_STATUSES = ['active']
-
-interface SubscriptionStatus {
-  isValid: boolean
-  status: string | null
-  reason?: string
-}
-
-export interface ContractorSubscriptionRow {
-  subscription_status: string | null
-  trial_ends_at: string | null
-  grace_period_expires_at: string | null
-}
-
-export function evaluateSubscription(
-  contractor: ContractorSubscriptionRow | null
-): SubscriptionStatus {
-  if (!contractor) {
-    return { isValid: false, status: null, reason: 'Contractor not found' }
-  }
-
-  const status = contractor.subscription_status || 'none'
-
-  if (ACTIVE_STATUSES.includes(status)) {
-    return { isValid: true, status }
-  }
-
-  if (status === 'trialing') {
-    if (!contractor.trial_ends_at) {
-      // No trial expiry recorded — treat as invalid. Both signup auto-enrollment and
-      // future Stripe-managed trials must populate trial_ends_at via the webhook;
-      // a null here indicates a partial write or manual SQL tampering.
-      return { isValid: false, status, reason: 'Trial expiry not set. Please contact support.' }
-    }
-    if (new Date(contractor.trial_ends_at) > new Date()) {
-      return { isValid: true, status }
-    }
-    return { isValid: false, status, reason: 'Your free trial has ended. Please subscribe to continue.' }
-  }
-
-  if (status === 'past_due' && contractor.grace_period_expires_at) {
-    if (new Date(contractor.grace_period_expires_at) > new Date()) {
-      return { isValid: true, status: 'past_due_grace_period' }
-    }
-  }
-
-  return { isValid: false, status, reason: getReasonForStatus(status) }
-}
+// Re-export so existing server-side callers don't need to change their import path.
+export { evaluateSubscription }
+export type { ContractorSubscriptionRow, SubscriptionStatus }
 
 export async function checkSubscription(
   contractorId: string
@@ -73,21 +41,6 @@ export async function checkSubscription(
   } catch (error) {
     console.error('Subscription check error:', error)
     return { isValid: false, status: null, reason: 'Failed to verify subscription' }
-  }
-}
-
-function getReasonForStatus(status: string): string {
-  switch (status) {
-    case 'canceled':
-      return 'Your subscription has been cancelled. Please subscribe to continue.'
-    case 'past_due':
-      return 'Your payment is overdue. Please update your payment method.'
-    case 'incomplete':
-      return 'Your subscription setup is incomplete. Please complete payment.'
-    case 'none':
-      return 'No subscription found. Please subscribe to access this feature.'
-    default:
-      return `Invalid subscription status: ${status}`
   }
 }
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { evaluateSubscription } from '@/lib/subscription-evaluation'
 import type { JobCategory } from '@/types'
 
 const STORAGE_KEY = 'job_form_draft'
@@ -63,6 +64,22 @@ export default function NewJobPage() {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) { router.push('/login'); return }
+
+    // Subscription check — client-side UX guard. RLS enforces this at the DB
+    // layer regardless, but checking here gives the user a clear error message
+    // instead of a raw Supabase permission error.
+    const { data: contractor } = await supabase
+      .from('contractors')
+      .select('subscription_status, trial_ends_at, grace_period_expires_at')
+      .eq('id', user.id)
+      .single()
+
+    const { isValid, reason } = evaluateSubscription(contractor)
+    if (!isValid) {
+      setError(reason ?? 'Your subscription has expired. Please subscribe to continue.')
+      setLoading(false)
+      return
+    }
 
     const originalValuePounds = parseFloat(formData.original_value) || 0
     const categoryValue = formData.category || null

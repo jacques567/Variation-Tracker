@@ -9,7 +9,6 @@
 
 import { test, expect } from '@playwright/test'
 import { evaluateSubscription } from '../../src/lib/subscription-evaluation'
-import Stripe from 'stripe'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

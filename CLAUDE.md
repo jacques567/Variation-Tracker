@@ -45,4 +45,23 @@ This project includes visual regression tests (Playwright screenshots). Importan
 
 ---
 
+## CI
+
+- **Status:** ✅ Live
+- **Template:** TypeScript (custom `main.yml` — more comprehensive than baseline)
+- **Workflow file:** `.github/workflows/main.yml`
+- **Checks:** Lint + type check + build → security audit + secret scan → E2E tests (Playwright)
+- **Branch protection:** Set on `main` — PRs required, checks must pass
+
+---
+
+## File Structure Notes
+
+- `research/competitive-brief-v1.md` — competitive brief (moved from project root May 2026)
+- `planning/risk-register-v1.md` — risk register (moved from project root May 2026)
+- `testing/archive/` — superseded Playwright configs (`playwright.config.ts`, `playwright.production.config.ts`). Active config: `testing/playwright.production.v2.config.ts`
+- `building/archive/` — misplaced Next.js artifacts (`next-env.d.ts`, `tsconfig.tsbuildinfo`) that were in `building/`. Canonical versions live at project root. `building/src/` is empty — do not use.
+- `Agents/archive/` — superseded agent files (`ALMA.md`, `Alma-CEO-Agent.html`). Current versions: `ALMA-v3.md`, `Alma-CEO-Agent-v2.html`
+- `Agents/paperclip/` — Paperclip agentic project files (`package.json`, `node_modules`, etc.)
+
 @AGENTS.md

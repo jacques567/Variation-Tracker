@@ -7,6 +7,15 @@
  * Any change to trial/grace-period rules must be reflected in both places.
  */
 
+// BETA_MODE bypasses all subscription checks — set via env var for beta deployments.
+// Server-side: BETA_MODE. Client-side: NEXT_PUBLIC_BETA_MODE.
+export function isBetaMode(): boolean {
+  return (
+    process.env.BETA_MODE === 'true' ||
+    process.env.NEXT_PUBLIC_BETA_MODE === 'true'
+  )
+}
+
 export interface ContractorSubscriptionRow {
   subscription_status: string | null
   trial_ends_at: string | null
@@ -24,6 +33,10 @@ const ACTIVE_STATUSES = ['active']
 export function evaluateSubscription(
   contractor: ContractorSubscriptionRow | null
 ): SubscriptionStatus {
+  if (isBetaMode()) {
+    return { isValid: true, status: 'active' }
+  }
+
   if (!contractor) {
     return { isValid: false, status: null, reason: 'Contractor not found' }
   }

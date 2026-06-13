@@ -10,17 +10,22 @@ import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
 import { Errors } from './errors'
 import {
   evaluateSubscription,
+  isBetaMode,
   type ContractorSubscriptionRow,
   type SubscriptionStatus,
 } from './subscription-evaluation'
 
 // Re-export so existing server-side callers don't need to change their import path.
-export { evaluateSubscription }
+export { evaluateSubscription, isBetaMode }
 export type { ContractorSubscriptionRow, SubscriptionStatus }
 
 export async function checkSubscription(
   contractorId: string
 ): Promise<SubscriptionStatus> {
+  if (isBetaMode()) {
+    return { isValid: true, status: 'active' }
+  }
+
   try {
     const supabase = createSupabaseAdmin(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

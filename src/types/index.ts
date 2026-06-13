@@ -1,4 +1,4 @@
-export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'incomplete'
+export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'incomplete' | 'none' | null
 
 export type JobStatus = 'active' | 'completed' | 'archived'
 

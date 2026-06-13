@@ -6,7 +6,13 @@ import Link from 'next/link'
 import { Plus, CheckCircle, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import JobCard from '@/components/jobs/JobCard'
+import { PaymentWarning } from '@/components/PaymentWarning'
 import type { JobCategory } from '@/types'
+
+interface Contractor {
+  subscription_status: string | null
+  grace_period_expires_at: string | null
+}
 
 export default function JobsPage() {
   const router = useRouter()
@@ -16,6 +22,7 @@ export default function JobsPage() {
 
   const [jobs, setJobs] = useState<any[]>([])
   const [categories, setCategories] = useState<JobCategory[]>([])
+  const [contractor, setContractor] = useState<Contractor | null>(null)
   const [loading, setLoading] = useState(true)
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
   const [showSubscribedBanner, setShowSubscribedBanner] = useState(justSubscribed)
@@ -26,6 +33,13 @@ export default function JobsPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
+      // Fetch contractor subscription info
+      const { data: contractorData } = await supabase
+        .from('contractors')
+        .select('subscription_status, grace_period_expires_at')
+        .eq('id', user.id)
+        .single()
 
       // Fetch all jobs
       const { data: allJobs } = await supabase
@@ -41,6 +55,7 @@ export default function JobsPage() {
         .eq('contractor_id', user.id)
         .order('name', { ascending: true })
 
+      setContractor(contractorData)
       setJobs(allJobs || [])
       setCategories(cats || [])
 
@@ -109,6 +124,12 @@ export default function JobsPage() {
           </Link>
         </div>
       </div>
+
+      {/* Payment warning */}
+      <PaymentWarning
+        status={contractor?.subscription_status}
+        gracePeriodExpiresAt={contractor?.grace_period_expires_at}
+      />
 
       {/* Category filter tabs */}
       <div className="mb-6 flex flex-wrap gap-2">

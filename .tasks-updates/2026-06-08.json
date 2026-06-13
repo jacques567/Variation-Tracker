@@ -1,0 +1,14 @@
+{
+  "project": "variation-tracker",
+  "session_date": "2026-06-08",
+  "completed": [
+    "Activate trial on test2@vartrack.com — set to 12-hour expiry"
+  ],
+  "new_tasks": [
+    {
+      "task": "Test trial expiry behavior — after test2@vartrack.com trial expires (12 hrs), verify: subscription guards block access, UI shows expired message/paywall, Stripe checkout still works, no stale state caching",
+      "section": "Pre-Launch / QA & Deploy"
+    }
+  ],
+  "blockers": []
+}

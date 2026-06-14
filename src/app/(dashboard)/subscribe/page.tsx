@@ -1,7 +1,6 @@
-'use client'
-
-import { useState } from 'react'
-import { Check, Zap } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { Check, Zap, LogOut } from 'lucide-react'
+import { SubscribeButton } from './subscribe-button'
 
 const features = [
   'Unlimited jobs and variations',
@@ -14,9 +13,7 @@ const features = [
 
 const isBetaMode = process.env.NEXT_PUBLIC_BETA_MODE === 'true'
 
-export default function SubscribePage() {
-  const [loading, setLoading] = useState(false)
-
+export default async function SubscribePage() {
   if (isBetaMode) {
     return (
       <div className="max-w-sm mx-auto pt-8 text-center">
@@ -29,11 +26,45 @@ export default function SubscribePage() {
     )
   }
 
-  async function handleSubscribe() {
-    setLoading(true)
-    const res = await fetch('/api/stripe/checkout', { method: 'POST' })
-    const { url } = await res.json()
-    window.location.href = url
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return null
+  }
+
+  const { data: contractor } = await supabase
+    .from('contractors')
+    .select('subscription_status, stripe_customer_id')
+    .eq('id', user.id)
+    .single()
+
+  const isSubscribed = contractor?.subscription_status === 'active'
+  const stripeCustomerId = contractor?.stripe_customer_id
+
+  if (isSubscribed && stripeCustomerId) {
+    return (
+      <div className="max-w-sm mx-auto pt-8">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
+            <Check className="w-6 h-6 text-green-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">You&apos;re subscribed</h1>
+          <p className="text-gray-500 mt-2 text-sm">Manage your subscription anytime.</p>
+        </div>
+
+        <a
+          href={`https://billing.stripe.com/a/sessions/${stripeCustomerId}`}
+          className="w-full block bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 transition-colors text-center"
+        >
+          Manage Subscription
+        </a>
+
+        <p className="text-xs text-gray-400 text-center mt-4">
+          Opens Stripe portal · Secure payment
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -62,13 +93,7 @@ export default function SubscribePage() {
         </ul>
       </div>
 
-      <button
-        onClick={handleSubscribe}
-        disabled={loading}
-        className="w-full bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
-      >
-        {loading ? 'Redirecting...' : 'Subscribe now'}
-      </button>
+      <SubscribeButton />
 
       <p className="text-xs text-gray-400 text-center mt-4">
         Secure payment via Stripe · Cancel any time

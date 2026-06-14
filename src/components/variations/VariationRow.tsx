@@ -25,9 +25,28 @@ export default function VariationRow({ variation, jobId }: Props) {
   const signLink = `${appUrl}/sign/${variation.signature_token}`
 
   async function copyLink() {
-    await navigator.clipboard.writeText(signLink)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      if (!variation.signature_token) {
+        console.warn('No signature token available')
+        return
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(signLink)
+      } else {
+        const input = document.createElement('input')
+        input.value = signLink
+        document.body.appendChild(input)
+        input.select()
+        document.execCommand('copy')
+        document.body.removeChild(input)
+      }
+
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy link:', err)
+    }
   }
 
   return (

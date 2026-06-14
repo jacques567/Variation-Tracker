@@ -8,6 +8,8 @@ import { createClient } from '@/lib/supabase/client'
 import { evaluateSubscription } from '@/lib/subscription-evaluation'
 import { use } from 'react'
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+
 export default function NewVariationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: jobId } = use(params)
   const router = useRouter()
@@ -15,10 +17,21 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
   const [loading, setLoading] = useState(false)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoError, setPhotoError] = useState<string | null>(null)
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+
+    setPhotoError(null)
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1)
+      setPhotoError(`Photo too large (${sizeMB}MB). Max 5MB.`)
+      setPhotoFile(null)
+      setPhotoPreview(null)
+      return
+    }
+
     setPhotoFile(file)
     setPhotoPreview(URL.createObjectURL(file))
   }
@@ -135,12 +148,12 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
           {/* Photo upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Photo proof <span className="text-gray-400 font-normal">(optional)</span>
+              Photo proof <span className="text-gray-400 font-normal">(optional, max 5MB)</span>
             </label>
             {photoPreview ? (
               <div className="relative w-full rounded-lg overflow-hidden border border-gray-200">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photoPreview} alt="Preview" className="w-full max-h-48 object-cover" />
+                <img src={photoPreview} alt="Preview" className="w-full max-h-48 object-contain bg-gray-50" />
                 <button type="button" onClick={removePhoto}
                   className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm border border-gray-200 hover:bg-gray-50">
                   <X className="w-4 h-4 text-gray-600" />
@@ -152,6 +165,9 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
                 <span className="text-sm text-gray-400">Tap to upload photo or receipt</span>
                 <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoChange} />
               </label>
+            )}
+            {photoError && (
+              <p className="text-sm text-red-600 mt-2">{photoError}</p>
             )}
           </div>
 

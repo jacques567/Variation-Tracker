@@ -1,0 +1,67 @@
+/* Design System Tokens */
+/* Source: DESIGN.md */
+/* All spacing, colors, typography, shadows, and transitions */
+
+:root {
+  /* Colors */
+  --color-primary: #0F4C5C;
+  --color-primary-dark: #0A2F3D;
+  --color-primary-darkest: #061F2D;
+  --color-background-primary: #F5F3F0;
+  --color-background-secondary: #FFFFFF;
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-border-light: #DDD7D2;
+  --color-border-medium: #C9B8AA;
+  --color-error-bg: #FCE4E6;
+  --color-error-text: #B71C1C;
+  --color-error-border: #F5A5AA;
+
+  /* Typography */
+  --font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 0.95rem; /* 15px */
+  --font-size-md: 1rem; /* 16px */
+  --font-size-lg: 1.5rem; /* 24px */
+  --font-size-xl: 2.2rem; /* 35px */
+  --font-size-2xl: 3.2rem; /* 51px */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.1;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.6;
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.8px;
+
+  /* Spacing Scale (base unit: 4px) */
+  --spacing-xs: 0.5rem; /* 8px */
+  --spacing-sm: 0.75rem; /* 12px */
+  --spacing-md: 1rem; /* 16px */
+  --spacing-lg: 1.5rem; /* 24px */
+  --spacing-xl: 2rem; /* 32px */
+  --spacing-2xl: 2.5rem; /* 40px */
+  --spacing-3xl: 3rem; /* 48px */
+  --spacing-4xl: 4rem; /* 64px */
+
+  /* Border & Corners */
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 3px;
+  --border-radius-none: 0px;
+
+  /* Shadows */
+  --shadow-none: none;
+  --shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.12);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}

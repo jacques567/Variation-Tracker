@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { Check, Zap, LogOut } from 'lucide-react'
-import { SubscribeButton } from './subscribe-button'
+import { Check, Zap } from 'lucide-react'
+import { SubscribeButton, ManageSubscriptionButton } from './subscribe-button'
 
 const features = [
   'Unlimited jobs and variations',
@@ -53,12 +53,7 @@ export default async function SubscribePage() {
           <p className="text-gray-500 mt-2 text-sm">Manage your subscription anytime.</p>
         </div>
 
-        <a
-          href={`https://billing.stripe.com/a/sessions/${stripeCustomerId}`}
-          className="w-full block bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 transition-colors text-center"
-        >
-          Manage Subscription
-        </a>
+        <ManageSubscriptionButton />
 
         <p className="text-xs text-gray-400 text-center mt-4">
           Opens Stripe portal · Secure payment

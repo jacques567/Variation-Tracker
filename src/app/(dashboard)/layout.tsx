@@ -29,8 +29,8 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
-  const { isValid } = evaluateSubscription(contractor)
   const betaMode = isBetaMode()
+  const { isValid } = evaluateSubscription(contractor)
 
   const trialDaysRemaining =
     !betaMode && contractor?.subscription_status === 'trialing'

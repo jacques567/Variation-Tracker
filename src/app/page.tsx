@@ -1,6 +1,8 @@
 import Image from 'next/image'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
-export default function LandingPage() {
+function LandingPage() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: '#0d1b2a' }}>
       <div className="flex flex-col items-center text-center max-w-lg w-full gap-8">
@@ -29,4 +31,21 @@ export default function LandingPage() {
       </div>
     </main>
   )
+}
+
+export default async function RootPage() {
+  const isBeta = process.env.NEXT_PUBLIC_BETA_MODE === 'true'
+
+  if (isBeta) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      redirect('/jobs')
+    } else {
+      redirect('/login')
+    }
+  }
+
+  return <LandingPage />
 }

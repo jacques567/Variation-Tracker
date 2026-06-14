@@ -22,3 +22,39 @@ export function SubscribeButton() {
     </button>
   )
 }
+
+export function ManageSubscriptionButton() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleManage() {
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' })
+      if (!res.ok) {
+        setError('Could not open billing portal. Please try again.')
+        setLoading(false)
+        return
+      }
+      const { url } = await res.json()
+      if (url) window.location.href = url
+    } catch {
+      setError('Could not open billing portal. Please try again.')
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <button
+        onClick={handleManage}
+        disabled={loading}
+        className="w-full bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+      >
+        {loading ? 'Opening...' : 'Manage Subscription'}
+      </button>
+      {error && <p className="text-xs text-red-600 text-center">{error}</p>}
+    </div>
+  )
+}

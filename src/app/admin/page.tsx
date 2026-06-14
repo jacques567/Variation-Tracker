@@ -71,39 +71,72 @@ export default async function AdminDashboard() {
 
   const jobById = new Map(jobsMap?.map(j => [j.id, j]) || [])
 
+  const metricCardStyle = {
+    background: 'var(--color-background-secondary)',
+    border: `1px solid var(--color-border-light)`,
+    padding: 'var(--spacing-lg)',
+  }
+
+  const metricLabelStyle = {
+    fontSize: 'var(--font-size-sm)',
+    color: 'var(--color-text-secondary)',
+    marginBottom: 'var(--spacing-sm)',
+  }
+
+  const metricValueStyle = {
+    fontSize: '2rem',
+    fontWeight: 'var(--font-weight-bold)',
+    marginTop: 'var(--spacing-sm)',
+  }
+
+  const listItemStyle = {
+    padding: 'var(--spacing-md)',
+    background: 'var(--color-background-primary)',
+    border: `1px solid var(--color-border-light)`,
+    cursor: 'pointer',
+    transition: 'all var(--transition-fast)',
+    textDecoration: 'none',
+    color: 'inherit',
+    display: 'block',
+  }
+
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Dashboard</h1>
+      <h1 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-lg)' }}>
+        Dashboard
+      </h1>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Total Contractors</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{contractorCount || 0}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-2xl)' }}>
+        <div style={metricCardStyle}>
+          <p style={metricLabelStyle}>Total Contractors</p>
+          <p style={{ ...metricValueStyle, color: 'var(--color-text-primary)' }}>{contractorCount || 0}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Active Subscriptions</p>
-          <p className="text-3xl font-bold text-green-600 mt-2">{activeSubscriptions}</p>
+        <div style={metricCardStyle}>
+          <p style={metricLabelStyle}>Active Subscriptions</p>
+          <p style={{ ...metricValueStyle, color: 'var(--color-primary)' }}>{activeSubscriptions}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Total Jobs</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{totalJobs || 0}</p>
+        <div style={metricCardStyle}>
+          <p style={metricLabelStyle}>Total Jobs</p>
+          <p style={{ ...metricValueStyle, color: 'var(--color-text-primary)' }}>{totalJobs || 0}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Signed Variations</p>
-          <p className="text-3xl font-bold text-blue-600 mt-2">{signedCount}</p>
+        <div style={metricCardStyle}>
+          <p style={metricLabelStyle}>Signed Variations</p>
+          <p style={{ ...metricValueStyle, color: 'var(--color-primary)' }}>{signedCount}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Pending Signatures</p>
-          <p className="text-3xl font-bold text-amber-600 mt-2">{draftCount}</p>
+        <div style={metricCardStyle}>
+          <p style={metricLabelStyle}>Pending Signatures</p>
+          <p style={{ ...metricValueStyle, color: 'var(--color-primary)' }}>{draftCount}</p>
         </div>
       </div>
 
       {/* Pending Signatures */}
       {draftCount > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Pending Signatures ({draftCount})</h2>
-          <div className="space-y-3">
+        <div style={{ background: 'var(--color-background-secondary)', border: `1px solid var(--color-border-light)`, padding: 'var(--spacing-lg)', marginBottom: 'var(--spacing-lg)' }}>
+          <h2 style={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-md)' }}>
+            Pending Signatures ({draftCount})
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
             {draftVariations?.map(variation => {
               const job = jobById.get(variation.job_id)
               const contractor = job ? contractorById.get(job.contractor_id) : null
@@ -111,10 +144,12 @@ export default async function AdminDashboard() {
                 <Link
                   key={variation.id}
                   href={`/admin/contractors/${job?.contractor_id}`}
-                  className="block p-3 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors border border-amber-200"
+                  style={listItemStyle}
                 >
-                  <p className="text-sm font-medium text-gray-900">{variation.description || job?.job_name}</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--color-text-primary)' }}>
+                    {variation.description || job?.job_name}
+                  </p>
+                  <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', marginTop: 'var(--spacing-xs)' }}>
                     {contractor} · {formatCurrency(variation.cost)}
                   </p>
                 </Link>
@@ -125,57 +160,69 @@ export default async function AdminDashboard() {
       )}
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--spacing-lg)' }}>
         {/* Recent Jobs */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Recently Created Jobs</h2>
-          <div className="space-y-3">
+        <div style={{ background: 'var(--color-background-secondary)', border: `1px solid var(--color-border-light)`, padding: 'var(--spacing-lg)' }}>
+          <h2 style={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-md)' }}>
+            Recently Created Jobs
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
             {recentJobs?.map(job => (
               <Link
                 key={job.id}
                 href={`/admin/contractors/${job.contractor_id}`}
-                className="block p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"
+                style={listItemStyle}
               >
-                <p className="text-sm font-medium text-gray-900">{job.job_name}</p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--color-text-primary)' }}>
+                  {job.job_name}
+                </p>
+                <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', marginTop: 'var(--spacing-xs)' }}>
                   {contractorById.get(job.contractor_id)} · {formatDate(job.created_at)}
                 </p>
               </Link>
             ))}
             {!recentJobs?.length && (
-              <p className="text-sm text-gray-500">No jobs yet</p>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>No jobs yet</p>
             )}
           </div>
         </div>
 
         {/* Recent Signatures */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Recently Signed</h2>
-          <div className="space-y-3">
+        <div style={{ background: 'var(--color-background-secondary)', border: `1px solid var(--color-border-light)`, padding: 'var(--spacing-lg)' }}>
+          <h2 style={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-md)' }}>
+            Recently Signed
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
             {recentSignatures?.map(sig => {
               const variation = variationById.get(sig.variation_id)
               const job = variation ? jobById.get(variation.job_id) : null
               return (
                 <div
                   key={sig.id}
-                  className="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"
+                  style={{
+                    padding: 'var(--spacing-md)',
+                    background: 'var(--color-background-primary)',
+                    border: `1px solid var(--color-border-light)`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 'var(--spacing-md)',
+                  }}
                 >
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
-                        {job?.job_name || 'Unknown Job'}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Signed by {sig.client_name} · {formatDate(sig.signed_at)}
-                      </p>
-                    </div>
-                    <SignatureModal signature={sig} variation={variation} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--color-text-primary)' }}>
+                      {job?.job_name || 'Unknown Job'}
+                    </p>
+                    <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', marginTop: 'var(--spacing-xs)' }}>
+                      Signed by {sig.client_name} · {formatDate(sig.signed_at)}
+                    </p>
                   </div>
+                  <SignatureModal signature={sig} variation={variation} />
                 </div>
               )
             })}
             {!recentSignatures?.length && (
-              <p className="text-sm text-gray-500">No signatures yet</p>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>No signatures yet</p>
             )}
           </div>
         </div>

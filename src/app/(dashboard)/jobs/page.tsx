@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import NextLink from 'next/link'
 import { Plus, CheckCircle, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/primitives/Button'
 import JobCard from '@/components/jobs/JobCard'
 import { PaymentWarning } from '@/components/PaymentWarning'
 import type { JobCategory } from '@/types'
@@ -79,7 +80,7 @@ export default function JobsPage() {
     : jobs
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-500">Loading...</div>
+    return <div style={{ textAlign: 'center', padding: 'var(--spacing-3xl) 0', color: 'var(--color-text-secondary)' }}>Loading...</div>
   }
 
   return (
@@ -88,40 +89,60 @@ export default function JobsPage() {
         <div
           role="status"
           aria-live="polite"
-          className="mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+          style={{
+            marginBottom: 'var(--spacing-md)',
+            background: '#f0fdf4',
+            border: '1px solid #86efac',
+            padding: 'var(--spacing-md)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 'var(--spacing-md)',
+          }}
         >
-          <div className="flex items-center gap-2 text-sm text-green-800">
-            <CheckCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', fontSize: 'var(--font-size-sm)', color: '#166534' }}>
+            <CheckCircle style={{ width: '1rem', height: '1rem', flexShrink: 0 }} aria-hidden="true" />
             <span>You&apos;re subscribed. Full access unlocked.</span>
           </div>
           <button
             onClick={() => setShowSubscribedBanner(false)}
             aria-label="Dismiss"
-            className="text-green-600 hover:text-green-800 transition-colors"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#16a34a',
+              cursor: 'pointer',
+              padding: 0,
+              fontSize: 'var(--font-size-sm)',
+            }}
           >
-            <X className="w-4 h-4" />
+            <X style={{ width: '1rem', height: '1rem' }} />
           </button>
         </div>
       )}
-      <div className="flex items-center justify-between mb-6">
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-lg)' }}>
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Jobs</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{jobs?.length ?? 0} total</p>
+          <h1 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-sm)' }}>
+            Jobs
+          </h1>
+          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+            {jobs?.length ?? 0} total
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/categories"
-            className="px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Manage categories
-          </Link>
-          <Link
-            href="/jobs/new"
-            className="flex items-center gap-2 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            New job
-          </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+          <NextLink href="/categories">
+            <Button variant="secondary" style={{ fontSize: 'var(--font-size-sm)', padding: 'var(--spacing-sm) var(--spacing-md)' }}>
+              Manage categories
+            </Button>
+          </NextLink>
+          <NextLink href="/jobs/new">
+            <Button style={{ fontSize: 'var(--font-size-sm)', padding: 'var(--spacing-sm) var(--spacing-md)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+              <Plus style={{ width: '1rem', height: '1rem' }} />
+              New job
+            </Button>
+          </NextLink>
         </div>
       </div>
 
@@ -132,28 +153,39 @@ export default function JobsPage() {
       />
 
       {/* Category filter tabs */}
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div style={{ marginBottom: 'var(--spacing-lg)', display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-sm)' }}>
         <button
           onClick={() => router.push('/jobs')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            !selectedCategory
-              ? 'bg-blue-100 text-blue-700'
-              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
+          style={{
+            padding: 'var(--spacing-sm) var(--spacing-md)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: 'var(--font-weight-medium)',
+            border: selectedCategory ? `1px solid var(--color-border-light)` : `2px solid var(--color-primary)`,
+            background: selectedCategory ? 'transparent' : 'var(--color-background-primary)',
+            color: selectedCategory ? 'var(--color-text-primary)' : 'var(--color-primary)',
+            cursor: 'pointer',
+            transition: 'all var(--transition-fast)',
+          }}
         >
           All Jobs ({jobs.length})
         </button>
         {categories.map(cat => {
           const count = jobs.filter(j => j.category === cat.name).length
+          const isSelected = selectedCategory === cat.name
           return (
             <button
               key={cat.id}
               onClick={() => router.push(`/jobs?category=${encodeURIComponent(cat.name)}`)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedCategory === cat.name
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
+              style={{
+                padding: 'var(--spacing-sm) var(--spacing-md)',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: 'var(--font-weight-medium)',
+                border: isSelected ? `2px solid var(--color-primary)` : `1px solid var(--color-border-light)`,
+                background: isSelected ? 'var(--color-background-primary)' : 'transparent',
+                color: isSelected ? 'var(--color-primary)' : 'var(--color-text-primary)',
+                cursor: 'pointer',
+                transition: 'all var(--transition-fast)',
+              }}
             >
               {cat.name} ({count})
             </button>
@@ -162,11 +194,16 @@ export default function JobsPage() {
         {uncategorizedCount > 0 && (
           <button
             onClick={() => router.push('/jobs?category=uncategorized')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedCategory === 'uncategorized'
-                ? 'bg-blue-100 text-blue-700'
-                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-            }`}
+            style={{
+              padding: 'var(--spacing-sm) var(--spacing-md)',
+              fontSize: 'var(--font-size-sm)',
+              fontWeight: 'var(--font-weight-medium)',
+              border: selectedCategory === 'uncategorized' ? `2px solid var(--color-primary)` : `1px solid var(--color-border-light)`,
+              background: selectedCategory === 'uncategorized' ? 'var(--color-background-primary)' : 'transparent',
+              color: selectedCategory === 'uncategorized' ? 'var(--color-primary)' : 'var(--color-text-primary)',
+              cursor: 'pointer',
+              transition: 'all var(--transition-fast)',
+            }}
           >
             Uncategorized ({uncategorizedCount})
           </button>
@@ -174,12 +211,12 @@ export default function JobsPage() {
       </div>
 
       {!filteredJobs.length ? (
-        <div className="text-center py-16 text-gray-400">
-          <p className="font-medium">No jobs yet</p>
-          <p className="text-sm mt-1">Create your first job to get started</p>
+        <div style={{ textAlign: 'center', padding: 'var(--spacing-4xl) 0', color: 'var(--color-text-secondary)' }}>
+          <p style={{ fontWeight: 'var(--font-weight-medium)' }}>No jobs yet</p>
+          <p style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-sm)' }}>Create your first job to get started</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
           {filteredJobs.map((job) => (
             <JobCard key={job.id} job={job} />
           ))}

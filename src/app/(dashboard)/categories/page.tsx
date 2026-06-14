@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { ArrowLeft, Plus, Trash2, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { JobCategory } from '@/types'
@@ -170,9 +169,9 @@ export default function CategoriesPage() {
 
   return (
     <div>
-      <Link href="/jobs" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6">
+      <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6 bg-none border-none cursor-pointer">
         <ArrowLeft className="w-4 h-4" /> Back to jobs
-      </Link>
+      </button>
 
       <h1 className="text-xl font-semibold text-gray-900 mb-6">Job Categories</h1>
 

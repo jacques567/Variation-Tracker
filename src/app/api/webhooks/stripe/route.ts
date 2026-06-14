@@ -27,13 +27,19 @@ async function updateSubscription(
   const gracePeriodExpiresAt =
     status === 'past_due' ? calculateGracePeriodExpiry() : null
 
+  const updateData: Record<string, unknown> = {
+    subscription_status: status,
+    subscription_id: subscriptionId,
+    grace_period_expires_at: gracePeriodExpiresAt,
+  }
+
+  if (status === 'active') {
+    updateData.trial_ends_at = null
+  }
+
   const { error } = await supabase
     .from('contractors')
-    .update({
-      subscription_status: status,
-      subscription_id: subscriptionId,
-      grace_period_expires_at: gracePeriodExpiresAt,
-    })
+    .update(updateData)
     .eq('stripe_customer_id', customerId)
 
   if (error) {

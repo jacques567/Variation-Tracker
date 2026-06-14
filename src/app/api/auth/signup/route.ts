@@ -103,11 +103,12 @@ export async function POST(request: NextRequest) {
         message: createError.message,
         details: (createError as any).details,
       })
-      // Auth user was created but contractor record setup failed.
-      // User should retry, or if repeated, contact support.
+      // Auth user was created but contractor record setup failed — clean up the orphan
+      // so the user can retry signup rather than being permanently blocked on login.
+      await supabaseService.auth.admin.deleteUser(data.user.id)
       return NextResponse.json(
         {
-          error: 'Account created but setup failed. Please try signing in or contact support if the problem persists.',
+          error: 'Account setup failed. Please try again.',
           errorCode: 'setup_failed',
         },
         { status: 500 }

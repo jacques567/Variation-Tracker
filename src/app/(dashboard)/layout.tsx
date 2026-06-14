@@ -41,6 +41,10 @@ export default async function DashboardLayout({
 
   const betaMode = isBetaMode()
 
+  // Server-side guard: redirect expired/invalid users before any content renders.
+  // SubscriptionGate below is a client-side belt-and-suspenders; this is the real gate.
+  if (!betaMode && !isValid) redirect('/subscribe')
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {!betaMode && <SubscriptionGate isValid={isValid} />}

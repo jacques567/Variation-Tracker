@@ -30,16 +30,16 @@ export default async function DashboardLayout({
     .single()
 
   const { isValid } = evaluateSubscription(contractor)
+  const betaMode = isBetaMode()
+
   const trialDaysRemaining =
-    contractor?.subscription_status === 'trialing'
+    !betaMode && contractor?.subscription_status === 'trialing'
       ? daysUntil(contractor.trial_ends_at)
       : null
   const graceDaysRemaining =
-    contractor?.subscription_status === 'past_due'
+    !betaMode && contractor?.subscription_status === 'past_due'
       ? daysUntil(contractor.grace_period_expires_at)
       : null
-
-  const betaMode = isBetaMode()
 
   // Server-side guard: redirect expired/invalid users before any content renders.
   // SubscriptionGate below is a client-side belt-and-suspenders; this is the real gate.

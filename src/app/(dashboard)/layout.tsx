@@ -3,7 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import NavBar from '@/components/ui/NavBar'
 import TrialExpiryBanner from '@/components/ui/TrialExpiryBanner'
 import PaymentWarning from '@/components/ui/PaymentWarning'
-import { evaluateSubscription } from '@/lib/subscription-guard'
+import SubscriptionGate from '@/components/ui/SubscriptionGate'
+import { evaluateSubscription, isBetaMode } from '@/lib/subscription-guard'
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
 
@@ -38,8 +39,11 @@ export default async function DashboardLayout({
       ? daysUntil(contractor.grace_period_expires_at)
       : null
 
+  const betaMode = isBetaMode()
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {!betaMode && <SubscriptionGate isValid={isValid} />}
       <NavBar contractor={contractor} hasSubscription={isValid} />
       <PaymentWarning
         subscriptionStatus={contractor?.subscription_status ?? null}

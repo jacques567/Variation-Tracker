@@ -103,8 +103,13 @@ export async function POST(request: NextRequest) {
         message: createError.message,
         details: (createError as any).details,
       })
+      // Auth user was created but contractor record setup failed.
+      // User should retry, or if repeated, contact support.
       return NextResponse.json(
-        { error: 'Failed to create contractor record' },
+        {
+          error: 'Account created but setup failed. Please try signing in or contact support if the problem persists.',
+          errorCode: 'setup_failed',
+        },
         { status: 500 }
       )
     }

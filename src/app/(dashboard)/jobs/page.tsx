@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, CheckCircle, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import JobCard from '@/components/jobs/JobCard'
 import { PaymentWarning } from '@/components/PaymentWarning'
@@ -18,12 +18,14 @@ export default function JobsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const selectedCategory = searchParams.get('category')
+  const justSubscribed = searchParams.get('subscribed') === 'true'
 
   const [jobs, setJobs] = useState<any[]>([])
   const [categories, setCategories] = useState<JobCategory[]>([])
   const [contractor, setContractor] = useState<Contractor | null>(null)
   const [loading, setLoading] = useState(true)
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
+  const [showSubscribedBanner, setShowSubscribedBanner] = useState(justSubscribed)
 
   async function loadData() {
     try {
@@ -82,6 +84,25 @@ export default function JobsPage() {
 
   return (
     <div>
+      {showSubscribedBanner && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+        >
+          <div className="flex items-center gap-2 text-sm text-green-800">
+            <CheckCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <span>You&apos;re subscribed. Full access unlocked.</span>
+          </div>
+          <button
+            onClick={() => setShowSubscribedBanner(false)}
+            aria-label="Dismiss"
+            className="text-green-600 hover:text-green-800 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">Jobs</h1>

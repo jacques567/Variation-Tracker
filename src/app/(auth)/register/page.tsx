@@ -2,7 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import NextLink from 'next/link'
+import { Button } from '@/components/primitives/Button'
+import { Input } from '@/components/primitives/Input'
+import { FormGroup } from '@/components/primitives/FormGroup'
+import { Card } from '@/components/primitives/Card'
+import { ErrorMessage } from '@/components/primitives/ErrorMessage'
 
 /** Clean up Supabase's "field: Message" format and map known errors to user-friendly copy. */
 function parseSignupError(apiError: string | undefined, status: number): string {
@@ -100,61 +105,54 @@ export default function RegisterPage() {
 
   if (emailSent) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Check your email</h2>
-        <p className="text-sm text-gray-500 mt-2">
+      <Card variant="form">
+        <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-sm)', textAlign: 'center' }}>
+          Check your email
+        </h2>
+        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginTop: 'var(--spacing-md)' }}>
           We sent a confirmation link to your email address. Click it to activate your account.
         </p>
-        <p className="text-sm text-gray-400 mt-4">
+        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-tertiary)', marginTop: 'var(--spacing-lg)', textAlign: 'center' }}>
           Already confirmed?{' '}
-          <Link href="/login" className="text-blue-600 font-medium hover:underline">
+          <NextLink href="/login" className="link">
             Sign in
-          </Link>
+          </NextLink>
         </p>
-      </div>
+      </Card>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Create your account</h2>
+    <Card variant="form">
+      <h2 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--spacing-lg)' }}>
+        Create your account
+      </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
-            Full name
-          </label>
-          <input
+      <form onSubmit={handleSubmit}>
+        <FormGroup label="Full name">
+          <Input
             id="full_name"
             name="full_name"
             type="text"
             required
             disabled={loading}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             placeholder="Joe Smith"
           />
-        </div>
+        </FormGroup>
 
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email address
-          </label>
-          <input
+        <FormGroup label="Email address">
+          <Input
             id="email"
             name="email"
             type="email"
             required
             disabled={loading}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             placeholder="joe@example.com"
           />
-        </div>
+        </FormGroup>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
-          <input
+        <FormGroup label="Password">
+          <Input
             id="password"
             name="password"
             type="password"
@@ -163,19 +161,24 @@ export default function RegisterPage() {
             value={passwordValue}
             onChange={e => setPasswordValue(e.target.value)}
             onBlur={() => setPasswordTouched(true)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
             placeholder="Create a password"
           />
 
           {/* Requirements — shown once user starts typing */}
           {(passwordTouched || passwordValue.length > 0) && (
-            <ul className="mt-2 space-y-1">
+            <ul style={{ marginTop: 'var(--spacing-md)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
               {PASSWORD_REQUIREMENTS.map(req => {
                 const met = req.test(passwordValue)
                 return (
                   <li
                     key={req.label}
-                    className={`flex items-center gap-1.5 text-xs ${met ? 'text-green-600' : 'text-gray-400'}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--spacing-xs)',
+                      fontSize: 'var(--font-size-xs)',
+                      color: met ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
+                    }}
                   >
                     <span>{met ? '✓' : '○'}</span>
                     {req.label}
@@ -184,27 +187,30 @@ export default function RegisterPage() {
               })}
             </ul>
           )}
-        </div>
+        </FormGroup>
 
-        {error && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
-        )}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
-        <button
+        <Button
           type="submit"
           disabled={loading || (passwordValue.length > 0 && !requirementsMet)}
-          className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          style={{ width: '100%', marginTop: 'var(--spacing-lg)' }}
         >
           {loading ? 'Creating account...' : 'Create account'}
-        </button>
+        </Button>
       </form>
 
-      <p className="text-sm text-gray-500 text-center mt-6">
+      <p style={{
+        fontSize: 'var(--font-size-sm)',
+        color: 'var(--color-text-secondary)',
+        textAlign: 'center',
+        marginTop: 'var(--spacing-2xl)',
+      }}>
         Already have an account?{' '}
-        <Link href="/login" className="text-blue-600 font-medium hover:underline">
+        <NextLink href="/login" className="link">
           Sign in
-        </Link>
+        </NextLink>
       </p>
-    </div>
+    </Card>
   )
 }

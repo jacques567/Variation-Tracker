@@ -1,7 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import NextLink from 'next/link'
+import { Button } from '@/components/primitives/Button'
+import { Input } from '@/components/primitives/Input'
+import { FormGroup } from '@/components/primitives/FormGroup'
+import { Card } from '@/components/primitives/Card'
+import { ErrorMessage } from '@/components/primitives/ErrorMessage'
 
 export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -35,59 +40,64 @@ export default function ForgotPasswordPage() {
 
   if (submitted) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
-        <h2 className="text-xl font-semibold text-gray-900 mb-3">Check your email</h2>
-        <p className="text-sm text-gray-600 mb-6">
+      <Card variant="form">
+        <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-md)', textAlign: 'center' }}>
+          Check your email
+        </h2>
+        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
           If that address is registered, you&apos;ll receive a password reset link shortly.
         </p>
-        <Link href="/login" className="text-sm text-blue-600 font-medium hover:underline">
-          Back to sign in
-        </Link>
-      </div>
+        <div style={{ textAlign: 'center' }}>
+          <NextLink href="/login" className="link" style={{ fontSize: 'var(--font-size-sm)' }}>
+            Back to sign in
+          </NextLink>
+        </div>
+      </Card>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">Reset your password</h2>
-      <p className="text-sm text-gray-500 mb-6">
+    <Card variant="form">
+      <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-sm)' }}>
+        Reset your password
+      </h2>
+      <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-lg)' }}>
         Enter your email and we&apos;ll send you a reset link.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email address
-          </label>
-          <input
+      <form onSubmit={handleSubmit}>
+        <FormGroup label="Email address">
+          <Input
             id="email"
             name="email"
             type="email"
             required
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="joe@example.com"
             disabled={loading}
           />
-        </div>
+        </FormGroup>
 
-        {error && (
-          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
-        )}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
-        <button
+        <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          style={{ width: '100%', marginTop: 'var(--spacing-lg)' }}
         >
           {loading ? 'Sending...' : 'Send reset link'}
-        </button>
+        </Button>
       </form>
 
-      <p className="text-sm text-gray-500 text-center mt-6">
-        <Link href="/login" className="text-blue-600 font-medium hover:underline">
+      <p style={{
+        fontSize: 'var(--font-size-sm)',
+        color: 'var(--color-text-secondary)',
+        textAlign: 'center',
+        marginTop: 'var(--spacing-2xl)',
+      }}>
+        <NextLink href="/login" className="link">
           Back to sign in
-        </Link>
+        </NextLink>
       </p>
-    </div>
+    </Card>
   )
 }

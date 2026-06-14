@@ -1,6 +1,11 @@
 @import "tailwindcss";
 /* @plugin "@tailwindcss/typography"; */
 
+/* Design System Imports */
+@import "../styles/tokens.css";
+@import "../styles/base.css";
+@import "../styles/components.css";
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

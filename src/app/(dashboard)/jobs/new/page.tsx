@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { evaluateSubscription } from '@/lib/subscription-evaluation'
 import type { JobCategory } from '@/types'
 
-const STORAGE_KEY = 'job_form_draft'
+const STORAGE_KEY_PREFIX = 'job_form_draft'
 
 export default function NewJobPage() {
   const router = useRouter()
@@ -25,6 +25,12 @@ export default function NewJobPage() {
     client_phone: ''
   })
   const formRef = useRef<HTMLFormElement>(null)
+  const userIdRef = useRef<string | null>(null)
+
+  function getStorageKey(): string {
+    if (!userIdRef.current) return STORAGE_KEY_PREFIX
+    return `${STORAGE_KEY_PREFIX}_${userIdRef.current}`
+  }
 
   async function loadCategories() {
     const supabase = createClient()
@@ -41,18 +47,27 @@ export default function NewJobPage() {
   }
 
   useEffect(() => {
-    loadCategories()
-    const saved = sessionStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      setFormData(JSON.parse(saved))
+    async function initForm() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      userIdRef.current = user.id
+      const saved = sessionStorage.getItem(getStorageKey())
+      if (saved) {
+        setFormData(JSON.parse(saved))
+      }
     }
+
+    loadCategories()
+    initForm()
   }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     const newData = { ...formData, [name]: value }
     setFormData(newData)
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newData))
+    sessionStorage.setItem(getStorageKey(), JSON.stringify(newData))
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -101,7 +116,7 @@ export default function NewJobPage() {
       return
     }
 
-    sessionStorage.removeItem(STORAGE_KEY)
+    sessionStorage.removeItem(getStorageKey())
     router.push(`/jobs/${data.id}`)
   }
 

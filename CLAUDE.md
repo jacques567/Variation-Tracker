@@ -55,6 +55,12 @@ This project includes visual regression tests (Playwright screenshots). Importan
 
 ---
 
+## Design & Reference
+
+**Login Page Reference:** Stitch project [12670254359852135253](https://stitch.withgoogle.com/projects/12670254359852135253?pli=1) — canonical design for all screen redesigns.
+
+---
+
 ## File Structure Notes
 
 - `research/competitive-brief-v1.md` — competitive brief (moved from project root May 2026)

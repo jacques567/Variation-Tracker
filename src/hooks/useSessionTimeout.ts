@@ -88,6 +88,7 @@ export function useSessionTimeout() {
     }
 
     // Set initial timer
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     resetInactivityTimer()
 
     // Add event listeners

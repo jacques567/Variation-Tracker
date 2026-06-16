@@ -35,7 +35,7 @@ export default function SessionTimeoutWarning({
           <span className="font-semibold">
             {minutes}:{seconds.toString().padStart(2, '0')}
           </span>
-          . Click below to stay active or you'll be logged out.
+          . Click below to stay active or you&apos;ll be logged out.
         </p>
 
         <div className="flex gap-3">

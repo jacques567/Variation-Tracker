@@ -15,7 +15,7 @@ export function useSessionTimeout() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const warningIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const lastActivityRef = useRef<number>(Date.now())
+  const lastActivityRef = useRef<number>(0)
 
   const resetInactivityTimer = () => {
     lastActivityRef.current = Date.now()
@@ -71,6 +71,9 @@ export function useSessionTimeout() {
   }
 
   useEffect(() => {
+    // Initialize lastActivityRef with current time
+    lastActivityRef.current = Date.now()
+
     // Activity events to monitor
     const activityEvents = [
       'mousedown',

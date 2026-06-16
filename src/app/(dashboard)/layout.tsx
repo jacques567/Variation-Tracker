@@ -4,6 +4,7 @@ import NavBar from '@/components/ui/NavBar'
 import TrialExpiryBanner from '@/components/ui/TrialExpiryBanner'
 import PaymentWarning from '@/components/ui/PaymentWarning'
 import SubscriptionGate from '@/components/ui/SubscriptionGate'
+import SessionTimeoutManager from '@/components/ui/SessionTimeoutManager'
 import { evaluateSubscription, isBetaMode } from '@/lib/subscription-guard'
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24
@@ -47,6 +48,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      <SessionTimeoutManager />
       {!betaMode && <SubscriptionGate isValid={isValid} />}
       <NavBar contractor={contractor} hasSubscription={isValid} />
       <PaymentWarning

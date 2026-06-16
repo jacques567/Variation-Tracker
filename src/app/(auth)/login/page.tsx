@@ -2,12 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import NextLink from 'next/link'
-import { Button } from '@/components/primitives/Button'
-import { Input } from '@/components/primitives/Input'
-import { FormGroup } from '@/components/primitives/FormGroup'
-import { Card } from '@/components/primitives/Card'
-import { ErrorMessage } from '@/components/primitives/ErrorMessage'
+import Link from 'next/link'
 
 function LoginForm() {
   const router = useRouter()
@@ -70,67 +65,70 @@ function LoginForm() {
   const callbackError = searchParams.get('error')
 
   return (
-    <Card variant="form">
-      <h2 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--spacing-lg)' }}>
-        Sign in
-      </h2>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">Sign in</h2>
 
       {callbackError === 'auth_callback_failed' && (
-        <ErrorMessage>
+        <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2 mb-4">
           The confirmation link is invalid or has expired. Please try again.
-        </ErrorMessage>
+        </p>
       )}
 
-      <form onSubmit={handleSubmit}>
-        <FormGroup label="Email address">
-          <Input
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email address
+          </label>
+          <input
             id="email"
             name="email"
             type="email"
             required
+            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="joe@example.com"
             disabled={loading}
           />
-        </FormGroup>
+        </div>
 
-        <FormGroup label="Password">
-          <Input
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+              Forgot password?
+            </Link>
+          </div>
+          <input
             id="password"
             name="password"
             type="password"
             required
+            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={loading}
           />
-          <div style={{ marginTop: 'var(--spacing-sm)' }}>
-            <NextLink href="/forgot-password" className="link" style={{ fontSize: 'var(--font-size-sm)' }}>
-              Forgot password?
-            </NextLink>
-          </div>
-        </FormGroup>
+        </div>
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+        )}
 
-        <Button
+        <button
           type="submit"
           disabled={loading}
-          style={{ width: '100%', marginTop: 'var(--spacing-lg)' }}
+          className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? 'Signing in...' : 'Sign in'}
-        </Button>
+        </button>
       </form>
 
-      <p style={{
-        fontSize: 'var(--font-size-sm)',
-        color: 'var(--color-text-secondary)',
-        textAlign: 'center',
-        marginTop: 'var(--spacing-2xl)',
-      }}>
+      <p className="text-sm text-gray-500 text-center mt-6">
         Don&apos;t have an account?{' '}
-        <NextLink href="/register" className="link">
+        <Link href="/register" className="text-blue-600 font-medium hover:underline">
           Create one free
-        </NextLink>
+        </Link>
       </p>
-    </Card>
+    </div>
   )
 }
 

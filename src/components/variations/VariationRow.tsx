@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, Check, ChevronUp, CheckCircle2 } from 'lucide-react'
+import { Share2, Check, Image, CheckCircle2 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { Variation, Signature } from '@/types'
 
@@ -18,7 +18,6 @@ const statusStyles: Record<string, string> = {
 
 export default function VariationRow({ variation, jobId }: Props) {
   const [copied, setCopied] = useState(false)
-  const [photoOpen, setPhotoOpen] = useState(false)
 
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== 'undefined')
     ? process.env.NEXT_PUBLIC_APP_URL
@@ -50,6 +49,30 @@ export default function VariationRow({ variation, jobId }: Props) {
     }
   }
 
+  async function shareLink() {
+    try {
+      if (!variation.signature_token) {
+        console.warn('No signature token available')
+        return
+      }
+
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Variation Signature',
+          text: 'Please sign this variation:',
+          url: signLink,
+        })
+      } else {
+        // Fallback to copy for browsers without Share API (mainly Firefox)
+        await copyLink()
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Failed to share link:', err)
+      }
+    }
+  }
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -66,6 +89,9 @@ export default function VariationRow({ variation, jobId }: Props) {
                 Awaiting Signature
               </span>
             )}
+            {variation.photo_url && (
+              <span className="text-gray-400"><Image className="w-3.5 h-3.5" /></span>
+            )}
           </div>
           <p className="text-xs text-gray-400 mt-1">{formatDate(variation.date)}</p>
           {variation.signature && (
@@ -75,43 +101,10 @@ export default function VariationRow({ variation, jobId }: Props) {
             </p>
           )}
         </div>
-        <div className="flex items-start gap-2 shrink-0">
-          {variation.photo_url && (
-            <button
-              onClick={() => setPhotoOpen(o => !o)}
-              aria-label="View photo"
-              aria-expanded={photoOpen}
-              className="rounded-lg overflow-hidden border border-gray-200 hover:border-blue-300 transition-colors"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={variation.photo_url}
-                alt="Variation photo thumbnail"
-                className="w-12 h-12 object-cover"
-              />
-            </button>
-          )}
+        <div className="text-right shrink-0">
           <p className="font-semibold text-gray-900">{formatCurrency(variation.cost)}</p>
         </div>
       </div>
-
-      {variation.photo_url && photoOpen && (
-        <div className="mt-3 relative">
-          <button
-            onClick={() => setPhotoOpen(false)}
-            className="absolute top-2 right-2 bg-white rounded-full p-0.5 shadow-sm hover:bg-gray-50 transition-colors"
-            aria-label="Close photo"
-          >
-            <ChevronUp className="w-4 h-4 text-gray-500" />
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={variation.photo_url}
-            alt="Variation photo"
-            className="w-full rounded-lg object-contain bg-gray-50 max-h-64"
-          />
-        </div>
-      )}
 
       {variation.status === 'draft' && (
         <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
@@ -121,11 +114,12 @@ export default function VariationRow({ variation, jobId }: Props) {
             className="flex-1 text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-500 truncate"
           />
           <button
-            onClick={copyLink}
+            onClick={shareLink}
+            aria-label="Share variation link"
             className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded-lg px-3 py-1.5 hover:bg-blue-100 transition-colors shrink-0"
           >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            {copied ? 'Copied' : 'Copy link'}
+            {copied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+            {copied ? 'Copied' : 'Share link'}
           </button>
         </div>
       )}

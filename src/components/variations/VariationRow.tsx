@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, Check, ChevronUp, CheckCircle2 } from 'lucide-react'
+import { Share2, Check, ChevronUp, CheckCircle2 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { Variation, Signature } from '@/types'
 
@@ -47,6 +47,30 @@ export default function VariationRow({ variation, jobId }: Props) {
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy link:', err)
+    }
+  }
+
+  async function shareLink() {
+    try {
+      if (!variation.signature_token) {
+        console.warn('No signature token available')
+        return
+      }
+
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Variation Signature',
+          text: 'Please sign this variation:',
+          url: signLink,
+        })
+      } else {
+        // Fallback to copy for browsers without Share API (mainly Firefox)
+        await copyLink()
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Failed to share link:', err)
+      }
     }
   }
 
@@ -121,11 +145,12 @@ export default function VariationRow({ variation, jobId }: Props) {
             className="flex-1 text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-500 truncate"
           />
           <button
-            onClick={copyLink}
+            onClick={shareLink}
+            aria-label="Share variation link"
             className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded-lg px-3 py-1.5 hover:bg-blue-100 transition-colors shrink-0"
           >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-            {copied ? 'Copied' : 'Copy link'}
+            {copied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+            {copied ? 'Copied' : 'Share link'}
           </button>
         </div>
       )}

@@ -1,24 +1,51 @@
-# Changes: Expandable Attached Photo in VariationRow
+# Changes: Postcode Address Lookup
+
+**Branch:** feature/postcode-address-lookup  
+**Built by:** Mason  
+**Date:** 2026-06-17
+
+---
 
 ## Summary
 
-Added clickable photo thumbnail and inline expand toggle to `VariationRow`. Variations with a `photo_url` now show a 48×48 thumbnail on the right side of the card. Clicking it expands the full photo inline beneath the variation details; a `ChevronUp` button collapses it.
+Replaced the free-text `Site address` input on `/jobs/new` with a postcode-first lookup component backed by postcodes.io. No API key, no cost, no backend proxy.
 
-## Files Modified
+---
 
-| File | Lines changed |
-|------|--------------|
-| `src/components/variations/VariationRow.tsx` | +28, -4 |
+## Files created or modified
 
-## Changes Detail
+| File | Action | Lines |
+|---|---|---|
+| `src/components/jobs/PostcodeLookup.tsx` | Created | 152 |
+| `src/app/(dashboard)/jobs/new/page.tsx` | Modified | +9 / -4 |
+| `tests/e2e/postcode-lookup.spec.ts` | Created | 107 |
+| `.pipeline/spec.md` | Created (supersedes prior spec) | — |
 
-- Removed `Image` lucide import, added `ChevronUp`
-- Added `photoOpen` state (`useState(false)`)
-- Replaced `<Image>` badge (w-3.5 h-3.5 icon) with a `<button>` thumbnail (48×48, `object-cover`, `rounded-lg`) in the right column alongside the cost
-- Right column changed from `text-right shrink-0` to `flex items-start gap-2 shrink-0` to accommodate thumbnail
-- Added conditional expanded photo block below the main row — `w-full rounded-lg object-contain bg-gray-50 max-h-64` with a `ChevronUp` close button overlaid top-right
-- Follows `img` tag ESLint suppress pattern from `sign/[token]/page.tsx`
+---
+
+## What was built
+
+- `PostcodeLookup` client component with three modes: `lookup` (default), `found` (post-success), `manual` (bypass)
+- In `found` mode: street input (editable) + readonly autofill showing `{adminDistrict}, {county}, {postcode}` from postcodes.io
+- Assembles final address as `"{street}, {adminDistrict}, {postcode}"` on every keystroke → calls `onAddressChange` → sets `formData.address` in parent
+- Session storage persistence handled by existing parent logic — no changes needed there
+- Graceful fallbacks: 404 → inline error, network failure → auto-switches to manual mode
+- "Enter manually" / "Use postcode lookup" toggle always accessible
+- Enter key triggers Find
+
+## Verified in browser
+
+- `SW1A1AA` → returned `Westminster, London, SW1A 1AA` in readonly field ✅
+- Street `10 Downing Street` → sessionStorage address = `"10 Downing Street, Westminster, SW1A 1AA"` ✅
+
+---
 
 ## Deviations from spec.md
 
-Zero deviations. Spec said thumbnail goes on the "right side" (edge case 4) — placed in right column next to cost, consistent with that note.
+**Zero deviations.**
+
+One additive behaviour not in spec: Enter key on the postcode input triggers Find (via `onKeyDown`). Additive only, does not change any specified behaviour.
+
+---
+
+_Tagging Alf: Build complete — `.pipeline/changes.md` ready for test._

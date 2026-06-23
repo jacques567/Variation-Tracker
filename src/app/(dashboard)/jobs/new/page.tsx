@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { evaluateSubscription } from '@/lib/subscription-evaluation'
+import PostcodeLookup from '@/components/jobs/PostcodeLookup'
 import type { JobCategory } from '@/types'
 
 const STORAGE_KEY_PREFIX = 'job_form_draft'
@@ -139,9 +140,13 @@ export default function NewJobPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Site address</label>
-            <input name="address" type="text" required value={formData.address} onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="14 Maple Street, Manchester, M1 1AB" />
+            <PostcodeLookup
+              onAddressChange={address => {
+                const newData = { ...formData, address }
+                setFormData(newData)
+                sessionStorage.setItem(getStorageKey(), JSON.stringify(newData))
+              }}
+            />
           </div>
 
           <div>

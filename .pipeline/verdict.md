@@ -1,59 +1,57 @@
-CODY PIPELINE VERDICT — expandable-photo-thumbnail — 2026-06-17
+CODY PIPELINE VERDICT — postcode-address-lookup — 2026-06-17
 ═══════════════════════════════════════════════════════════════
-Branch: feature/expandable-photo-thumbnail
+Branch: feature/postcode-address-lookup
 Spec: .pipeline/spec.md
 Changes: .pipeline/changes.md
 Tests: .pipeline/test-results.md
 
 SPEC REQUIREMENTS CHECK
 ───────────────────────
-✓ Photo badge replaced — `<Image>` icon removed, replaced with 48×48 thumbnail button
-✓ Button has `aria-label="View photo"` and `aria-expanded={photoOpen}`
-✓ Clicking toggles `photoOpen` state
-✓ Expanded photo renders below the flex row on `photoOpen === true`
-✓ Expanded img uses `w-full rounded-lg object-contain bg-gray-50 max-h-64`
-✓ ESLint suppression comment matches `sign/[token]/page.tsx` pattern exactly
-✓ No modal, no new tab — pure inline toggle
-✓ ChevronUp close button at top-right of expanded image
-✓ `ChevronUp` imported from lucide-react (was already in project)
-✓ No new files, no DB migrations, no new API routes
-✓ Edge case 1 (null photo_url): conditional renders gate both thumbnail and expand — clean
-✓ Edge case 3 (photo + sign link together): expanded photo renders above the `border-t` sign link section — no conflict
-✓ Edge case 4 (long description): thumbnail moved to right column — doesn't affect text wrapping
+✓ Postcode input + Find button renders in default state
+✓ postcodes.io called directly from browser — no proxy, no API key, no cost
+✓ Town + county auto-populate in readonly field on success
+✓ Street input is editable; assembly fires on every keystroke
+✓ Address assembled as "{street}, {adminDistrict}, {postcode}" — matches spec format
+✓ 404 response → inline error, stays in lookup mode
+✓ Network/server error → auto-switches to manual entry mode
+✓ "Enter manually" toggle always accessible in lookup and found modes
+✓ "Use postcode lookup" toggle always accessible in manual mode
+✓ Empty postcode validates before API call (no unnecessary fetch)
+✓ Spaces stripped from postcode before call (M11AB and M1 1AB both handled)
+✓ No DB schema change — address stays single string
+✓ Session storage persistence handled entirely by parent — no duplication
+✓ initialValue prop starts in manual mode — forward-compatible with edit page
 
 DEVIATIONS FROM SPEC
 ────────────────────
-One deliberate position deviation from the literal spec, already declared in changes.md:
-- Spec said "replace the badge" (which was in the left column). Mason placed the thumbnail in
-  the right column next to the cost, citing spec edge case 4 ("right side"). This is correct
-  — the right column is the better UX placement, and the spec's own edge case note confirms
-  it. Not a concern.
+One undeclared additive (minor): Enter key triggers Find on the postcode input.
+Noted by Mason in changes.md. Additive only — does not change any specified behaviour.
+Not a concern.
+
+One issue found and fixed during review:
+Hidden required sentinel input added to block form submission with empty address
+when user stays in lookup mode without completing selection. Fix committed
+(1f80247) before verdict was written — clean.
 
 TEST COVERAGE CHECK
 ───────────────────
-Static checks: 3/3 passing (tsc, eslint, build)
-E2E tests: BLOCKED — missing Supabase env vars in worktree, not a code defect
-All 5 spec edge cases scaffolded in tests/e2e/photo-thumbnail.spec.ts
-
-The blocked E2E tests are an environment constraint, not a coverage gap. The scaffolded
-tests are correct and will run cleanly in the dev environment. No spec edge case is
-uncovered or untested by design.
+Type check: ✅ clean
+E2E automated: 6/6 passing (Chromium + Firefox)
+Interactive component: BLOCKED — auth-gated, consistent with project pattern
+Manual verification: performed in dev preview (SW1A 1AA → "Westminster, London, SW1A 1AA" ✅)
+All 8 interactive spec cases documented in spec for future auth-fixture implementation.
 
 ARCHITECTURAL CONCERNS
 ──────────────────────
-None. This is a single-component state toggle with no external dependencies, no API calls,
-and no new abstractions. The `photo_url` is already on the `Variation` type — nothing
-added, nothing changed downstream.
-
-One observation worth noting (not blocking): `photoOpen` resets on every re-render of the
-parent (e.g. if the jobs list re-fetches). That's expected behaviour for local UI state on
-a toggle — no action needed for v1.
+None. Direct browser fetch to a public CORS-enabled API is the right call here —
+no secrets, no server round-trip, no complexity. The component is self-contained,
+follows existing className conventions, and touches nothing outside its own state.
 
 VERDICT
 ═══════════════════════════════════════════════════════════════
-✅ APPROVED — safe to merge to main
+✅ APPROVED — safe to PR to main
 
-The implementation is clean, spec-compliant, and architecturally minimal. The one position
-deviation (right column vs left) is correct by the spec's own edge case note. Static checks
-pass. E2E scaffold is solid. Merge when ready.
+Clean implementation, zero cost, spec-compliant. The one real issue (empty address
+submission) was caught and fixed in review. E2E scaffold is solid for when auth
+fixtures land. Merge when ready.
 ═══════════════════════════════════════════════════════════════

@@ -1,13 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+
+type PageState = 'checking' | 'ready' | 'expired' | 'success'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
+  const [pageState, setPageState] = useState<PageState>('checking')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    async function checkSession() {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      setPageState(session ? 'ready' : 'expired')
+    }
+    checkSession()
+  }, [])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -33,7 +46,39 @@ export default function ResetPasswordPage() {
       return
     }
 
-    router.push('/jobs')
+    setPageState('success')
+    setTimeout(() => router.push('/jobs'), 2000)
+  }
+
+  if (pageState === 'checking') {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+        <p className="text-sm text-gray-500">Verifying your link...</p>
+      </div>
+    )
+  }
+
+  if (pageState === 'expired') {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+        <h2 className="text-xl font-semibold text-gray-900 mb-3">Link expired</h2>
+        <p className="text-sm text-gray-600 mb-6">
+          This password reset link has expired or already been used.
+        </p>
+        <Link href="/forgot-password" className="text-sm text-blue-600 font-medium hover:underline">
+          Request a new link
+        </Link>
+      </div>
+    )
+  }
+
+  if (pageState === 'success') {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+        <h2 className="text-xl font-semibold text-gray-900 mb-3">Password updated</h2>
+        <p className="text-sm text-gray-600">Signing you in...</p>
+      </div>
+    )
   }
 
   return (
@@ -53,6 +98,7 @@ export default function ResetPasswordPage() {
             minLength={8}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Minimum 8 characters"
+            disabled={loading}
           />
         </div>
 
@@ -67,6 +113,7 @@ export default function ResetPasswordPage() {
             required
             minLength={8}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={loading}
           />
         </div>
 

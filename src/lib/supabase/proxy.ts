@@ -35,14 +35,15 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute =
     pathname === '/login' ||
     pathname === '/register' ||
-    pathname === '/reset-password'
+    pathname === '/forgot-password'
 
   const isPublicRoute =
     pathname.startsWith('/sign') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
-    pathname.startsWith('/cookies')
+    pathname.startsWith('/cookies') ||
+    pathname === '/reset-password'
 
   const isRootRoute = pathname === '/'
 

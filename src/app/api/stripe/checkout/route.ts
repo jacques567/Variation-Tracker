@@ -53,14 +53,16 @@ export async function POST(request: NextRequest) {
     // No trial_period_days — users receive a 7-day trial at signup (app-managed,
     // no card required). Adding a second Stripe trial would give users 14 free days
     // total and is unintentional. The Stripe subscription starts immediately on payment.
+    const origin = request.headers.get('origin') ?? `https://${request.headers.get('host')}`
+
     const session = await stripe.checkout.sessions.create(
       {
         customer: customerId,
         payment_method_types: ['card'],
         mode: 'subscription',
         line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/jobs?subscribed=true`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe`,
+        success_url: `${origin}/jobs?subscribed=true`,
+        cancel_url: `${origin}/subscribe`,
         subscription_data: {
           metadata: { supabase_user_id: user.id },
         },

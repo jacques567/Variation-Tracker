@@ -51,6 +51,9 @@ TASKS.md
 test-results/
 tests/e2e/visual-regression.spec.ts-snapshots/
 
+# Pipeline handoff files (ephemeral, cleared after each PR)
+.pipeline/
+
 # Stage-specific folders (local workspace only, not synced to repo)
 building/
 research/

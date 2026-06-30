@@ -61,22 +61,17 @@ export async function POST(request: NextRequest) {
         ? `https://${process.env.VERCEL_URL}`
         : (request.headers.get('origin') ?? `https://${request.headers.get('host')}`)
 
-    const session = await stripe.checkout.sessions.create(
-      {
-        customer: customerId,
-        payment_method_types: ['card'],
-        mode: 'subscription',
-        line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
-        success_url: `${baseUrl}/jobs?subscribed=true`,
-        cancel_url: `${baseUrl}/subscribe`,
-        subscription_data: {
-          metadata: { supabase_user_id: user.id },
-        },
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
+      success_url: `${baseUrl}/jobs?subscribed=true`,
+      cancel_url: `${baseUrl}/subscribe`,
+      subscription_data: {
+        metadata: { supabase_user_id: user.id },
       },
-      {
-        idempotencyKey: `checkout_${user.id}_${process.env.STRIPE_PRICE_ID}`,
-      }
-    )
+    })
 
     return NextResponse.json({ url: session.url })
   } catch {

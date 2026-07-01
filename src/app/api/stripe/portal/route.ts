@@ -25,9 +25,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(err.toJSON(), { status: err.statusCode })
     }
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+      ? process.env.NEXT_PUBLIC_APP_URL.startsWith('http')
+        ? process.env.NEXT_PUBLIC_APP_URL
+        : `https://${process.env.NEXT_PUBLIC_APP_URL}`
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : (request.headers.get('origin') ?? `https://${request.headers.get('host')}`)
+
     const session = await stripe.billingPortal.sessions.create({
       customer: contractor.stripe_customer_id,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/jobs`,
+      return_url: `${baseUrl}/jobs`,
     })
 
     return NextResponse.json({ url: session.url })

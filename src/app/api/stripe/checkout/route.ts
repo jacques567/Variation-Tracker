@@ -53,33 +53,36 @@ export async function POST(request: NextRequest) {
     // No trial_period_days — users receive a 7-day trial at signup (app-managed,
     // no card required). Adding a second Stripe trial would give users 14 free days
     // total and is unintentional. The Stripe subscription starts immediately on payment.
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-      ? process.env.NEXT_PUBLIC_APP_URL.startsWith('http')
-        ? process.env.NEXT_PUBLIC_APP_URL
-        : `https://${process.env.NEXT_PUBLIC_APP_URL}`
-      : process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : (request.headers.get('origin') ?? `https://${request.headers.get('host')}`)
+    //
+    // On Vercel preview deployments, VERCEL_URL is the canonical URL for this build.
+    // NEXT_PUBLIC_APP_URL is the production custom domain and must not be used on preview
+    // or the success/cancel redirect will go to the live site instead.
+    const isVercelPreview = process.env.VERCEL_ENV === 'preview'
+    const baseUrl = isVercelPreview && process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_APP_URL
+        ? process.env.NEXT_PUBLIC_APP_URL.startsWith('http')
+          ? process.env.NEXT_PUBLIC_APP_URL
+          : `https://${process.env.NEXT_PUBLIC_APP_URL}`
+        : process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}`
+          : (request.headers.get('origin') ?? `https://${request.headers.get('host')}`)
 
-    const session = await stripe.checkout.sessions.create(
-      {
-        customer: customerId,
-        payment_method_types: ['card'],
-        mode: 'subscription',
-        line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
-        success_url: `${baseUrl}/jobs?subscribed=true`,
-        cancel_url: `${baseUrl}/subscribe`,
-        subscription_data: {
-          metadata: { supabase_user_id: user.id },
-        },
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [{ price: process.env.STRIPE_PRICE_ID!, quantity: 1 }],
+      success_url: `${baseUrl}/jobs?subscribed=true`,
+      cancel_url: `${baseUrl}/subscribe`,
+      subscription_data: {
+        metadata: { supabase_user_id: user.id },
       },
-      {
-        idempotencyKey: `checkout_${user.id}_${process.env.STRIPE_PRICE_ID}`,
-      }
-    )
+    })
 
     return NextResponse.json({ url: session.url })
-  } catch {
+  } catch (error) {
+    console.error('[checkout] Failed to create checkout session:', error)
     const err = Errors.stripeError('Failed to create checkout session')
     return NextResponse.json(err.toJSON(), { status: err.statusCode })
   }

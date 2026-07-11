@@ -13,7 +13,7 @@ export function SubscribeButton() {
       const res = await fetch('/api/stripe/checkout', { method: 'POST' })
       const data = await res.json()
       if (!res.ok || !data.url) {
-        setError('Could not start checkout. Please try again.')
+        setError(res.status === 409 && data.message ? data.message : 'Could not start checkout. Please try again.')
         setLoading(false)
         return
       }

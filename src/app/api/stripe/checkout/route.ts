@@ -50,6 +50,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Guard against duplicate subscriptions — a user re-clicking subscribe (or
+    // subscribing again after already being active) would otherwise stack a second
+    // Stripe subscription on the same customer instead of reusing the existing one.
+    const existingSubscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: 'all',
+      limit: 10,
+    })
+    const hasActiveSubscription = existingSubscriptions.data.some((sub) =>
+      ['active', 'trialing', 'past_due'].includes(sub.status)
+    )
+    if (hasActiveSubscription) {
+      const err = Errors.conflict('You already have an active subscription.')
+      return NextResponse.json(err.toJSON(), { status: err.statusCode })
+    }
+
     // No trial_period_days — users receive a 7-day trial at signup (app-managed,
     // no card required). Adding a second Stripe trial would give users 14 free days
     // total and is unintentional. The Stripe subscription starts immediately on payment.

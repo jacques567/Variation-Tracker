@@ -58,11 +58,15 @@ export async function POST(request: NextRequest) {
       status: 'all',
       limit: 10,
     })
+    // 'incomplete' is included because it also represents a live, unresolved
+    // subscription on this customer (first payment not yet confirmed) — without it,
+    // an abandoned checkout lets this route stack a second incomplete subscription
+    // on top of the first.
     const hasActiveSubscription = existingSubscriptions.data.some((sub) =>
-      ['active', 'trialing', 'past_due'].includes(sub.status)
+      ['active', 'trialing', 'past_due', 'incomplete'].includes(sub.status)
     )
     if (hasActiveSubscription) {
-      const err = Errors.conflict('You already have an active subscription.')
+      const err = Errors.conflict('You already have a subscription in progress.')
       return NextResponse.json(err.toJSON(), { status: err.statusCode })
     }
 

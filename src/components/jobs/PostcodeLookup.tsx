@@ -156,9 +156,6 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
   // lookup mode
   return (
     <div>
-      {/* Hidden sentinel — carries assembled address for native form required validation */}
-      <input type="text" required aria-hidden tabIndex={-1} value="" onChange={() => {}}
-        style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, width: 0 }} />
       <div className="flex gap-2">
         <input
           type="text"

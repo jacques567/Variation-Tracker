@@ -8,6 +8,10 @@ import type { Variation, Signature } from '@/types'
 interface Props {
   variation: Variation & { signature: Signature | null }
   jobId: string
+  jobName: string
+  clientName: string
+  companyName: string | null
+  address: string
 }
 
 const statusStyles: Record<string, string> = {
@@ -16,7 +20,7 @@ const statusStyles: Record<string, string> = {
   signed: 'bg-green-50 text-green-700',
 }
 
-export default function VariationRow({ variation, jobId }: Props) {
+export default function VariationRow({ variation, jobId, jobName, clientName, companyName, address }: Props) {
   const [copied, setCopied] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
 
@@ -25,6 +29,10 @@ export default function VariationRow({ variation, jobId }: Props) {
     : (typeof window !== 'undefined' ? window.location.origin : '')
   const signLink = `${appUrl}/sign/${variation.signature_token}`
 
+  const shareTitle = `Variation for ${jobName}`
+  const fromSuffix = companyName ? ` from ${companyName}` : ''
+  const shareText = `Hi ${clientName}, please review and sign this ${formatCurrency(variation.cost)} variation for ${jobName}${fromSuffix} at ${address}:`
+
   async function copyLink() {
     try {
       if (!variation.signature_token) {
@@ -32,11 +40,13 @@ export default function VariationRow({ variation, jobId }: Props) {
         return
       }
 
+      const copyText = `${shareText} ${signLink}`
+
       if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(signLink)
+        await navigator.clipboard.writeText(copyText)
       } else {
         const input = document.createElement('input')
-        input.value = signLink
+        input.value = copyText
         document.body.appendChild(input)
         input.select()
         document.execCommand('copy')
@@ -59,8 +69,8 @@ export default function VariationRow({ variation, jobId }: Props) {
 
       if (navigator.share) {
         await navigator.share({
-          title: 'Variation Signature',
-          text: 'Please sign this variation:',
+          title: shareTitle,
+          text: shareText,
           url: signLink,
         })
       } else {

@@ -1,6 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import IdealAddressLookup from './IdealAddressLookup'
+
+const USE_IDEAL_POSTCODES = process.env.NEXT_PUBLIC_USE_IDEAL_POSTCODES === 'true'
 
 interface PostcodeResult {
   adminDistrict: string
@@ -101,6 +104,25 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
   }
 
   const inputClass = 'w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500'
+
+  if (USE_IDEAL_POSTCODES && mode !== 'manual') {
+    return (
+      <div>
+        <IdealAddressLookup
+          onAddressChange={onAddressChange}
+          initialValue={initialValue}
+          onFallback={switchToManual}
+        />
+        <button
+          type="button"
+          onClick={switchToManual}
+          className="mt-1.5 text-xs text-blue-600 hover:underline"
+        >
+          or enter address manually
+        </button>
+      </div>
+    )
+  }
 
   if (mode === 'manual') {
     return (

@@ -34,36 +34,36 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold text-gray-900">{job.job_name}</h1>
+      <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl font-semibold text-gray-900 truncate">{job.job_name}</h1>
             {job.category && (
-              <span className="px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+              <span className="shrink-0 px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
                 {job.category}
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-0.5">{job.client_name} · {job.address}</p>
+          <p className="text-sm text-gray-500 mt-0.5 break-words">{job.client_name} · {job.address}</p>
         </div>
         <ExportInvoiceButton jobId={job.id} jobName={job.job_name} />
       </div>
 
       {/* Totals */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">Contract value</p>
-          <p className="text-lg font-semibold text-gray-900 mt-1">{formatCurrency(job.original_value)}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 flex items-baseline justify-between gap-3 sm:block">
+          <p className="text-xs text-gray-500 shrink-0">Contract value</p>
+          <p className="text-base sm:text-lg font-semibold text-gray-900 sm:mt-1 tabular-nums">{formatCurrency(job.original_value)}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500">Signed variations</p>
-          <p className={`text-lg font-semibold mt-1 ${signedTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 flex items-baseline justify-between gap-3 sm:block">
+          <p className="text-xs text-gray-500 shrink-0">Signed variations</p>
+          <p className={`text-base sm:text-lg font-semibold sm:mt-1 tabular-nums ${signedTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {signedTotal >= 0 ? '+' : ''}{formatCurrency(signedTotal)}
           </p>
         </div>
-        <div className="bg-blue-600 rounded-xl p-4">
-          <p className="text-xs text-blue-100">Running total</p>
-          <p className="text-lg font-semibold text-white mt-1">{formatCurrency(grandTotal)}</p>
+        <div className="bg-blue-600 rounded-xl p-3 sm:p-4 flex items-baseline justify-between gap-3 sm:block">
+          <p className="text-xs text-blue-100 shrink-0">Running total</p>
+          <p className="text-base sm:text-lg font-semibold text-white sm:mt-1 tabular-nums">{formatCurrency(grandTotal)}</p>
         </div>
       </div>
 

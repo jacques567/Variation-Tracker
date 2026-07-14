@@ -22,6 +22,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
   if (!job) notFound()
 
+  const { data: contractor } = await supabase
+    .from('contractors')
+    .select('company_name')
+    .eq('id', user.id)
+    .single()
+
   const variations = job.variations ?? []
   const signedTotal = variations.filter((v: { status: string }) => v.status === 'signed').reduce((s: number, v: { cost: number }) => s + v.cost, 0)
   const pendingTotal = variations.filter((v: { status: string }) => v.status === 'pending').reduce((s: number, v: { cost: number }) => s + v.cost, 0)
@@ -92,7 +98,15 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       ) : (
         <div className="space-y-2">
           {variations.map((v: Variation & { signature: Signature | null }) => (
-            <VariationRow key={v.id} variation={v} jobId={id} />
+            <VariationRow
+              key={v.id}
+              variation={v}
+              jobId={id}
+              jobName={job.job_name}
+              clientName={job.client_name}
+              companyName={contractor?.company_name ?? null}
+              address={job.address}
+            />
           ))}
         </div>
       )}

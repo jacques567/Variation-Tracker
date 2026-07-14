@@ -93,22 +93,14 @@ export default async function SignPage({ params }: { params: Promise<{ token: st
           {variation.photo_url && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-xs text-gray-500 mb-2">Photo evidence</p>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={variation.photo_url}
-                alt="Variation photo"
-                className="w-full rounded-lg object-contain bg-gray-50 max-h-48 cursor-pointer"
-                onClick={() => {
-                  if (variation.photo_url) window.open(variation.photo_url, '_blank')
-                }}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if ((e.key === 'Enter' || e.key === ' ') && variation.photo_url) {
-                    window.open(variation.photo_url, '_blank')
-                  }
-                }}
-              />
+              <a href={variation.photo_url} target="_blank" rel="noopener noreferrer">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={variation.photo_url}
+                  alt="Variation photo"
+                  className="w-full rounded-lg object-contain bg-gray-50 max-h-48 cursor-pointer"
+                />
+              </a>
             </div>
           )}
         </div>

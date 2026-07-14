@@ -25,8 +25,15 @@ export default function NewJobPage() {
     client_email: '',
     client_phone: ''
   })
+  const [formLoaded, setFormLoaded] = useState(false)
+  const [showValidation, setShowValidation] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const userIdRef = useRef<string | null>(null)
+
+  const REQUIRED_FIELDS = ['job_name', 'address', 'original_value', 'client_name', 'client_email'] as const
+  const missingFields = new Set(
+    REQUIRED_FIELDS.filter(field => !formData[field]?.toString().trim())
+  )
 
   function getStorageKey(): string {
     if (!userIdRef.current) return STORAGE_KEY_PREFIX
@@ -58,6 +65,7 @@ export default function NewJobPage() {
       if (saved) {
         setFormData(JSON.parse(saved))
       }
+      setFormLoaded(true)
     }
 
     loadCategories()
@@ -74,6 +82,12 @@ export default function NewJobPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
+
+    if (missingFields.size > 0) {
+      setShowValidation(true)
+      return
+    }
+    setShowValidation(false)
     setLoading(true)
 
     const supabase = createClient()
@@ -130,28 +144,37 @@ export default function NewJobPage() {
       <h1 className="text-xl font-semibold text-gray-900 mb-6">New job</h1>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
+        <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Job name</label>
-            <input name="job_name" type="text" required value={formData.job_name} onChange={handleInputChange}
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Job name{showValidation && missingFields.has('job_name') && <span className="text-red-600"> *</span>}
+            </label>
+            <input name="job_name" type="text" value={formData.job_name} onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="e.g. Kitchen extension – 14 Maple St" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Site address</label>
-            <PostcodeLookup
-              onAddressChange={address => {
-                const newData = { ...formData, address }
-                setFormData(newData)
-                sessionStorage.setItem(getStorageKey(), JSON.stringify(newData))
-              }}
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Site address{showValidation && missingFields.has('address') && <span className="text-red-600"> *</span>}
+            </label>
+            {formLoaded && (
+              <PostcodeLookup
+                initialValue={formData.address}
+                onAddressChange={address => {
+                  const newData = { ...formData, address }
+                  setFormData(newData)
+                  sessionStorage.setItem(getStorageKey(), JSON.stringify(newData))
+                }}
+              />
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Original contract value (£)</label>
-            <input name="original_value" type="number" min="0" step="0.01" required value={formData.original_value} onChange={handleInputChange}
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Original contract value (£){showValidation && missingFields.has('original_value') && <span className="text-red-600"> *</span>}
+            </label>
+            <input name="original_value" type="number" min="0" step="0.01" value={formData.original_value} onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="5000.00" />
           </div>
@@ -174,16 +197,20 @@ export default function NewJobPage() {
           <p className="text-sm font-medium text-gray-700">Client details</p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Client name</label>
-            <input name="client_name" type="text" required value={formData.client_name} onChange={handleInputChange}
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Client name{showValidation && missingFields.has('client_name') && <span className="text-red-600"> *</span>}
+            </label>
+            <input name="client_name" type="text" value={formData.client_name} onChange={handleInputChange}
               className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="John Smith" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Client email</label>
-              <input name="client_email" type="email" required value={formData.client_email} onChange={handleInputChange}
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Client email{showValidation && missingFields.has('client_email') && <span className="text-red-600"> *</span>}
+              </label>
+              <input name="client_email" type="email" value={formData.client_email} onChange={handleInputChange}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="john@example.com" />
             </div>
@@ -209,6 +236,10 @@ export default function NewJobPage() {
               {loading ? 'Creating...' : 'Create job'}
             </button>
           </div>
+
+          {showValidation && missingFields.size > 0 && (
+            <p className="text-sm text-red-600 text-center">Not all fields are filled in</p>
+          )}
         </form>
       </div>
     </div>

@@ -1,24 +1,25 @@
 import { test, expect } from '@playwright/test';
 
+// Fixed, reused test account — avoids creating a new prod account on every CI run.
+// If it already exists (expected after the first run), the "already registered" error is fine too.
+const FIXED_TEST_EMAIL = 'qa-basic@vartracker-test.internal';
+const FIXED_TEST_PASSWORD = 'TestPassword123!';
+
 test.describe('Authenticated User Flow', () => {
   test('register and access dashboard', async ({ page }) => {
-    const uniqueEmail = `test-${Date.now()}@example.com`;
-    const password = 'TestPassword123!';
-
     // Register
     await page.goto('/register');
     await page.locator('input[name="full_name"]').fill('Test User');
-    await page.locator('input[name="email"]').fill(uniqueEmail);
-    await page.locator('input[name="password"]').fill(password);
+    await page.locator('input[name="email"]').fill(FIXED_TEST_EMAIL);
+    await page.locator('input[name="password"]').fill(FIXED_TEST_PASSWORD);
 
     const submitButton = page.locator('button[type="submit"]');
     await expect(submitButton).toBeEnabled();
     await submitButton.click();
 
-    // Wait for redirect (should go to /jobs or show error)
+    // Wait for redirect (should go to /jobs), an "already registered" error (expected on repeat runs), or confirmation
     await page.waitForTimeout(3000);
     const finalUrl = page.url();
-    // Should either be on jobs page or still on register (if there was an error)
     expect(finalUrl).toMatch(/\/(jobs|register|confirmation)/);
   });
 

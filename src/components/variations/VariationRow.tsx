@@ -40,13 +40,11 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
         return
       }
 
-      const copyText = `${shareText} ${signLink}`
-
       if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(copyText)
+        await navigator.clipboard.writeText(signLink)
       } else {
         const input = document.createElement('input')
-        input.value = copyText
+        input.value = signLink
         document.body.appendChild(input)
         input.select()
         document.execCommand('copy')

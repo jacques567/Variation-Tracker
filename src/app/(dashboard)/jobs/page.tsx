@@ -78,6 +78,10 @@ export default function JobsPage() {
       : jobs.filter(j => j.category === selectedCategory)
     : jobs
 
+  const gracePeriodDaysRemaining = contractor?.grace_period_expires_at
+    ? Math.ceil((new Date(contractor.grace_period_expires_at).getTime() - Date.now()) / 86400000)
+    : null
+
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Loading...</div>
   }
@@ -128,9 +132,7 @@ export default function JobsPage() {
       {/* Payment warning */}
       <PaymentWarning
         subscriptionStatus={contractor?.subscription_status ?? null}
-        daysRemaining={contractor?.grace_period_expires_at
-          ? Math.ceil((new Date(contractor.grace_period_expires_at).getTime() - Date.now()) / 86400000)
-          : null}
+        daysRemaining={gracePeriodDaysRemaining}
       />
 
       {/* Category filter tabs */}

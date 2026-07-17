@@ -6,7 +6,7 @@
  * re-exported here for server-side callers. The DB-layer equivalent is has_active_subscription()
  * in supabase/migrations/016_rls_subscription_enforcement.sql — any rule change must update both.
  */
-import { createClient as createSupabaseAdmin } from '@supabase/supabase-js'
+import { createServiceRoleClient } from './supabase/server'
 import { Errors } from './errors'
 import {
   evaluateSubscription,
@@ -23,10 +23,7 @@ export async function checkSubscription(
   contractorId: string
 ): Promise<SubscriptionStatus> {
   try {
-    const supabase = createSupabaseAdmin(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = await createServiceRoleClient()
 
     const { data: contractor, error } = await supabase
       .from('contractors')

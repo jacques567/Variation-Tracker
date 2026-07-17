@@ -23,6 +23,7 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([])
   const [categories, setCategories] = useState<JobCategory[]>([])
   const [contractor, setContractor] = useState<Contractor | null>(null)
+  const [gracePeriodDaysRemaining, setGracePeriodDaysRemaining] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
   const [showSubscribedBanner, setShowSubscribedBanner] = useState(justSubscribed)
@@ -56,6 +57,10 @@ export default function JobsPage() {
         .order('name', { ascending: true })
 
       setContractor(contractorData)
+      if (contractorData?.grace_period_expires_at) {
+        const expires = new Date(contractorData.grace_period_expires_at).getTime()
+        setGracePeriodDaysRemaining(Math.ceil((expires - Date.now()) / 86400000))
+      }
       setJobs(allJobs || [])
       setCategories(cats || [])
 
@@ -77,10 +82,6 @@ export default function JobsPage() {
       ? jobs.filter(j => !j.category)
       : jobs.filter(j => j.category === selectedCategory)
     : jobs
-
-  const gracePeriodDaysRemaining = contractor?.grace_period_expires_at
-    ? Math.ceil((new Date(contractor.grace_period_expires_at).getTime() - Date.now()) / 86400000)
-    : null
 
   if (loading) {
     return <div className="text-center py-12 text-gray-500">Loading...</div>

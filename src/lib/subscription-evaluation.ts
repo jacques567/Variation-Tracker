@@ -32,8 +32,6 @@ export interface SubscriptionStatus {
   reason?: string
 }
 
-const ACTIVE_STATUSES = ['active']
-
 export function evaluateSubscription(
   contractor: ContractorSubscriptionRow | null
 ): SubscriptionStatus {
@@ -43,7 +41,7 @@ export function evaluateSubscription(
 
   const status = contractor.subscription_status || 'none'
 
-  if (ACTIVE_STATUSES.includes(status)) {
+  if (status === 'active') {
     return { isValid: true, status }
   }
 

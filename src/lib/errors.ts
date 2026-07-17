@@ -1,11 +1,11 @@
-export interface ApiError {
+interface ApiError {
   code: string
   message: string
   retryable: boolean
   details?: Record<string, unknown>
 }
 
-export class ApiErrorResponse extends Error implements ApiError {
+class ApiErrorResponse extends Error implements ApiError {
   code: string
   message: string
   retryable: boolean
@@ -38,7 +38,7 @@ export class ApiErrorResponse extends Error implements ApiError {
   }
 }
 
-export const ErrorCodes = {
+const ErrorCodes = {
   INVALID_INPUT: 'invalid_input',
   UNAUTHORIZED: 'unauthorized',
   FORBIDDEN: 'forbidden',

@@ -1,7 +1,13 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { isBetaMode } from '@/lib/subscription-evaluation'
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  // Production (non-beta) deployments are coming-soon-only — the auth pages
+  // only exist for the beta site. Anyone hitting /login, /register, or
+  // /forgot-password directly on the live domain lands back on the landing page.
+  if (!isBetaMode()) redirect('/')
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 

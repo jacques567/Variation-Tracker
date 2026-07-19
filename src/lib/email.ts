@@ -132,18 +132,18 @@ export async function sendVariationExpiryReminder(params: VariationExpiryParams)
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: contractorEmail,
-    subject: `Signing link expiring soon — ${jobName}`,
+    subject: `Reminder: signature needed on "${jobName}" by ${formatDate(expiresAt)}`, // plain text — do not HTML-escape
     html: `
       <!DOCTYPE html>
       <html>
         <head><meta charset="utf-8"></head>
         <body style="font-family: sans-serif; color: #111; max-width: 560px; margin: 0 auto; padding: 32px 16px;">
-          <p style="font-size: 14px; color: #555; margin-bottom: 4px;">Signing link expiring soon</p>
+          <p style="font-size: 14px; color: #555; margin-bottom: 4px;">Still awaiting signature</p>
           <h1 style="font-size: 20px; margin: 0 0 24px;">${safeJobName}</h1>
 
           <p style="font-size: 15px;">
-            Your client hasn't signed the variation below yet, and the signing link expires on
-            <strong>${safeExpiresAt}</strong>. You may want to follow up with them.
+            Your client hasn't signed off on this variation yet, and their signing link expires on
+            <strong>${safeExpiresAt}</strong>. A quick nudge now can save you re-issuing the request later.
           </p>
 
           <div style="background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 8px; padding: 20px; margin: 24px 0;">
@@ -164,7 +164,7 @@ export async function sendVariationExpiryReminder(params: VariationExpiryParams)
             </table>
           </div>
 
-          <p style="font-size: 13px;"><a href="${APP_URL}/jobs" style="color: #2563eb;">View your jobs →</a></p>
+          <p style="font-size: 13px;"><a href="${APP_URL}/jobs" style="color: #2563eb;">View this job in VarTracker →</a></p>
           <p style="font-size: 13px; color: #aaa; margin-top: 32px;">VarTracker · vartracker.com</p>
         </body>
       </html>
@@ -190,7 +190,7 @@ export async function sendVariationExpiredNotice(params: VariationExpiryParams) 
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: contractorEmail,
-    subject: `Signing link expired — ${jobName}`,
+    subject: `Signing link expired — "${jobName}" needs to be re-issued`, // plain text — do not HTML-escape
     html: `
       <!DOCTYPE html>
       <html>
@@ -200,8 +200,9 @@ export async function sendVariationExpiredNotice(params: VariationExpiryParams) 
           <h1 style="font-size: 20px; margin: 0 0 24px;">${safeJobName}</h1>
 
           <p style="font-size: 15px;">
-            The signing link for the variation below expired on <strong>${safeExpiresAt}</strong>
-            without being signed. Re-issue a new variation to send your client an active link.
+            The signing link for this variation expired on <strong>${safeExpiresAt}</strong> without being signed.
+            No action was taken and nothing was lost — re-issue the variation from your dashboard to send
+            your client a fresh link.
           </p>
 
           <div style="background: #f9f9f9; border: 1px solid #e5e5e5; border-radius: 8px; padding: 20px; margin: 24px 0;">
@@ -222,7 +223,7 @@ export async function sendVariationExpiredNotice(params: VariationExpiryParams) 
             </table>
           </div>
 
-          <p style="font-size: 13px;"><a href="${APP_URL}/jobs" style="color: #2563eb;">View your jobs →</a></p>
+          <p style="font-size: 13px;"><a href="${APP_URL}/jobs" style="color: #2563eb;">Re-issue this variation →</a></p>
           <p style="font-size: 13px; color: #aaa; margin-top: 32px;">VarTracker · vartracker.com</p>
         </body>
       </html>

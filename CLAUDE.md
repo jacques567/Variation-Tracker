@@ -10,6 +10,8 @@
 
 Do not proceed with edits until feature branch is created.
 
+**Also confirm the checkout itself isn't stale before relying on it.** This folder is what Vercel deploys from GitHub, not what's live — but it's still the reference point for "what does prod actually look like." Incident 2026-07-11: this checkout was found sitting on a leftover feature branch (`feature/wire-nextjs-middleware`) instead of `main`, missing 4 merged PRs. Before starting work or answering "is X live yet," run `git status` and confirm you're on `main` and `git pull` is clean — don't assume the folder is current.
+
 ---
 
 ## Git Workflow (SOP)
@@ -21,7 +23,7 @@ Do not proceed with edits until feature branch is created.
 3. **Test locally** — run `npm run test:e2e` to verify all tests pass
 4. **Push to GitHub** — `git push origin feature-branch`
 5. **Create PR** — `gh pr create` to propose merge to main
-6. **Review & merge** — GitHub Actions verifies tests pass, then merge
+6. **Review & merge** — GitHub Actions verifies tests pass; Jacques merges (Claude never merges without explicit approval)
 
 **Before pushing, always run:**
 ```bash

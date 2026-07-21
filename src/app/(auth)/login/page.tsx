@@ -34,14 +34,9 @@ function LoginForm() {
         return
       }
 
-      const { session } = await res.json()
-
-      // Check if user is admin
-      const adminRes = await fetch('/api/admin/check-admin', {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      })
+      // Check if user is admin — check-admin reads the session from cookies
+      // (already set by the login request above), no token needs to be passed.
+      const adminRes = await fetch('/api/admin/check-admin')
 
       const isAdmin = adminRes.ok
 

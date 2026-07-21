@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { extractClientIp } from '@/lib/csrf'
+import { Errors } from '@/lib/errors'
 
 const MAX_LOGIN_ATTEMPTS = 5
 const LOCKOUT_DURATION_MINUTES = 15
@@ -11,6 +14,16 @@ const LoginSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  // IP-based throttle — independent of the per-account lockout below. Stops
+  // credential stuffing across many different emails from one IP, and covers
+  // emails that don't match any contractor (the per-account lockout can't,
+  // since it only runs once a matching row is found).
+  const ip = extractClientIp(request.headers.get('x-forwarded-for'), request.headers.get('x-real-ip')) ?? 'unknown'
+  if (!(await checkRateLimit(`login:${ip}`, 10, 60_000))) {
+    const err = Errors.rateLimited()
+    return NextResponse.json(err.toJSON(), { status: err.statusCode })
+  }
+
   try {
     const body = await request.json()
     const { email, password } = LoginSchema.parse(body)
@@ -114,10 +127,13 @@ export async function POST(request: NextRequest) {
         .eq('id', contractor.id)
     }
 
+    // The real session already lives in httpOnly cookies (set by createClient()'s
+    // cookie adapter during signInWithPassword above). Don't also hand the raw
+    // access/refresh tokens back in the response body — that's a second exposure
+    // surface for no benefit, since nothing on the client needs them directly.
     return NextResponse.json({
       success: true,
-      session: data.session,
-      user: data.user,
+      user: data.user ? { id: data.user.id, email: data.user.email } : null,
     })
   } catch (error) {
     if (error instanceof z.ZodError) {

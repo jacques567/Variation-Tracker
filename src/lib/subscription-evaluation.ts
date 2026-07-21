@@ -7,11 +7,16 @@
  * Any change to trial/grace-period rules must be reflected in both places.
  */
 
-// BETA_MODE — set via env var for beta deployments. Does NOT bypass subscription
-// checks (evaluateSubscription/has_active_subscription() must stay the single
-// source of truth so RLS and the app always agree). Signup grants beta accounts a
-// long real trial instead (see src/app/api/auth/signup/route.ts); this flag is only
-// used for UI-only behavior (marketing redirects, hiding pricing/trial messaging).
+// BETA_MODE — set via env var, true only on the separate beta deployment
+// (beta-vartracker.vercel.app). The production domain (vartracker.com) never
+// sets this and serves a coming-soon landing page instead of the app.
+//
+// On the beta deployment, this intentionally DOES bypass the paywall — beta
+// testers get free reign with no subscription required (see the dashboard
+// layout's `!betaMode && !isValid` check). evaluateSubscription() /
+// has_active_subscription() remain the single source of truth for what
+// "valid" means when the paywall IS enforced (i.e. always, in production);
+// this flag only controls whether that gate applies at all.
 // Server-side: BETA_MODE. Client-side: NEXT_PUBLIC_BETA_MODE.
 export function isBetaMode(): boolean {
   return (

@@ -24,6 +24,7 @@ export default function SignatureForm({
   const [loading, setLoading] = useState(false)
   const [isEmpty, setIsEmpty] = useState(true)
   const [csrfToken, setCsrfToken] = useState<string | null>(null)
+  const [emailWarning, setEmailWarning] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchCsrfToken() {
@@ -76,11 +77,16 @@ export default function SignatureForm({
         }),
       })
 
+      const data = await res.json()
+
       if (!res.ok) {
-        const data = await res.json()
         setError(data.error || 'Failed to save signature. Please try again.')
         setLoading(false)
         return
+      }
+
+      if (data.emailWarning) {
+        setEmailWarning(data.emailWarning)
       }
 
       router.refresh()
@@ -133,6 +139,10 @@ export default function SignatureForm({
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+      )}
+
+      {emailWarning && (
+        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{emailWarning}</p>
       )}
 
       <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">

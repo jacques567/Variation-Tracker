@@ -23,6 +23,7 @@ export default function NewJobPage() {
     category: '',
     client_name: '',
     client_email: '',
+    client_email_confirm: '',
     client_phone: ''
   })
   const formRef = useRef<HTMLFormElement>(null)
@@ -74,6 +75,12 @@ export default function NewJobPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
+
+    if (formData.client_email.toLowerCase() !== formData.client_email_confirm.toLowerCase()) {
+      setError('Email addresses do not match')
+      return
+    }
+
     setLoading(true)
 
     const supabase = createClient()
@@ -180,19 +187,25 @@ export default function NewJobPage() {
               placeholder="John Smith" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Client email</label>
-              <input name="client_email" type="email" required value={formData.client_email} onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="john@example.com" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Client phone</label>
-              <input name="client_phone" type="tel" value={formData.client_phone} onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="07700 900000" />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Client email</label>
+            <input name="client_email" type="email" required value={formData.client_email} onChange={handleInputChange}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="john@example.com" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm client email</label>
+            <input name="client_email_confirm" type="email" required value={formData.client_email_confirm} onChange={handleInputChange}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="john@example.com" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Client phone</label>
+            <input name="client_phone" type="tel" value={formData.client_phone} onChange={handleInputChange}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="07700 900000" />
           </div>
 
           {error && (

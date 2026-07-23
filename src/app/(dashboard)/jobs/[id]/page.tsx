@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/utils'
 import VariationRow from '@/components/variations/VariationRow'
 import ExportInvoiceButton from '@/components/variations/ExportInvoiceButton'
 import type { Variation, Signature } from '@/types'
+import ClientEmailEdit from '@/components/jobs/ClientEmailEdit'
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -44,7 +45,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-0.5">{job.client_name} · {job.address}</p>
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span className="text-sm text-gray-500">{job.client_name}</span>
+            <span className="text-sm text-gray-300">·</span>
+            <ClientEmailEdit jobId={job.id} initialEmail={job.client_email} />
+            <span className="text-sm text-gray-300">·</span>
+            <span className="text-sm text-gray-500">{job.address}</span>
+          </div>
         </div>
         <ExportInvoiceButton jobId={job.id} jobName={job.job_name} />
       </div>

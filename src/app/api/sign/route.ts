@@ -20,10 +20,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { variationId, token, clientName, signatureData, csrfToken } = await request.json()
+    const { variationId, token, clientName, signatureData, csrfToken, declarationText } = await request.json()
 
     if (!variationId || !token || !clientName || !signatureData || !csrfToken) {
       const err = Errors.missingFields(['variationId', 'token', 'clientName', 'signatureData', 'csrfToken'])
+      return errorResponse(err)
+    }
+
+    // The declaration is the consent itself — it must be recorded verbatim.
+    // Refuse rather than store a signature with no provable wording.
+    if (typeof declarationText !== 'string' || declarationText.trim().length === 0) {
+      const err = Errors.missingFields(['declarationText'])
       return errorResponse(err)
     }
 
@@ -70,6 +77,8 @@ export async function POST(request: NextRequest) {
       p_client_name: clientName.trim(),
       p_signature_data: signatureData,
       p_client_ip: clientIp,
+      p_declaration_text: declarationText.trim().slice(0, 2000),
+      p_user_agent: request.headers.get('user-agent')?.slice(0, 500) ?? null,
     })
 
     if (error) {
@@ -81,6 +90,10 @@ export async function POST(request: NextRequest) {
     if (data?.error) {
       if (data.code === 'already_signed') {
         const err = Errors.conflict('Variation has already been signed')
+        return errorResponse(err)
+      }
+      if (data.code === 'content_mismatch') {
+        const err = Errors.conflict(data.error)
         return errorResponse(err)
       }
       if (data.code === 'not_found') {

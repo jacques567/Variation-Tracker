@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Share2, Check, ChevronUp, CheckCircle2 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import SignatureRecord from './SignatureRecord'
 import type { Variation, Signature } from '@/types'
 
 interface Props {
@@ -100,12 +101,6 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
             )}
           </div>
           <p className="text-xs text-gray-400 mt-1">{formatDate(variation.date)}</p>
-          {variation.signature && (
-            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Signed on {formatDate(variation.signature.signed_at)} by {variation.signature.client_name}
-            </p>
-          )}
         </div>
         <div className="flex items-start gap-2 shrink-0">
           {variation.photo_url && (
@@ -143,6 +138,10 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
             className="w-full rounded-lg object-contain bg-gray-50 max-h-64"
           />
         </div>
+      )}
+
+      {variation.signature && (
+        <SignatureRecord signature={variation.signature} variationId={variation.id} />
       )}
 
       {variation.status === 'draft' && (

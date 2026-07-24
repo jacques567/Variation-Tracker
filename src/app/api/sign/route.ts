@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send confirmation email to client (best-effort — don't fail the request if email fails)
+    let emailWarning: string | undefined
     try {
       const { data: variationDetails } = await supabase
         .from('variations')
@@ -111,12 +112,15 @@ export async function POST(request: NextRequest) {
           cost: variationDetails.cost,
           signedAt: new Date().toISOString(),
         })
+      } else {
+        emailWarning = 'No client email on file — confirmation not sent.'
       }
     } catch (emailError) {
       console.error('Signature confirmation email failed:', emailError)
+      emailWarning = 'Confirmation email could not be sent. The contractor has been notified.'
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, ...(emailWarning ? { emailWarning } : {}) })
   } catch (error) {
     console.error('Signature submission error:', error)
     return errorResponse(error)

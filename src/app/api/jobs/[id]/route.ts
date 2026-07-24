@@ -12,6 +12,56 @@ function errorResponse(err: unknown) {
 }
 
 /**
+ * PATCH /api/jobs/[id]
+ *
+ * Updates editable job fields. Currently supports: client_email.
+ * Only the authenticated contractor who owns the job may update it.
+ */
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id: jobId } = await params
+
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(Errors.unauthorized().toJSON(), { status: 401 })
+    }
+
+    const body = await request.json()
+    const { client_email } = body
+
+    if (!client_email || typeof client_email !== 'string') {
+      return NextResponse.json(Errors.missingFields(['client_email']).toJSON(), { status: 400 })
+    }
+
+    // Basic email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client_email)) {
+      return NextResponse.json(Errors.invalidInput('Invalid email address').toJSON(), { status: 400 })
+    }
+
+    const { error: updateError } = await supabase
+      .from('jobs')
+      .update({ client_email: client_email.trim().toLowerCase() })
+      .eq('id', jobId)
+      .eq('contractor_id', user.id)
+
+    if (updateError) {
+      console.error('Job update error:', updateError)
+      return NextResponse.json(Errors.databaseError().toJSON(), { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Job patch error:', error)
+    return NextResponse.json(Errors.internalError().toJSON(), { status: 500 })
+  }
+}
+
+/**
  * DELETE /api/jobs/[id]
  *
  * Deletes a job and all associated data:

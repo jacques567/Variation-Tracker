@@ -120,6 +120,7 @@ export default function SignatureForm({
               height: 160,
             }}
             backgroundColor="transparent"
+            clearOnResize={false}
             onBegin={() => setIsEmpty(false)}
             onEnd={() => {
               if (sigRef.current && !sigRef.current.isEmpty()) {

@@ -9,6 +9,24 @@ function fmtDate(d: string) {
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(d))
 }
 
+// Mirrors formatDateTime() in src/lib/utils.ts — the timestamp shown in-app and
+// the one printed on this record must be the same moment in the same timezone.
+function fmtDateTime(d: string) {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+    timeZone: 'Europe/London',
+    timeZoneName: 'short',
+  })
+    .format(new Date(d))
+    .replace(', ', ' at ')
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function VariationPDF({ variation }: { variation: any }) {
   const contractor = variation.job?.contractor
@@ -76,17 +94,27 @@ export function VariationPDF({ variation }: { variation: any }) {
         {signature && (
           <>
             <View style={styles.divider} />
-            <View style={{ marginBottom: 16 }}>
+            <View style={{ marginBottom: 16 }} wrap={false}>
               <Text style={styles.sectionTitle}>Client Sign-off</Text>
               <View style={[styles.row, { marginTop: 8 }]}>
-                <View>
+                <View style={{ flex: 1, paddingRight: 12 }}>
                   <Text style={styles.label}>Signed by</Text>
-                  <Text style={styles.value}>{signature.client_name}</Text>
-                  <Text style={styles.label}>Date signed</Text>
-                  <Text style={styles.value}>{fmtDate(signature.signed_at)}</Text>
+                  <Text style={[styles.value, { marginBottom: 6 }]}>{signature.client_name}</Text>
+
+                  <Text style={styles.label}>Signed at</Text>
+                  <Text style={[styles.value, { marginBottom: 6 }]}>{fmtDateTime(signature.signed_at)}</Text>
+
+                  <Text style={styles.label}>Variation ref</Text>
+                  <Text style={[styles.value, { marginBottom: 6 }]}>{variation.id.slice(0, 8).toUpperCase()}</Text>
+
+                  <Text style={styles.label}>Signed from IP</Text>
+                  <Text style={styles.value}>{signature.client_ip || 'Not recorded'}</Text>
                 </View>
-                <View style={{ width: 160, height: 64, backgroundColor: colors.gray100, borderRadius: 6, padding: 4 }}>
-                  <Image src={signature.signature_data} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <View style={{ width: 170 }}>
+                  <Text style={[styles.label, { textAlign: 'center' }]}>Client signature</Text>
+                  <View style={{ height: 70, backgroundColor: colors.gray100, borderRadius: 6, padding: 4, marginTop: 2 }}>
+                    <Image src={signature.signature_data} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  </View>
                 </View>
               </View>
             </View>

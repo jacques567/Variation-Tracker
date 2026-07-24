@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Plus, CheckCircle, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import JobCard from '@/components/jobs/JobCard'
-import { PaymentWarning } from '@/components/PaymentWarning'
+import PaymentWarning from '@/components/ui/PaymentWarning'
 import type { JobCategory } from '@/types'
 
 interface Contractor {
@@ -23,6 +23,7 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<any[]>([])
   const [categories, setCategories] = useState<JobCategory[]>([])
   const [contractor, setContractor] = useState<Contractor | null>(null)
+  const [gracePeriodDaysRemaining, setGracePeriodDaysRemaining] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [uncategorizedCount, setUncategorizedCount] = useState(0)
   const [showSubscribedBanner, setShowSubscribedBanner] = useState(justSubscribed)
@@ -56,6 +57,10 @@ export default function JobsPage() {
         .order('name', { ascending: true })
 
       setContractor(contractorData)
+      if (contractorData?.grace_period_expires_at) {
+        const expires = new Date(contractorData.grace_period_expires_at).getTime()
+        setGracePeriodDaysRemaining(Math.ceil((expires - Date.now()) / 86400000))
+      }
       setJobs(allJobs || [])
       setCategories(cats || [])
 
@@ -127,8 +132,8 @@ export default function JobsPage() {
 
       {/* Payment warning */}
       <PaymentWarning
-        status={contractor?.subscription_status}
-        gracePeriodExpiresAt={contractor?.grace_period_expires_at}
+        subscriptionStatus={contractor?.subscription_status ?? null}
+        daysRemaining={gracePeriodDaysRemaining}
       />
 
       {/* Category filter tabs */}

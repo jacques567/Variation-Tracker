@@ -134,6 +134,10 @@ jobs:
           STRIPE_PRICE_ID: ${{ secrets.STRIPE_PRICE_ID || 'price_placeholder' }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL || 'https://vartracker.com' }}
           CSRF_SECRET: ${{ secrets.CSRF_SECRET || 'placeholder_csrf_secret_32chars_xx' }}
+          # The test suite exercises login/register/forgot-password/admin/dashboard —
+          # routes that only exist on the beta deployment now that (auth)/layout.tsx
+          # redirects to the coming-soon page when beta mode is off.
+          NEXT_PUBLIC_BETA_MODE: 'true'
 
       - name: Upload test results
         if: always()

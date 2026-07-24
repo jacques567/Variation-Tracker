@@ -13,10 +13,13 @@ test.describe('Authentication', () => {
     await expect(page.locator('text=Create your account')).toBeVisible();
   });
 
-  test('root shows landing page', async ({ page }) => {
+  // CI runs with NEXT_PUBLIC_BETA_MODE=true (the beta site config) since that's the
+  // only deployment with a functional app to test — production is a static
+  // coming-soon page. In beta mode, root redirects unauthenticated visitors to
+  // /login instead of showing the coming-soon landing page.
+  test('root redirects unauthenticated visitors to login (beta mode)', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveURL('/');
-    await expect(page.locator('text=Coming Soon')).toBeVisible();
+    await expect(page).toHaveURL('/login');
   });
 
   test('login form has required fields', async ({ page }) => {

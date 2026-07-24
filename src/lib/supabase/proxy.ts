@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/database'
-import { evaluateSubscription } from '@/lib/subscription-guard'
+import { evaluateSubscription, isBetaMode } from '@/lib/subscription-guard'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -64,7 +64,11 @@ export async function updateSession(request: NextRequest) {
 
   // Subscription paywall — gate dashboard pages when the user has no valid sub.
   // /subscribe and /admin are exempt (subscribe lets them pay; admin is a separate gate).
+  // Beta deployments (NEXT_PUBLIC_BETA_MODE) have no paywall at all — must match
+  // the same bypass in (dashboard)/layout.tsx, or beta testers get redirected here
+  // before the layout's bypass ever runs.
   if (
+    !isBetaMode() &&
     user &&
     !isAuthRoute &&
     !isPublicRoute &&

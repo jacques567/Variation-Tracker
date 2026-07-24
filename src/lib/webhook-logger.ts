@@ -12,13 +12,6 @@ interface WebhookLog {
   logged_at: string
 }
 
-function adminClient() {
-  return createSupabaseAdmin(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
-
 export async function logWebhookEvent(
   event: Stripe.Event,
   status: 'success' | 'failed',
@@ -29,7 +22,10 @@ export async function logWebhookEvent(
     const customerId = subscription?.customer as string | undefined
     const subscriptionId = subscription?.id
 
-    const supabase = adminClient()
+    const supabase = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     const log: WebhookLog = {
       event_type: event.type,
@@ -49,50 +45,5 @@ export async function logWebhookEvent(
     }
   } catch (error) {
     console.error('Webhook logging error:', error)
-  }
-}
-
-export async function getWebhookLogs(
-  hours: number = 24,
-  status?: 'success' | 'failed'
-) {
-  try {
-    const supabase = adminClient()
-    const since = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString()
-
-    let query = supabase
-      .from('stripe_webhook_logs')
-      .select('*')
-      .gte('logged_at', since)
-      .order('logged_at', { ascending: false })
-
-    if (status) {
-      query = query.eq('status', status)
-    }
-
-    const { data, error } = await query
-    if (error) throw error
-    return data || []
-  } catch (error) {
-    console.error('Error fetching webhook logs:', error)
-    return []
-  }
-}
-
-export async function pruneWebhookLogs(days: number = 30): Promise<void> {
-  try {
-    const supabase = adminClient()
-    const before = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
-
-    const { error } = await supabase
-      .from('stripe_webhook_logs')
-      .delete()
-      .lt('logged_at', before)
-
-    if (error) {
-      console.error('Failed to prune webhook logs:', error)
-    }
-  } catch (error) {
-    console.error('Webhook log pruning error:', error)
   }
 }

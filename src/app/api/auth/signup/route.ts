@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { extractClientIp } from '@/lib/csrf'
+import { isBetaMode } from '@/lib/subscription-evaluation'
 
 const SignupSchema = z.object({
   email: z.string().email('Invalid email format').toLowerCase(),
@@ -76,12 +77,18 @@ export async function POST(request: NextRequest) {
 
     console.log('User created successfully:', { userId: data.user.id })
 
-    // Auto-enroll a 7-day trial. Stripe webhooks override this if the user pays.
+    // Auto-enroll a trial. Stripe webhooks override this if the user pays.
     // Use service-role client + upsert: subscription/trial columns are read-only to the
     // authenticated role (migration 014), and the handle_new_user trigger may have
     // already inserted a row with default values that we need to update.
+    //
+    // During beta, grant a long trial window instead of maintaining a separate
+    // bypass path in evaluateSubscription()/has_active_subscription() — this keeps
+    // a single source of truth (real contractor data) for both the app and RLS.
+    // Retiring beta is then just deleting this one branch; no RLS/SQL changes needed.
+    const trialDays = isBetaMode() ? 365 : 7
     const trialEndsAt = new Date()
-    trialEndsAt.setDate(trialEndsAt.getDate() + 7)
+    trialEndsAt.setDate(trialEndsAt.getDate() + trialDays)
 
     const supabaseService = await createServiceRoleClient()
     const { error: createError } = await supabaseService

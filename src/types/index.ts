@@ -54,6 +54,8 @@ export interface Variation {
   created_at: string
   updated_at: string
   signature_token_expires_at?: string | null
+  expiry_reminder_sent_at?: string | null
+  expiry_notice_sent_at?: string | null
   signature?: Signature | null
   job?: Job
 }

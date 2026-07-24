@@ -7,7 +7,16 @@
  * Any change to trial/grace-period rules must be reflected in both places.
  */
 
-// BETA_MODE bypasses all subscription checks — set via env var for beta deployments.
+// BETA_MODE — set via env var, true only on the separate beta deployment
+// (beta-vartracker.vercel.app). The production domain (vartracker.com) never
+// sets this and serves a coming-soon landing page instead of the app.
+//
+// On the beta deployment, this intentionally DOES bypass the paywall — beta
+// testers get free reign with no subscription required (see the dashboard
+// layout's `!betaMode && !isValid` check). evaluateSubscription() /
+// has_active_subscription() remain the single source of truth for what
+// "valid" means when the paywall IS enforced (i.e. always, in production);
+// this flag only controls whether that gate applies at all.
 // Server-side: BETA_MODE. Client-side: NEXT_PUBLIC_BETA_MODE.
 export function isBetaMode(): boolean {
   return (
@@ -28,22 +37,16 @@ export interface SubscriptionStatus {
   reason?: string
 }
 
-const ACTIVE_STATUSES = ['active']
-
 export function evaluateSubscription(
   contractor: ContractorSubscriptionRow | null
 ): SubscriptionStatus {
-  if (isBetaMode()) {
-    return { isValid: true, status: 'active' }
-  }
-
   if (!contractor) {
     return { isValid: false, status: null, reason: 'Contractor not found' }
   }
 
   const status = contractor.subscription_status || 'none'
 
-  if (ACTIVE_STATUSES.includes(status)) {
+  if (status === 'active') {
     return { isValid: true, status }
   }
 

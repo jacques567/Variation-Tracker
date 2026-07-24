@@ -209,6 +209,8 @@ export type Database = {
           created_at: string
           date: string
           description: string
+          expiry_notice_sent_at: string | null
+          expiry_reminder_sent_at: string | null
           id: string
           job_id: string
           photo_url: string | null
@@ -222,6 +224,8 @@ export type Database = {
           created_at?: string
           date?: string
           description: string
+          expiry_notice_sent_at?: string | null
+          expiry_reminder_sent_at?: string | null
           id?: string
           job_id: string
           photo_url?: string | null
@@ -235,6 +239,8 @@ export type Database = {
           created_at?: string
           date?: string
           description?: string
+          expiry_notice_sent_at?: string | null
+          expiry_reminder_sent_at?: string | null
           id?: string
           job_id?: string
           photo_url?: string | null

@@ -118,6 +118,99 @@ export interface VariationExpiryParams {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://vartracker.com'
 
+export interface VariationSignedParams {
+  contractorEmail: string
+  jobId: string
+  jobName: string
+  address: string
+  description: string
+  cost: number // in pence
+  signerName: string
+  signedAt: string
+}
+
+/**
+ * Sent to the contractor the moment their client signs a variation.
+ *
+ * Unlike the other senders in this file, this one RETURNS whether the send
+ * succeeded instead of only logging. Callers use that to decide whether to stamp
+ * variations.signed_notice_sent_at — marking a failed send as sent would drop the
+ * notification permanently, since the reconciliation cron only retries rows where
+ * that column is still null.
+ */
+export async function sendVariationSignedNotice(params: VariationSignedParams): Promise<boolean> {
+  const { contractorEmail, jobId, jobName, address, description, cost, signerName, signedAt } = params
+
+  try {
+    const resend = getResendClient()
+    const safeJobName     = escapeHtml(jobName)
+    const safeDescription = escapeHtml(description)
+    const safeAddress     = escapeHtml(address)
+    const safeCost        = escapeHtml(formatCurrency(cost))
+    const safeSignerName  = escapeHtml(signerName)
+    const safeSignedAt    = escapeHtml(formatDate(signedAt))
+
+    const { error } = await resend.emails.send({
+      from: FROM_ADDRESS,
+      to: contractorEmail,
+      subject: `Signed: ${formatCurrency(cost)} variation on "${jobName}"`, // plain text — do not HTML-escape
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="font-family: sans-serif; color: #111; max-width: 560px; margin: 0 auto; padding: 32px 16px;">
+            <p style="font-size: 14px; color: #16a34a; margin-bottom: 4px;">Variation signed</p>
+            <h1 style="font-size: 20px; margin: 0 0 24px;">${safeJobName}</h1>
+
+            <p style="font-size: 15px;">
+              <strong>${safeSignerName}</strong> signed off on this variation on ${safeSignedAt}.
+              It now counts towards the job's running total.
+            </p>
+
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin: 24px 0;">
+              <p style="margin: 0 0 8px; font-size: 13px; color: #666;">Description of work</p>
+              <p style="margin: 0 0 16px; font-size: 15px; font-weight: 500;">${safeDescription}</p>
+
+              <hr style="border: none; border-top: 1px solid #bbf7d0; margin: 16px 0;">
+
+              <table style="width: 100%; font-size: 14px;">
+                <tr>
+                  <td style="color: #666;">Site address</td>
+                  <td style="text-align: right;">${safeAddress}</td>
+                </tr>
+                <tr>
+                  <td style="color: #666; padding-top: 8px;">Additional cost</td>
+                  <td style="text-align: right; padding-top: 8px; font-weight: 700; font-size: 18px;">${safeCost}</td>
+                </tr>
+                <tr>
+                  <td style="color: #666; padding-top: 8px;">Signed by</td>
+                  <td style="text-align: right; padding-top: 8px;">${safeSignerName}</td>
+                </tr>
+              </table>
+            </div>
+
+            <p style="font-size: 13px;"><a href="${APP_URL}/jobs/${encodeURIComponent(jobId)}" style="color: #2563eb;">View this job in VarTracker →</a></p>
+            <p style="font-size: 13px; color: #aaa; margin-top: 32px;">VarTracker · vartracker.com</p>
+          </body>
+        </html>
+      `,
+    })
+
+    if (error) {
+      console.error('Failed to send variation signed notice email:', error)
+      return false
+    }
+
+    return true
+  } catch (err) {
+    // Covers a missing RESEND_API_KEY and any network-level throw. Never rethrow —
+    // the caller is either finishing a successful signature or mid-sweep over a
+    // batch, and neither should be aborted by one failed email.
+    console.error('Failed to send variation signed notice email:', err)
+    return false
+  }
+}
+
 /** Sent ~2 days before a signing link expires, so the contractor can chase the client. */
 export async function sendVariationExpiryReminder(params: VariationExpiryParams) {
   const { contractorEmail, jobName, address, description, cost, expiresAt } = params

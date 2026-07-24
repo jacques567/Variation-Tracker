@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
 import VariationRow from '@/components/variations/VariationRow'
 import ExportInvoiceButton from '@/components/variations/ExportInvoiceButton'
+import VariationsLiveUpdater from '@/components/variations/VariationsLiveUpdater'
 import type { Variation, Signature } from '@/types'
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,6 +36,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
   return (
     <div>
+      {/* Flips a variation to Signed the moment the client signs, without a reload */}
+      <VariationsLiveUpdater jobId={id} />
+
       <Link href="/jobs" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6">
         <ArrowLeft className="w-4 h-4" /> All jobs
       </Link>

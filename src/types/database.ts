@@ -216,6 +216,7 @@ export type Database = {
           photo_url: string | null
           signature_token: string
           signature_token_expires_at: string | null
+          signed_notice_sent_at: string | null
           status: string
           updated_at: string
         }
@@ -231,6 +232,7 @@ export type Database = {
           photo_url?: string | null
           signature_token?: string
           signature_token_expires_at?: string | null
+          signed_notice_sent_at?: string | null
           status?: string
           updated_at?: string
         }
@@ -246,6 +248,7 @@ export type Database = {
           photo_url?: string | null
           signature_token?: string
           signature_token_expires_at?: string | null
+          signed_notice_sent_at?: string | null
           status?: string
           updated_at?: string
         }

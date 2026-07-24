@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
 import { Errors } from '@/lib/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { sendSignatureConfirmation } from '@/lib/email'
+import { sendSignatureConfirmation, sendVariationSignedNotice } from '@/lib/email'
 
 function errorResponse(err: unknown) {
   if (err instanceof Error && 'statusCode' in err && typeof err.statusCode === 'number') {
@@ -91,16 +91,29 @@ export async function POST(request: NextRequest) {
       return errorResponse(err)
     }
 
-    // Send confirmation email to client (best-effort — don't fail the request if email fails)
+    // ── Notifications ─────────────────────────────────────────────────────────
+    // The signature is already committed at this point. Everything below is
+    // best-effort: the client's browser must get a success response even if every
+    // email provider is down. The two sends are wrapped separately so a failure in
+    // one cannot skip the other.
+    const signedAt = new Date().toISOString()
+
+    const { data: variationDetails } = await supabase
+      .from('variations')
+      .select('description, cost, date, job_id, job:jobs(job_name, address, client_email, client_name, contractor:contractors(email))')
+      .eq('id', variationId)
+      .single()
+
+    const job = variationDetails?.job as unknown as {
+      job_name: string
+      address: string
+      client_email: string
+      client_name: string
+      contractor: { email: string } | null
+    } | null
+
+    // 1. Confirmation to the client who just signed.
     try {
-      const { data: variationDetails } = await supabase
-        .from('variations')
-        .select('description, cost, date, job:jobs(job_name, address, client_email, client_name)')
-        .eq('id', variationId)
-        .single()
-
-      const job = variationDetails?.job as unknown as { job_name: string; address: string; client_email: string; client_name: string } | null
-
       if (variationDetails && job?.client_email) {
         await sendSignatureConfirmation({
           clientEmail: job.client_email,
@@ -109,11 +122,42 @@ export async function POST(request: NextRequest) {
           address: job.address,
           description: variationDetails.description,
           cost: variationDetails.cost,
-          signedAt: new Date().toISOString(),
+          signedAt,
         })
       }
     } catch (emailError) {
       console.error('Signature confirmation email failed:', emailError)
+    }
+
+    // 2. Notification to the contractor that their variation was signed.
+    // signed_notice_sent_at is only stamped on a confirmed send — if this fails,
+    // the row stays null and the daily cron picks it up (see 020 migration).
+    try {
+      const contractorEmail = job?.contractor?.email
+
+      if (variationDetails && job && contractorEmail) {
+        const sent = await sendVariationSignedNotice({
+          contractorEmail,
+          jobId: variationDetails.job_id,
+          jobName: job.job_name,
+          address: job.address,
+          description: variationDetails.description,
+          cost: variationDetails.cost,
+          signerName: clientName.trim(),
+          signedAt,
+        })
+
+        if (sent) {
+          await supabase
+            .from('variations')
+            .update({ signed_notice_sent_at: signedAt })
+            .eq('id', variationId)
+        }
+      } else {
+        console.warn('[sign] no contractor email on file — signed notice deferred to cron', { variationId })
+      }
+    } catch (notifyError) {
+      console.error('Contractor signed-notice failed:', notifyError)
     }
 
     return NextResponse.json({ success: true })

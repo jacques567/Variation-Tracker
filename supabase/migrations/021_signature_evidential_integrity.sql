@@ -1,10 +1,8 @@
 -- Signature evidential integrity
 --
--- Addresses four defects in the e-signature evidence bundle:
---
---   1. Signed variations remained editable. The contractor UPDATE policy had no
---      status check, so description/cost/date could change after signing with
---      nothing in the record to contradict "that's not what I signed".
+-- Addresses three defects in the e-signature evidence bundle. A fourth —
+-- signed variations remaining editable — was fixed by 019_lock_signed_variations.sql
+-- while this branch was open; see section 2 below.
 --
 --   2. The declaration shown to the client ("I authorise this variation and the
 --      additional cost of £X") was rendered client-side only and never stored,
@@ -41,42 +39,17 @@ COMMENT ON COLUMN public.signatures.content_hash IS
   'SHA-256 of variation id|description|cost|date at signing time. Recomputable to detect post-signing edits.';
 
 
--- ─── 2. LOCK SIGNED VARIATIONS ──────────────────────────────────────────────
--- Replaces the update policy from 016. Contractors keep full control of
--- draft/sent variations; once status = 'signed' the row is frozen at the RLS
--- layer. Corrections after signing must be issued as a new variation — which
--- is the correct contractual behaviour anyway.
-
-DROP POLICY IF EXISTS "Contractors can update own variations" ON public.variations;
-
-CREATE POLICY "Contractors can update own unsigned variations"
-  on public.variations for update
-  using (
-    status <> 'signed'
-    AND auth.uid() = (
-      select contractor_id from public.jobs where id = job_id
-    )
-  )
-  with check (
-    status <> 'signed'
-    AND auth.uid() = (
-      select contractor_id from public.jobs where id = job_id
-    )
-  );
-
--- Deleting a signed variation would destroy the evidence bundle just as
--- effectively as editing it.
-DROP POLICY IF EXISTS "Contractors can delete own variations" ON public.variations;
-
-CREATE POLICY "Contractors can delete own unsigned variations"
-  on public.variations for delete
-  using (
-    status <> 'signed'
-    AND auth.uid() = (
-      select contractor_id from public.jobs where id = job_id
-    )
-  );
-
+-- ─── 2. LOCK SIGNED VARIATIONS — ALREADY DONE ───────────────────────────────
+-- Defect 1 was fixed independently by 019_lock_signed_variations.sql while this
+-- branch was open. That migration is the authority; nothing is redefined here,
+-- because two migrations dropping and recreating the same policy would make the
+-- final state depend on apply order.
+--
+-- 019 additionally blocks flipping status to 'signed' by hand in its WITH CHECK,
+-- which this branch's version did not, and documents the remaining cascade-delete
+-- gap (deleting a parent job still removes signed variations — left open
+-- deliberately, since blocking it collides with the GDPR right to erasure).
+--
 -- Signatures are append-only. Nothing in the application updates or deletes
 -- them; absent policies mean RLS denies both for anon and authenticated roles.
 

@@ -27,13 +27,6 @@ export async function POST(request: NextRequest) {
       return errorResponse(err)
     }
 
-    // The declaration is the consent itself — it must be recorded verbatim.
-    // Refuse rather than store a signature with no provable wording.
-    if (typeof declarationText !== 'string' || declarationText.trim().length === 0) {
-      const err = Errors.missingFields(['declarationText'])
-      return errorResponse(err)
-    }
-
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -42,6 +35,18 @@ export async function POST(request: NextRequest) {
     const isValidCsrf = await verifyCsrfToken(supabase, csrfToken)
     if (!isValidCsrf) {
       const err = Errors.invalidToken()
+      return errorResponse(err)
+    }
+
+    // Checked after CSRF, not with the other required fields above: an
+    // unauthenticated caller must get 403 for the bad token, not a 400 that
+    // tells them which fields the endpoint wants. Payload shape is only worth
+    // validating once the request has earned the right to be processed.
+    //
+    // The declaration is the consent itself — refuse rather than store a
+    // signature whose wording cannot later be produced in evidence.
+    if (typeof declarationText !== 'string' || declarationText.trim().length === 0) {
+      const err = Errors.missingFields(['declarationText'])
       return errorResponse(err)
     }
 

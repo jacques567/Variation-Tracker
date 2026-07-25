@@ -94,23 +94,38 @@ export async function POST(request: NextRequest) {
     // ── Notifications ─────────────────────────────────────────────────────────
     // The signature is already committed at this point. Everything below is
     // best-effort: the client's browser must get a success response even if every
-    // email provider is down. The two sends are wrapped separately so a failure in
-    // one cannot skip the other.
+    // email provider is down. Each step is wrapped separately so one failure
+    // cannot skip the others.
     const signedAt = new Date().toISOString()
+    let emailWarning: string | undefined
 
-    const { data: variationDetails } = await supabase
-      .from('variations')
-      .select('description, cost, date, job_id, job:jobs(job_name, address, client_email, client_name, contractor:contractors(email))')
-      .eq('id', variationId)
-      .single()
-
-    const job = variationDetails?.job as unknown as {
+    type SignedJob = {
       job_name: string
       address: string
       client_email: string
       client_name: string
       contractor: { email: string } | null
-    } | null
+    }
+
+    let variationDetails: { description: string; cost: number; job_id: string } | null = null
+    let job: SignedJob | null = null
+
+    // Fetched once and shared by both emails. Wrapped in its own try: the signature
+    // has already committed, so a failure loading these details must degrade to a
+    // warning, never a 500 that tells the client their signature didn't take.
+    try {
+      const { data: details } = await supabase
+        .from('variations')
+        .select('description, cost, date, job_id, job:jobs(job_name, address, client_email, client_name, contractor:contractors(email))')
+        .eq('id', variationId)
+        .single()
+
+      variationDetails = details
+      job = (details?.job ?? null) as unknown as SignedJob | null
+    } catch (fetchError) {
+      console.error('[sign] failed to load variation details for notifications:', fetchError)
+      emailWarning = 'Confirmation email could not be sent. The contractor has been notified.'
+    }
 
     // 1. Confirmation to the client who just signed.
     try {
@@ -124,12 +139,18 @@ export async function POST(request: NextRequest) {
           cost: variationDetails.cost,
           signedAt,
         })
+      } else if (!emailWarning) {
+        // Guarded so a failed details fetch keeps its own, accurate message rather
+        // than being relabelled as "no client email on file".
+        emailWarning = 'No client email on file — confirmation not sent.'
       }
     } catch (emailError) {
       console.error('Signature confirmation email failed:', emailError)
+      emailWarning = 'Confirmation email could not be sent. The contractor has been notified.'
     }
 
-    // 2. Notification to the contractor that their variation was signed.
+    // 2. Notification to the contractor that their variation was signed. This is
+    // what makes the warning above's "the contractor has been notified" true.
     // signed_notice_sent_at is only stamped on a confirmed send — if this fails,
     // the row stays null and the daily cron picks it up (see 020 migration).
     try {
@@ -160,7 +181,7 @@ export async function POST(request: NextRequest) {
       console.error('Contractor signed-notice failed:', notifyError)
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, ...(emailWarning ? { emailWarning } : {}) })
   } catch (error) {
     console.error('Signature submission error:', error)
     return errorResponse(error)

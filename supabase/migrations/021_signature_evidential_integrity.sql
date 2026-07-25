@@ -135,8 +135,8 @@ CREATE OR REPLACE FUNCTION public.sign_variation(
   p_client_name     text,
   p_signature_data  text,
   p_client_ip       inet,
-  p_declaration_text text DEFAULT NULL,
-  p_user_agent      text DEFAULT NULL
+  p_declaration_text text,
+  p_user_agent      text
 )
 RETURNS jsonb AS $$
 DECLARE
@@ -159,10 +159,17 @@ BEGIN
   -- The declaration states the cost. If the client's browser rendered a cost
   -- that no longer matches the row we are about to sign, the variation changed
   -- underneath them — refuse rather than record a consent to the wrong figure.
+  -- The declaration is the consent. A signature without it is not worth
+  -- storing, so this is a hard rejection rather than a nullable column.
+  IF p_declaration_text IS NULL OR btrim(p_declaration_text) = '' THEN
+    RETURN jsonb_build_object(
+      'error', 'Declaration text is required', 'code', 'missing_declaration'
+    );
+  END IF;
+
   -- Commas are stripped first: the client renders "£1,234.00" but cost is
   -- stored in pence, so the comparison is made on the ungrouped decimal form.
-  IF p_declaration_text IS NOT NULL
-     AND position(
+  IF position(
            to_char(v_variation.cost / 100.0, 'FM999999990.00')
            IN replace(p_declaration_text, ',', '')
          ) = 0 THEN

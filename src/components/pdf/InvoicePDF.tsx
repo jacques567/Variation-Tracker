@@ -1,34 +1,17 @@
 import { Document, Page, Text, View, Image } from '@react-pdf/renderer'
 import { styles, colors } from './styles'
+import {
+  formatCurrency as fmt,
+  formatDateTime as fmtDateTime,
+  formatReference as ref,
+} from '@/lib/utils'
 
-function fmt(pence: number) {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(pence / 100)
-}
-
+// Line-item dates use an abbreviated month to keep the table narrow — the only
+// place that differs from formatDate(). Signature timestamps deliberately do
+// not: those come from formatDateTime() so the printed record and the on-screen
+// record are always the same string.
 function fmtDate(d: string) {
   return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(d))
-}
-
-// Mirrors formatDateTime() in src/lib/utils.ts — the timestamp shown in-app and
-// the one printed on the invoice must be the same moment in the same timezone.
-function fmtDateTime(d: string) {
-  return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    timeZone: 'Europe/London',
-    timeZoneName: 'short',
-  })
-    .format(new Date(d))
-    .replace(', ', ' at ')
-}
-
-function ref(id: string) {
-  return id.slice(0, 8).toUpperCase()
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

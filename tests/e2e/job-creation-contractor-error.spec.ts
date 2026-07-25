@@ -24,6 +24,14 @@ test.describe('Job creation — contractor lookup failure', () => {
     const signupRes = await page.context().request.post(`${baseURL}/api/auth/signup`, {
       data: { email, password, full_name: 'Contractor Error Test' },
     })
+    // Signup is rate-limited to 5/hour/IP (src/app/api/auth/signup/route.ts).
+    // Other specs in this suite also create real accounts, so on a shared CI
+    // runner IP this can legitimately run dry — skip rather than flake red,
+    // consistent with how auth-gated tests elsewhere in this suite are marked
+    // BLOCKED when a real session can't be established (see postcode-lookup.spec.ts).
+    if (signupRes.status() === 429) {
+      test.skip(true, 'Signup rate-limited (5/hour/IP) — likely exhausted by other specs in this run')
+    }
     expect(signupRes.ok()).toBeTruthy()
 
     // Force the contractor subscription lookup to fail once we're past
@@ -49,10 +57,14 @@ test.describe('Job creation — contractor lookup failure', () => {
     await page.locator('input[name="client_name"]').fill('Test Client')
     await page.locator('input[name="client_email"]').fill('client@example.com')
 
-    await page.locator('button[type="submit"]').click()
+    const [contractorResponse] = await Promise.all([
+      page.waitForResponse(res => res.url().includes('/rest/v1/contractors') && res.request().method() === 'GET'),
+      page.locator('button[type="submit"]').click(),
+    ])
+    expect(contractorResponse.status()).toBe(500)
 
     const errorBanner = page.locator('p.bg-red-50', { hasText: 'Unable to verify your account right now' })
-    await expect(errorBanner).toBeVisible()
+    await expect(errorBanner).toBeVisible({ timeout: 10000 })
     await expect(page.locator('p.bg-red-50')).not.toContainText('Contractor not found')
   })
 })

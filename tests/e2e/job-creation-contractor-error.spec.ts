@@ -37,8 +37,10 @@ test.describe('Job creation — contractor lookup failure', () => {
 
     // Force the contractor subscription lookup to fail once we're past
     // login, so we exercise the new error branch rather than the happy path.
+    let contractorRouteHits = 0
     await page.route('**/rest/v1/contractors*', route => {
       if (route.request().method() === 'GET') {
+        contractorRouteHits++
         return route.fulfill({
           status: 500,
           contentType: 'application/json',
@@ -46,6 +48,16 @@ test.describe('Job creation — contractor lookup failure', () => {
         })
       }
       return route.continue()
+    })
+    page.on('request', req => {
+      if (req.url().includes('/rest/v1/contractors')) {
+        console.log(`DEBUG contractors request: ${req.method()} ${req.url()}`)
+      }
+    })
+    page.on('response', res => {
+      if (res.url().includes('/rest/v1/contractors')) {
+        console.log(`DEBUG contractors response: ${res.status()} ${res.url()}`)
+      }
     })
 
     await page.goto('/jobs/new')
@@ -63,7 +75,12 @@ test.describe('Job creation — contractor lookup failure', () => {
     // Generous timeout: CI runners are slower than local dev, and this is
     // waiting on a real round trip to production Supabase before the UI updates.
     const errorBanner = page.locator('p.bg-red-50', { hasText: 'Unable to verify your account right now' })
-    await expect(errorBanner).toBeVisible({ timeout: 20000 })
+    try {
+      await expect(errorBanner).toBeVisible({ timeout: 20000 })
+    } catch (e) {
+      console.log(`DEBUG contractorRouteHits=${contractorRouteHits} finalUrl=${page.url()}`)
+      throw e
+    }
     await expect(page.locator('p.bg-red-50')).not.toContainText('Contractor not found')
   })
 })

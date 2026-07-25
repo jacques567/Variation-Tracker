@@ -63,12 +63,32 @@ test.describe('Job creation — contractor lookup failure', () => {
     await page.goto('/jobs/new')
     await page.waitForLoadState('networkidle')
 
-    await page.locator('input[name="job_name"]').fill('Test Job')
-    await page.getByText('or enter address manually').click()
-    await page.getByPlaceholder('14 Maple Street, Manchester, M1 1AB').fill('14 Maple Street, Manchester, M1 1AB')
-    await page.locator('input[name="original_value"]').fill('5000')
-    await page.locator('input[name="client_name"]').fill('Test Client')
-    await page.locator('input[name="client_email"]').fill('client@example.com')
+    // Fill + verify each field explicitly (instead of fire-and-forget fills)
+    // so that if CI's slower rendering drops one, the failure points at the
+    // actual field instead of a generic "banner never appeared" timeout.
+    const jobNameInput = page.locator('input[name="job_name"]')
+    await jobNameInput.fill('Test Job')
+    await expect(jobNameInput).toHaveValue('Test Job')
+
+    const manualToggle = page.getByText('or enter address manually')
+    await expect(manualToggle).toBeVisible()
+    await manualToggle.click()
+    const addressInput = page.getByPlaceholder('14 Maple Street, Manchester, M1 1AB')
+    await expect(addressInput).toBeVisible()
+    await addressInput.fill('14 Maple Street, Manchester, M1 1AB')
+    await expect(addressInput).toHaveValue('14 Maple Street, Manchester, M1 1AB')
+
+    const valueInput = page.locator('input[name="original_value"]')
+    await valueInput.fill('5000')
+    await expect(valueInput).toHaveValue('5000')
+
+    const clientNameInput = page.locator('input[name="client_name"]')
+    await clientNameInput.fill('Test Client')
+    await expect(clientNameInput).toHaveValue('Test Client')
+
+    const clientEmailInput = page.locator('input[name="client_email"]')
+    await clientEmailInput.fill('client@example.com')
+    await expect(clientEmailInput).toHaveValue('client@example.com')
 
     await page.locator('button[type="submit"]').click()
 
@@ -78,7 +98,8 @@ test.describe('Job creation — contractor lookup failure', () => {
     try {
       await expect(errorBanner).toBeVisible({ timeout: 20000 })
     } catch (e) {
-      console.log(`DEBUG contractorRouteHits=${contractorRouteHits} finalUrl=${page.url()}`)
+      const validationText = await page.locator('p.text-red-600').allTextContents()
+      console.log(`DEBUG contractorRouteHits=${contractorRouteHits} finalUrl=${page.url()} redText=${JSON.stringify(validationText)}`)
       throw e
     }
     await expect(page.locator('p.bg-red-50')).not.toContainText('Contractor not found')

@@ -1,5 +1,8 @@
 @import "tailwindcss";
-/* @plugin "@tailwindcss/typography"; */
+/* Required by the `prose` classes on /privacy, /terms and /cookies. Commenting
+   this out silently strips their styling — the pages still render, just with
+   no typography at all. */
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #ffffff;

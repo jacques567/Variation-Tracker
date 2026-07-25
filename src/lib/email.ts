@@ -92,8 +92,8 @@ export async function sendSignatureConfirmation(params: SignatureConfirmationPar
           </div>
 
           <p style="font-size: 13px; color: #888;">
-            This authorisation was captured electronically and constitutes a legally binding agreement
-            under the Electronic Communications Act 2000. Please retain this email for your records.
+            This authorisation was captured electronically. Electronic signatures are admissible as
+            evidence under the Electronic Communications Act 2000. Please retain this email for your records.
           </p>
           <p style="font-size: 13px; color: #aaa; margin-top: 32px;">VarTracker · vartracker.com</p>
         </body>

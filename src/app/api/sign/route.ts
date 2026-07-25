@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { variationId, token, clientName, signatureData, csrfToken } = await request.json()
+    const { variationId, token, clientName, signatureData, csrfToken, declarationText } = await request.json()
 
     if (!variationId || !token || !clientName || !signatureData || !csrfToken) {
       const err = Errors.missingFields(['variationId', 'token', 'clientName', 'signatureData', 'csrfToken'])
@@ -35,6 +35,18 @@ export async function POST(request: NextRequest) {
     const isValidCsrf = await verifyCsrfToken(supabase, csrfToken)
     if (!isValidCsrf) {
       const err = Errors.invalidToken()
+      return errorResponse(err)
+    }
+
+    // Checked after CSRF, not with the other required fields above: an
+    // unauthenticated caller must get 403 for the bad token, not a 400 that
+    // tells them which fields the endpoint wants. Payload shape is only worth
+    // validating once the request has earned the right to be processed.
+    //
+    // The declaration is the consent itself — refuse rather than store a
+    // signature whose wording cannot later be produced in evidence.
+    if (typeof declarationText !== 'string' || declarationText.trim().length === 0) {
+      const err = Errors.missingFields(['declarationText'])
       return errorResponse(err)
     }
 
@@ -70,6 +82,8 @@ export async function POST(request: NextRequest) {
       p_client_name: clientName.trim(),
       p_signature_data: signatureData,
       p_client_ip: clientIp,
+      p_declaration_text: declarationText.trim().slice(0, 2000),
+      p_user_agent: request.headers.get('user-agent')?.slice(0, 500) ?? null,
     })
 
     if (error) {
@@ -81,6 +95,10 @@ export async function POST(request: NextRequest) {
     if (data?.error) {
       if (data.code === 'already_signed') {
         const err = Errors.conflict('Variation has already been signed')
+        return errorResponse(err)
+      }
+      if (data.code === 'content_mismatch') {
+        const err = Errors.conflict(data.error)
         return errorResponse(err)
       }
       if (data.code === 'not_found') {

@@ -151,6 +151,24 @@ export function InvoicePDF({ job }: { job: any }) {
 
                     <Text style={styles.label}>Signed from IP</Text>
                     <Text style={styles.value}>{v.signature.client_ip || 'Not recorded'}</Text>
+
+                    {v.signature.declaration_text && (
+                      <>
+                        <Text style={[styles.label, { marginTop: 6 }]}>Declaration accepted</Text>
+                        <Text style={[styles.value, { fontSize: 8 }]}>
+                          &ldquo;{v.signature.declaration_text}&rdquo;
+                        </Text>
+                      </>
+                    )}
+
+                    {v.signature.content_hash && (
+                      <>
+                        <Text style={[styles.label, { marginTop: 6 }]}>Content fingerprint</Text>
+                        <Text style={{ fontSize: 6, color: colors.gray600 }}>
+                          {v.signature.content_hash}
+                        </Text>
+                      </>
+                    )}
                   </View>
 
                   <View style={{ width: 170 }}>

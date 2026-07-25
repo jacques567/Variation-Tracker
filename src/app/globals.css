@@ -1,5 +1,8 @@
 @import "tailwindcss";
-/* @plugin "@tailwindcss/typography"; */
+/* Required by the `prose` classes on /privacy, /terms and /cookies. Commenting
+   this out silently strips their styling — the pages still render, just with
+   no typography at all. */
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #ffffff;
@@ -24,4 +27,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* iOS/Android auto-zoom the viewport on focus when a form field's font-size is under 16px. */
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }

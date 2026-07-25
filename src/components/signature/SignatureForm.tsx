@@ -8,6 +8,11 @@ function formatCurrency(pence: number): string {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(pence / 100)
 }
 
+function buildDeclaration(name: string, cost: number): string {
+  const who = name.trim() ? ` I ${name.trim()}` : ''
+  return `By signing,${who} confirm I authorise this variation and the additional cost of ${formatCurrency(cost)}.`
+}
+
 export default function SignatureForm({
   variationId,
   token,
@@ -24,6 +29,12 @@ export default function SignatureForm({
   const [loading, setLoading] = useState(false)
   const [isEmpty, setIsEmpty] = useState(true)
   const [csrfToken, setCsrfToken] = useState<string | null>(null)
+  const [emailWarning, setEmailWarning] = useState<string | null>(null)
+
+  // Single source of truth for the consent wording. The exact string shown on
+  // screen is the exact string stored against the signature — deriving both
+  // from here means the displayed and recorded declarations cannot drift apart.
+  const declarationText = buildDeclaration(clientName, cost)
 
   useEffect(() => {
     async function fetchCsrfToken() {
@@ -73,14 +84,20 @@ export default function SignatureForm({
           clientName: clientName.trim(),
           signatureData,
           csrfToken,
+          declarationText,
         }),
       })
 
+      const data = await res.json()
+
       if (!res.ok) {
-        const data = await res.json()
         setError(data.error || 'Failed to save signature. Please try again.')
         setLoading(false)
         return
+      }
+
+      if (data.emailWarning) {
+        setEmailWarning(data.emailWarning)
       }
 
       router.refresh()
@@ -120,6 +137,7 @@ export default function SignatureForm({
               height: 160,
             }}
             backgroundColor="transparent"
+            clearOnResize={false}
             onBegin={() => setIsEmpty(false)}
             onEnd={() => {
               if (sigRef.current && !sigRef.current.isEmpty()) {
@@ -135,18 +153,12 @@ export default function SignatureForm({
         <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
       )}
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        {clientName.trim() ? (
-          <>
-            By signing, I <strong>{clientName.trim()}</strong> confirm I authorise this variation
-            and the additional cost of <strong>{formatCurrency(cost)}</strong>.
-          </>
-        ) : (
-          <>
-            By signing, I confirm I authorise this variation and the additional cost of{' '}
-            <strong>{formatCurrency(cost)}</strong>.
-          </>
-        )}
+      {emailWarning && (
+        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{emailWarning}</p>
+      )}
+
+      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+        {declarationText}
       </div>
 
       <button
@@ -158,7 +170,8 @@ export default function SignatureForm({
       </button>
 
       <p className="text-xs text-gray-400 text-center">
-        This constitutes a legally binding agreement under the Electronic Communications Act 2000
+        Your electronic signature, name, IP address and the time of signing are recorded, and are
+        admissible as evidence under the Electronic Communications Act 2000.
       </p>
     </form>
   )

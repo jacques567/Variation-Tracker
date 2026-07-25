@@ -170,27 +170,45 @@ export type Database = {
           admin_notes: string | null
           client_ip: string | null
           client_name: string
+          content_hash: string | null
+          declaration_text: string | null
           id: string
           signature_data: string
           signed_at: string
+          signed_cost: number | null
+          signed_date: string | null
+          signed_description: string | null
+          user_agent: string | null
           variation_id: string
         }
         Insert: {
           admin_notes?: string | null
           client_ip?: string | null
           client_name: string
+          content_hash?: string | null
+          declaration_text?: string | null
           id?: string
           signature_data: string
           signed_at?: string
+          signed_cost?: number | null
+          signed_date?: string | null
+          signed_description?: string | null
+          user_agent?: string | null
           variation_id: string
         }
         Update: {
           admin_notes?: string | null
           client_ip?: string | null
           client_name?: string
+          content_hash?: string | null
+          declaration_text?: string | null
           id?: string
           signature_data?: string
           signed_at?: string
+          signed_cost?: number | null
+          signed_date?: string | null
+          signed_description?: string | null
+          user_agent?: string | null
           variation_id?: string
         }
         Relationships: [
@@ -198,6 +216,56 @@ export type Database = {
             foreignKeyName: "signatures_variation_id_fkey"
             columns: ["variation_id"]
             isOneToOne: true
+            referencedRelation: "variations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      variation_deliveries: {
+        Row: {
+          channel: string
+          client_ip: string | null
+          created_at: string
+          evidence_source: string
+          id: string
+          note: string | null
+          recipient: string | null
+          recorded_by: string | null
+          sent_at: string
+          user_agent: string | null
+          variation_id: string
+        }
+        Insert: {
+          channel: string
+          client_ip?: string | null
+          created_at?: string
+          evidence_source?: string
+          id?: string
+          note?: string | null
+          recipient?: string | null
+          recorded_by?: string | null
+          sent_at?: string
+          user_agent?: string | null
+          variation_id: string
+        }
+        Update: {
+          channel?: string
+          client_ip?: string | null
+          created_at?: string
+          evidence_source?: string
+          id?: string
+          note?: string | null
+          recipient?: string | null
+          recorded_by?: string | null
+          sent_at?: string
+          user_agent?: string | null
+          variation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "variation_deliveries_variation_id_fkey"
+            columns: ["variation_id"]
+            isOneToOne: false
             referencedRelation: "variations"
             referencedColumns: ["id"]
           },
@@ -216,6 +284,7 @@ export type Database = {
           photo_url: string | null
           signature_token: string
           signature_token_expires_at: string | null
+          signed_notice_sent_at: string | null
           status: string
           updated_at: string
         }
@@ -231,6 +300,7 @@ export type Database = {
           photo_url?: string | null
           signature_token?: string
           signature_token_expires_at?: string | null
+          signed_notice_sent_at?: string | null
           status?: string
           updated_at?: string
         }
@@ -246,6 +316,7 @@ export type Database = {
           photo_url?: string | null
           signature_token?: string
           signature_token_expires_at?: string | null
+          signed_notice_sent_at?: string | null
           status?: string
           updated_at?: string
         }

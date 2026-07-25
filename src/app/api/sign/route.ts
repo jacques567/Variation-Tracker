@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
 import { Errors } from '@/lib/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { sendSignatureConfirmation } from '@/lib/email'
+import { sendSignatureConfirmation, sendVariationSignedNotice } from '@/lib/email'
 
 function errorResponse(err: unknown) {
   if (err instanceof Error && 'statusCode' in err && typeof err.statusCode === 'number') {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { variationId, token, clientName, signatureData, csrfToken } = await request.json()
+    const { variationId, token, clientName, signatureData, csrfToken, declarationText } = await request.json()
 
     if (!variationId || !token || !clientName || !signatureData || !csrfToken) {
       const err = Errors.missingFields(['variationId', 'token', 'clientName', 'signatureData', 'csrfToken'])
@@ -35,6 +35,18 @@ export async function POST(request: NextRequest) {
     const isValidCsrf = await verifyCsrfToken(supabase, csrfToken)
     if (!isValidCsrf) {
       const err = Errors.invalidToken()
+      return errorResponse(err)
+    }
+
+    // Checked after CSRF, not with the other required fields above: an
+    // unauthenticated caller must get 403 for the bad token, not a 400 that
+    // tells them which fields the endpoint wants. Payload shape is only worth
+    // validating once the request has earned the right to be processed.
+    //
+    // The declaration is the consent itself — refuse rather than store a
+    // signature whose wording cannot later be produced in evidence.
+    if (typeof declarationText !== 'string' || declarationText.trim().length === 0) {
+      const err = Errors.missingFields(['declarationText'])
       return errorResponse(err)
     }
 
@@ -70,6 +82,8 @@ export async function POST(request: NextRequest) {
       p_client_name: clientName.trim(),
       p_signature_data: signatureData,
       p_client_ip: clientIp,
+      p_declaration_text: declarationText.trim().slice(0, 2000),
+      p_user_agent: request.headers.get('user-agent')?.slice(0, 500) ?? null,
     })
 
     if (error) {
@@ -83,6 +97,10 @@ export async function POST(request: NextRequest) {
         const err = Errors.conflict('Variation has already been signed')
         return errorResponse(err)
       }
+      if (data.code === 'content_mismatch') {
+        const err = Errors.conflict(data.error)
+        return errorResponse(err)
+      }
       if (data.code === 'not_found') {
         const err = Errors.notFound('Variation')
         return errorResponse(err)
@@ -91,16 +109,44 @@ export async function POST(request: NextRequest) {
       return errorResponse(err)
     }
 
-    // Send confirmation email to client (best-effort — don't fail the request if email fails)
+    // ── Notifications ─────────────────────────────────────────────────────────
+    // The signature is already committed at this point. Everything below is
+    // best-effort: the client's browser must get a success response even if every
+    // email provider is down. Each step is wrapped separately so one failure
+    // cannot skip the others.
+    const signedAt = new Date().toISOString()
+    let emailWarning: string | undefined
+
+    type SignedJob = {
+      job_name: string
+      address: string
+      client_email: string
+      client_name: string
+      contractor: { email: string } | null
+    }
+
+    let variationDetails: { description: string; cost: number; job_id: string } | null = null
+    let job: SignedJob | null = null
+
+    // Fetched once and shared by both emails. Wrapped in its own try: the signature
+    // has already committed, so a failure loading these details must degrade to a
+    // warning, never a 500 that tells the client their signature didn't take.
     try {
-      const { data: variationDetails } = await supabase
+      const { data: details } = await supabase
         .from('variations')
-        .select('description, cost, date, job:jobs(job_name, address, client_email, client_name)')
+        .select('description, cost, date, job_id, job:jobs(job_name, address, client_email, client_name, contractor:contractors(email))')
         .eq('id', variationId)
         .single()
 
-      const job = variationDetails?.job as unknown as { job_name: string; address: string; client_email: string; client_name: string } | null
+      variationDetails = details
+      job = (details?.job ?? null) as unknown as SignedJob | null
+    } catch (fetchError) {
+      console.error('[sign] failed to load variation details for notifications:', fetchError)
+      emailWarning = 'Confirmation email could not be sent. The contractor has been notified.'
+    }
 
+    // 1. Confirmation to the client who just signed.
+    try {
       if (variationDetails && job?.client_email) {
         await sendSignatureConfirmation({
           clientEmail: job.client_email,
@@ -109,14 +155,51 @@ export async function POST(request: NextRequest) {
           address: job.address,
           description: variationDetails.description,
           cost: variationDetails.cost,
-          signedAt: new Date().toISOString(),
+          signedAt,
         })
+      } else if (!emailWarning) {
+        // Guarded so a failed details fetch keeps its own, accurate message rather
+        // than being relabelled as "no client email on file".
+        emailWarning = 'No client email on file — confirmation not sent.'
       }
     } catch (emailError) {
       console.error('Signature confirmation email failed:', emailError)
+      emailWarning = 'Confirmation email could not be sent. The contractor has been notified.'
     }
 
-    return NextResponse.json({ success: true })
+    // 2. Notification to the contractor that their variation was signed. This is
+    // what makes the warning above's "the contractor has been notified" true.
+    // signed_notice_sent_at is only stamped on a confirmed send — if this fails,
+    // the row stays null and the daily cron picks it up (see 020 migration).
+    try {
+      const contractorEmail = job?.contractor?.email
+
+      if (variationDetails && job && contractorEmail) {
+        const sent = await sendVariationSignedNotice({
+          contractorEmail,
+          jobId: variationDetails.job_id,
+          jobName: job.job_name,
+          address: job.address,
+          description: variationDetails.description,
+          cost: variationDetails.cost,
+          signerName: clientName.trim(),
+          signedAt,
+        })
+
+        if (sent) {
+          await supabase
+            .from('variations')
+            .update({ signed_notice_sent_at: signedAt })
+            .eq('id', variationId)
+        }
+      } else {
+        console.warn('[sign] no contractor email on file — signed notice deferred to cron', { variationId })
+      }
+    } catch (notifyError) {
+      console.error('Contractor signed-notice failed:', notifyError)
+    }
+
+    return NextResponse.json({ success: true, ...(emailWarning ? { emailWarning } : {}) })
   } catch (error) {
     console.error('Signature submission error:', error)
     return errorResponse(error)

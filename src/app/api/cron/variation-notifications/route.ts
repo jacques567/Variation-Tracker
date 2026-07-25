@@ -1,14 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { sendVariationExpiryReminder, sendVariationExpiredNotice } from '@/lib/email'
+import { sendVariationExpiryReminder, sendVariationExpiredNotice, sendVariationSignedNotice } from '@/lib/email'
 
 const REMINDER_WINDOW_DAYS = 2
+const SIGNED_NOTICE_LOOKBACK_DAYS = 14
 
 type VariationRow = {
   id: string
   description: string
   cost: number
   signature_token_expires_at: string
+  job: {
+    job_name: string
+    address: string
+    contractor: { email: string } | null
+  } | null
+}
+
+type SignedVariationRow = {
+  id: string
+  description: string
+  cost: number
+  job_id: string
+  signature: { client_name: string; signed_at: string } | null
   job: {
     job_name: string
     address: string
@@ -37,6 +51,7 @@ export async function GET(request: NextRequest) {
 
   let remindersSent = 0
   let noticesSent = 0
+  let signedNoticesSent = 0
 
   const { data: dueForReminder, error: reminderError } = await supabase
     .from('variations')
@@ -103,5 +118,57 @@ export async function GET(request: NextRequest) {
     noticesSent++
   }
 
-  return NextResponse.json({ remindersSent, noticesSent })
+  // ── Reconciliation: signed variations whose contractor notice never went out ──
+  // POST /api/sign sends this inline and stamps signed_notice_sent_at on success.
+  // Anything still null here means that send failed (Resend outage, missing API
+  // key, contractor email added after the fact), so retry it once a day.
+  //
+  // Bounded to recent signatures: if signed_notice_sent_at were ever cleared in
+  // bulk, an unbounded query would email contractors about their entire history.
+  const signedLookback = new Date(now.getTime() - SIGNED_NOTICE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
+
+  const { data: missedSignedNotices, error: signedError } = await supabase
+    .from('variations')
+    // !inner so the signed_at filter constrains the variations themselves rather
+    // than just trimming the embedded signature — a plain embed would return every
+    // unnotified signed variation regardless of age.
+    .select('id, description, cost, job_id, signature:signatures!inner(client_name, signed_at), job:jobs(job_name, address, contractor:contractors(email))')
+    .eq('status', 'signed')
+    .is('signed_notice_sent_at', null)
+    .gte('signatures.signed_at', signedLookback.toISOString())
+
+  if (signedError) {
+    console.error('[cron:variation-notifications] failed to query missed signed notices:', signedError.message)
+  }
+
+  for (const variation of (missedSignedNotices ?? []) as unknown as SignedVariationRow[]) {
+    const contractorEmail = variation.job?.contractor?.email
+    const signature = variation.signature
+
+    // No contractor email or no signature row — nothing sendable. Leave the column
+    // null rather than stamping it, so the row is reconsidered if the data is fixed.
+    if (!contractorEmail || !variation.job || !signature) continue
+
+    const sent = await sendVariationSignedNotice({
+      contractorEmail,
+      jobId: variation.job_id,
+      jobName: variation.job.job_name,
+      address: variation.job.address,
+      description: variation.description,
+      cost: variation.cost,
+      signerName: signature.client_name,
+      signedAt: signature.signed_at,
+    })
+
+    if (!sent) continue
+
+    await supabase
+      .from('variations')
+      .update({ signed_notice_sent_at: now.toISOString() })
+      .eq('id', variation.id)
+
+    signedNoticesSent++
+  }
+
+  return NextResponse.json({ remindersSent, noticesSent, signedNoticesSent })
 }

@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/server'
 import { formatCurrency } from '@/lib/utils'
 import VariationRow from '@/components/variations/VariationRow'
 import ExportInvoiceButton from '@/components/variations/ExportInvoiceButton'
+import VariationsLiveUpdater from '@/components/variations/VariationsLiveUpdater'
 import type { Variation, Signature } from '@/types'
+import ClientEmailEdit from '@/components/jobs/ClientEmailEdit'
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -35,6 +37,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
   return (
     <div>
+      {/* Flips a variation to Signed the moment the client signs, without a reload */}
+      <VariationsLiveUpdater jobId={id} />
+
       <Link href="/jobs" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6">
         <ArrowLeft className="w-4 h-4" /> All jobs
       </Link>
@@ -50,7 +55,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 mt-0.5 break-words">{job.client_name} · {job.address}</p>
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span className="text-sm text-gray-500 break-words">{job.client_name}</span>
+            <span className="text-sm text-gray-300">·</span>
+            <ClientEmailEdit jobId={job.id} initialEmail={job.client_email} />
+            <span className="text-sm text-gray-300">·</span>
+            <span className="text-sm text-gray-500 break-words">{job.address}</span>
+          </div>
         </div>
         <ExportInvoiceButton jobId={job.id} jobName={job.job_name} />
       </div>

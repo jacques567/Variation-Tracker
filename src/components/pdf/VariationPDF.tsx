@@ -1,31 +1,11 @@
 import { Page, Text, View, Image, Document } from '@react-pdf/renderer'
 import { styles, colors } from './styles'
-
-function fmt(pence: number) {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(pence / 100)
-}
-
-function fmtDate(d: string) {
-  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(d))
-}
-
-// Mirrors formatDateTime() in src/lib/utils.ts — the timestamp shown in-app and
-// the one printed on this record must be the same moment in the same timezone.
-function fmtDateTime(d: string) {
-  return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-    timeZone: 'Europe/London',
-    timeZoneName: 'short',
-  })
-    .format(new Date(d))
-    .replace(', ', ' at ')
-}
+import {
+  formatCurrency as fmt,
+  formatDate as fmtDate,
+  formatDateTime as fmtDateTime,
+  formatReference,
+} from '@/lib/utils'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function VariationPDF({ variation }: { variation: any }) {
@@ -45,7 +25,7 @@ export function VariationPDF({ variation }: { variation: any }) {
             <Text style={{ fontSize: 9, color: colors.gray400 }}>Date</Text>
             <Text style={{ fontSize: 10 }}>{fmtDate(variation.date)}</Text>
             <Text style={{ fontSize: 9, color: colors.gray400, marginTop: 6 }}>Ref</Text>
-            <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{variation.id.slice(0, 8).toUpperCase()}</Text>
+            <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold' }}>{formatReference(variation.id)}</Text>
           </View>
         </View>
 
@@ -105,7 +85,7 @@ export function VariationPDF({ variation }: { variation: any }) {
                   <Text style={[styles.value, { marginBottom: 6 }]}>{fmtDateTime(signature.signed_at)}</Text>
 
                   <Text style={styles.label}>Variation ref</Text>
-                  <Text style={[styles.value, { marginBottom: 6 }]}>{variation.id.slice(0, 8).toUpperCase()}</Text>
+                  <Text style={[styles.value, { marginBottom: 6 }]}>{formatReference(variation.id)}</Text>
 
                   <Text style={styles.label}>Signed from IP</Text>
                   <Text style={styles.value}>{signature.client_ip || 'Not recorded'}</Text>

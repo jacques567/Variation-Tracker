@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Share2, Check, ChevronUp, CheckCircle2, Send } from 'lucide-react'
+import { Link2, MessageSquare, Check, ChevronUp, CheckCircle2, Send } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import SignatureRecord from './SignatureRecord'
 import type { Variation, Signature } from '@/types'
@@ -32,7 +32,7 @@ const statusStyles: Record<string, string> = {
 }
 
 export default function VariationRow({ variation, jobId, jobName, clientName, companyName, address }: Props) {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<'link' | 'text' | null>(null)
   const [photoOpen, setPhotoOpen] = useState(false)
   const [recordOpen, setRecordOpen] = useState(false)
   const [recordChannel, setRecordChannel] = useState<DeliveryChannel>('whatsapp')
@@ -78,9 +78,21 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
     : (typeof window !== 'undefined' ? window.location.origin : '')
   const signLink = `${appUrl}/sign/${variation.signature_token}`
 
-  const shareTitle = `Variation for ${jobName}`
   const fromSuffix = companyName ? ` from ${companyName}` : ''
   const shareText = `Hi ${clientName}, please review and sign this ${formatCurrency(variation.cost)} variation for ${jobName}${fromSuffix} at ${address}:`
+
+  async function copyToClipboard(value: string) {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value)
+    } else {
+      const input = document.createElement('input')
+      input.value = value
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+    }
+  }
 
   async function copyLink() {
     try {
@@ -89,51 +101,31 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
         return
       }
 
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(signLink)
-      } else {
-        const input = document.createElement('input')
-        input.value = signLink
-        document.body.appendChild(input)
-        input.select()
-        document.execCommand('copy')
-        document.body.removeChild(input)
-      }
-
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await copyToClipboard(signLink)
+      setCopied('link')
+      setTimeout(() => setCopied(null), 2000)
       void recordDelivery('link_copied')
     } catch (err) {
       console.error('Failed to copy link:', err)
     }
   }
 
-  async function shareLink() {
+  async function copyText() {
     try {
       if (!variation.signature_token) {
         console.warn('No signature token available')
         return
       }
 
-      if (navigator.share) {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: signLink,
-        })
-        // The Web Share API deliberately does not reveal the chosen target app,
-        // so this records only that a share was completed — not the channel.
-        // The contractor can add the actual channel below.
-        void recordDelivery('share_sheet')
-        setRecordOpen(true)
-      } else {
-        // Fallback to copy for browsers without Share API (mainly Firefox)
-        await copyLink()
-      }
+      await copyToClipboard(`${shareText}\n\n${signLink}`)
+      setCopied('text')
+      setTimeout(() => setCopied(null), 2000)
+      // Copying the message+link doesn't tell us which app it gets pasted
+      // into, so prompt the contractor to log the actual channel.
+      void recordDelivery('link_copied')
+      setRecordOpen(true)
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        console.error('Failed to share link:', err)
-      }
+      console.error('Failed to copy text:', err)
     }
   }
 
@@ -206,12 +198,20 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
             className="flex-1 text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-500 truncate"
           />
           <button
-            onClick={shareLink}
-            aria-label="Share variation link"
+            onClick={copyLink}
+            aria-label="Copy sign link"
             className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded-lg px-3 py-1.5 hover:bg-blue-100 transition-colors shrink-0"
           >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
-            {copied ? 'Copied' : 'Share link'}
+            {copied === 'link' ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+            {copied === 'link' ? 'Copied' : 'Copy link'}
+          </button>
+          <button
+            onClick={copyText}
+            aria-label="Copy message with link"
+            className="flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-lg px-3 py-1.5 hover:bg-gray-200 transition-colors shrink-0"
+          >
+            {copied === 'text' ? <Check className="w-3.5 h-3.5" /> : <MessageSquare className="w-3.5 h-3.5" />}
+            {copied === 'text' ? 'Copied' : 'Copy text'}
           </button>
         </div>
       )}

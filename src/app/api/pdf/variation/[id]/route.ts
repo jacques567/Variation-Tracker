@@ -27,7 +27,7 @@ export async function GET(
 
     const { data: variation } = await supabase
       .from('variations')
-      .select('*, job:jobs(*, contractor:contractors(*)), signature:signatures(*)')
+      .select('*, job:jobs(*, contractor:contractors(*)), signature:signatures(*), deliveries:variation_deliveries(id, channel, recipient, evidence_source, sent_at)')
       .eq('id', id)
       .single()
 

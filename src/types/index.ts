@@ -68,6 +68,34 @@ export interface Signature {
   signed_at: string
   client_ip: string | null
   admin_notes?: string | null
+  // Evidence bundle captured at signing. Null on signatures created before
+  // migration 019 — treat null as "not captured", never as "verified empty".
+  declaration_text?: string | null
+  user_agent?: string | null
+  signed_description?: string | null
+  signed_cost?: number | null
+  signed_date?: string | null
+  content_hash?: string | null
+}
+
+export type DeliveryChannel =
+  | 'email'
+  | 'whatsapp'
+  | 'sms'
+  | 'share_sheet'
+  | 'link_copied'
+  | 'in_person'
+  | 'other'
+
+export interface VariationDelivery {
+  id: string
+  variation_id: string
+  channel: DeliveryChannel
+  recipient: string | null
+  note: string | null
+  /** 'system' = platform-sent and provably logged; 'declared' = contractor's own statement. */
+  evidence_source: 'system' | 'declared'
+  sent_at: string
 }
 
 export interface JobWithTotals extends Job {

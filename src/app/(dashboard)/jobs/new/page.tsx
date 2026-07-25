@@ -105,11 +105,18 @@ export default function NewJobPage() {
     // Subscription check — client-side UX guard. RLS enforces this at the DB
     // layer regardless, but checking here gives the user a clear error message
     // instead of a raw Supabase permission error.
-    const { data: contractor } = await supabase
+    const { data: contractor, error: contractorError } = await supabase
       .from('contractors')
       .select('subscription_status, trial_ends_at, grace_period_expires_at')
       .eq('id', user.id)
       .single()
+
+    if (contractorError) {
+      console.error('Failed to load contractor record:', contractorError)
+      setError('Unable to verify your account right now. Please try again or contact support.')
+      setLoading(false)
+      return
+    }
 
     const { isValid, reason } = evaluateSubscription(contractor)
     if (!isValid) {

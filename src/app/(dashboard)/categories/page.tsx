@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Plus, Trash2, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { readJobFormDraft, writeJobFormDraft } from '@/lib/jobFormDraft'
 import type { JobCategory } from '@/types'
 
 interface UncategorizedJob {
@@ -14,6 +15,8 @@ interface UncategorizedJob {
 
 export default function CategoriesPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnTo = searchParams.get('returnTo')
   const [categories, setCategories] = useState<(JobCategory & { job_count: number })[]>([])
   const [uncategorizedJobs, setUncategorizedJobs] = useState<UncategorizedJob[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,6 +25,8 @@ export default function CategoriesPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleteWarning, setDeleteWarning] = useState<string | null>(null)
   const [assigningJobId, setAssigningJobId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string>('')
 
   useEffect(() => {
     loadCategories()
@@ -33,6 +38,7 @@ export default function CategoriesPage() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      setUserId(user.id)
 
       // Fetch categories
       const { data: cats, error: catsError } = await supabase
@@ -105,6 +111,9 @@ export default function CategoriesPage() {
         return
       }
 
+      if (returnTo) {
+        setSelectedCategory(newCategoryName.trim())
+      }
       setNewCategoryName('')
       await loadCategories()
     } catch (err: any) {
@@ -112,6 +121,16 @@ export default function CategoriesPage() {
     } finally {
       setCreating(false)
     }
+  }
+
+  function confirmAndReturn() {
+    if (!returnTo) return
+    const draft = readJobFormDraft(userId)
+    writeJobFormDraft(userId, { ...(draft ?? {
+      job_name: '', address: '', original_value: '', category: '',
+      client_name: '', client_email: '', client_email_confirm: '', client_phone: ''
+    }), category: selectedCategory })
+    router.push(returnTo)
   }
 
   async function handleDelete(categoryId: string, categoryName: string, jobCount: number) {
@@ -173,6 +192,12 @@ export default function CategoriesPage() {
         <ArrowLeft className="w-4 h-4" /> Back to jobs
       </button>
 
+      {returnTo && (
+        <span className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 rounded-md px-2 py-1 mb-3">
+          Continuing job creation
+        </span>
+      )}
+
       <h1 className="text-xl font-semibold text-gray-900 mb-6">Job Categories</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -196,6 +221,29 @@ export default function CategoriesPage() {
               {creating ? 'Creating...' : 'Create'}
             </button>
           </form>
+
+          {returnTo && categories.length > 0 && (
+            <>
+              <hr className="border-gray-100 my-4" />
+              <label className="block text-xs text-gray-500 mb-1.5">Select category to use</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+              >
+                <option value="">-- No category --</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                ))}
+              </select>
+              <button
+                onClick={confirmAndReturn}
+                className="w-full border border-blue-600 text-blue-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-50 transition-colors"
+              >
+                Confirm & continue job
+              </button>
+            </>
+          )}
         </div>
 
         {/* Uncategorized Jobs section */}

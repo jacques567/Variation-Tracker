@@ -86,7 +86,17 @@ test.afterAll(async () => {
   if (contractorId) await supabase.auth.admin.deleteUser(contractorId);
 });
 
-test.use({ ...devices['iPhone 13'] });
+// Only the mobile viewport/touch/UA fields, not the whole iPhone 13 preset:
+// that preset also sets defaultBrowserType: 'webkit', which this repo's
+// playwright.config.ts doesn't install (only chromium/firefox projects are
+// configured) and CI has no webkit binary cached, so it fails to launch.
+const iPhone13 = devices['iPhone 13'];
+test.use({
+  viewport: iPhone13.viewport,
+  userAgent: iPhone13.userAgent,
+  isMobile: iPhone13.isMobile,
+  hasTouch: iPhone13.hasTouch,
+});
 
 test('signature survives an address-bar resize event mid-scroll', async ({ page }) => {
   test.skip(!supabase || !signatureToken, skipReason);

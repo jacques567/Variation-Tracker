@@ -34,26 +34,20 @@ test.beforeAll(async () => {
   // doesn't need the generated Database types the app code uses.
   supabase = createClient(url, serviceRoleKey) as any;
 
-  // randomUUID, not Date.now(): this spec runs concurrently across multiple
-  // Playwright browser projects (chromium, firefox, ...) in the same CI job,
-  // and their beforeAll hooks can fire within the same millisecond — a
-  // timestamp-based email collided across workers and caused a
-  // contractors_pkey conflict on insert.
   const email = `mobile-scroll-qa-${crypto.randomUUID()}@example.com`;
   const { data: userData, error: userError } = await supabase.auth.admin.createUser({
     email,
     password: crypto.randomUUID(),
     email_confirm: true,
+    user_metadata: { full_name: 'QA Mobile Scroll Test' },
   });
   if (userError || !userData.user) throw new Error(`Failed to seed test contractor: ${userError?.message}`);
   contractorId = userData.user.id;
 
-  const { error: contractorError } = await supabase.from('contractors').insert({
-    id: contractorId,
-    email,
-    full_name: 'QA Mobile Scroll Test',
-  });
-  if (contractorError) throw new Error(`Failed to seed contractor row: ${contractorError.message}`);
+  // No separate insert into `contractors` here: the on_auth_user_created
+  // trigger (001_initial_schema.sql) already inserts that row from
+  // auth.users, reading full_name out of user_metadata above. A second
+  // explicit insert with the same id hit contractors_pkey every time.
 
   const { data: job, error: jobError } = await supabase
     .from('jobs')

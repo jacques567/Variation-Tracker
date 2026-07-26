@@ -7,9 +7,8 @@ import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { evaluateSubscription } from '@/lib/subscription-evaluation'
 import PostcodeLookup from '@/components/jobs/PostcodeLookup'
+import { readJobFormDraft, writeJobFormDraft, clearJobFormDraft } from '@/lib/jobFormDraft'
 import type { JobCategory } from '@/types'
-
-const STORAGE_KEY_PREFIX = 'job_form_draft'
 
 export default function NewJobPage() {
   const router = useRouter()
@@ -36,11 +35,6 @@ export default function NewJobPage() {
     REQUIRED_FIELDS.filter(field => !formData[field]?.toString().trim())
   )
 
-  function getStorageKey(): string {
-    if (!userIdRef.current) return STORAGE_KEY_PREFIX
-    return `${STORAGE_KEY_PREFIX}_${userIdRef.current}`
-  }
-
   async function loadCategories() {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -62,9 +56,9 @@ export default function NewJobPage() {
       if (!user) return
 
       userIdRef.current = user.id
-      const saved = sessionStorage.getItem(getStorageKey())
+      const saved = readJobFormDraft(user.id)
       if (saved) {
-        setFormData(JSON.parse(saved))
+        setFormData(saved)
       }
       setFormLoaded(true)
     }
@@ -77,7 +71,7 @@ export default function NewJobPage() {
     const { name, value } = e.target
     const newData = { ...formData, [name]: value }
     setFormData(newData)
-    sessionStorage.setItem(getStorageKey(), JSON.stringify(newData))
+    writeJobFormDraft(userIdRef.current, newData)
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -145,7 +139,7 @@ export default function NewJobPage() {
       return
     }
 
-    sessionStorage.removeItem(getStorageKey())
+    clearJobFormDraft(userIdRef.current)
     router.push(`/jobs/${data.id}`)
   }
 
@@ -178,7 +172,7 @@ export default function NewJobPage() {
                 onAddressChange={address => {
                   const newData = { ...formData, address }
                   setFormData(newData)
-                  sessionStorage.setItem(getStorageKey(), JSON.stringify(newData))
+                  writeJobFormDraft(userIdRef.current, newData)
                 }}
               />
             )}
@@ -203,7 +197,7 @@ export default function NewJobPage() {
               ))}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              <Link href="/categories" className="text-blue-600 hover:underline">Manage categories</Link>
+              <Link href="/categories?returnTo=/jobs/new" className="text-blue-600 hover:underline">Manage categories</Link>
             </p>
           </div>
 

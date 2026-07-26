@@ -90,11 +90,12 @@ test.afterAll(async () => {
 // that preset also sets defaultBrowserType: 'webkit', which this repo's
 // playwright.config.ts doesn't install (only chromium/firefox projects are
 // configured) and CI has no webkit binary cached, so it fails to launch.
+// isMobile is also skipped — Firefox's newContext rejects it outright, and
+// viewport + hasTouch are what actually exercise the touch-drag + resize path.
 const iPhone13 = devices['iPhone 13'];
 test.use({
   viewport: iPhone13.viewport,
   userAgent: iPhone13.userAgent,
-  isMobile: iPhone13.isMobile,
   hasTouch: iPhone13.hasTouch,
 });
 

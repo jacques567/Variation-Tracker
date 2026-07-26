@@ -91,7 +91,7 @@ export default function SignatureForm({
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Failed to save signature. Please try again.')
+        setError(data.message || 'Failed to save signature. Please try again.')
         setLoading(false)
         return
       }

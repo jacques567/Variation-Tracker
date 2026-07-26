@@ -34,7 +34,12 @@ test.beforeAll(async () => {
   // doesn't need the generated Database types the app code uses.
   supabase = createClient(url, serviceRoleKey) as any;
 
-  const email = `mobile-scroll-qa-${Date.now()}@example.com`;
+  // randomUUID, not Date.now(): this spec runs concurrently across multiple
+  // Playwright browser projects (chromium, firefox, ...) in the same CI job,
+  // and their beforeAll hooks can fire within the same millisecond — a
+  // timestamp-based email collided across workers and caused a
+  // contractors_pkey conflict on insert.
+  const email = `mobile-scroll-qa-${crypto.randomUUID()}@example.com`;
   const { data: userData, error: userError } = await supabase.auth.admin.createUser({
     email,
     password: crypto.randomUUID(),

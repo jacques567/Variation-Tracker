@@ -4,6 +4,7 @@ import { verifyCsrfToken, extractClientIp } from '@/lib/csrf'
 import { Errors } from '@/lib/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { sendSignatureConfirmation, sendVariationSignedNotice } from '@/lib/email'
+import { logSecurityEvent } from '@/lib/security-event-logger'
 
 function errorResponse(err: unknown) {
   if (err instanceof Error && 'statusCode' in err && typeof err.statusCode === 'number') {
@@ -34,6 +35,10 @@ export async function POST(request: NextRequest) {
 
     const isValidCsrf = await verifyCsrfToken(supabase, csrfToken)
     if (!isValidCsrf) {
+      await logSecurityEvent('csrf.verify', 'failed', {
+        clientIp: ip,
+        metadata: { variationId },
+      })
       const err = Errors.invalidToken()
       return errorResponse(err)
     }
@@ -59,6 +64,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!variation) {
+      await logSecurityEvent('signature.reject', 'failed', {
+        errorMessage: 'Variation link has expired or token mismatch',
+        clientIp: ip,
+        metadata: { variationId },
+      })
       const err = Errors.expiredToken('Variation link has expired')
       return errorResponse(err)
     }

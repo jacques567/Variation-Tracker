@@ -4,6 +4,7 @@ import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { extractClientIp } from '@/lib/csrf'
 import { isBetaMode } from '@/lib/subscription-evaluation'
+import { logSecurityEvent } from '@/lib/security-event-logger'
 
 const SignupSchema = z.object({
   email: z.string().email('Invalid email format').toLowerCase(),
@@ -61,6 +62,12 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      await logSecurityEvent('auth.signup', 'failed', {
+        errorMessage: signUpError.message,
+        clientIp: ip,
+        metadata: { email, errCode },
+      })
+
       return NextResponse.json(
         { error: signUpError.message || 'Sign up failed', errorCode: errCode },
         { status: 400 }
@@ -110,6 +117,13 @@ export async function POST(request: NextRequest) {
         message: createError.message,
         details: (createError as any).details,
       })
+      await logSecurityEvent('auth.signup', 'failed', {
+        errorMessage: createError.message,
+        contractorId: data.user.id,
+        clientIp: ip,
+        metadata: { email, code: createError.code, stage: 'contractor_upsert' },
+      })
+
       // Auth user was created but contractor record setup failed — clean up the orphan
       // so the user can retry signup rather than being permanently blocked on login.
       await supabaseService.auth.admin.deleteUser(data.user.id)

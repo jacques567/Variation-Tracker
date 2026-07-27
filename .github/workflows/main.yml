@@ -163,3 +163,21 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+
+  notify-on-main-failure:
+    needs: [lint, security, test]
+    if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    name: "🚨 Notify on main failure"
+    steps:
+      - name: Post to Slack
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL secret not set — skipping notification."
+            exit 0
+          fi
+          curl -sf -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "{\"text\": \"🚨 CI failed on \`main\` for ${{ github.repository }} — commit ${{ github.sha }} by ${{ github.actor }}. <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>\"}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

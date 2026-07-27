@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { generateCsrfToken, extractClientIp } from '@/lib/csrf'
 import { Errors } from '@/lib/errors'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -11,13 +11,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(err.toJSON(), { status: err.statusCode })
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const supabase = await createClient()
 
-  const { data: { session } } = await supabase.auth.getSession()
-  const userId = session?.user?.id
+  const { data: { user } } = await supabase.auth.getUser()
+  const userId = user?.id
 
   const clientIp = extractClientIp(
     request.headers.get('x-forwarded-for'),

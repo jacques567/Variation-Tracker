@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Link2, MessageSquare, Check, ChevronUp, CheckCircle2, Send } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Link2, Share2, Check, ChevronUp, CheckCircle2, Send } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import SignatureRecord from './SignatureRecord'
 import type { Variation, Signature } from '@/types'
@@ -32,12 +32,20 @@ const statusStyles: Record<string, string> = {
 }
 
 export default function VariationRow({ variation, jobId, jobName, clientName, companyName, address }: Props) {
-  const [copied, setCopied] = useState<'link' | 'text' | null>(null)
+  const [copied, setCopied] = useState<'link' | null>(null)
+  const [shared, setShared] = useState(false)
+  const [canNativeShare, setCanNativeShare] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
   const [recordOpen, setRecordOpen] = useState(false)
   const [recordChannel, setRecordChannel] = useState<DeliveryChannel>('whatsapp')
   const [recipient, setRecipient] = useState('')
   const [recorded, setRecorded] = useState(false)
+
+  // Firefox (desktop and Android) and older browsers don't implement the Web
+  // Share API — they fall back to the copy-link button below.
+  useEffect(() => {
+    setCanNativeShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function')
+  }, [])
 
   // Best-effort: a failed delivery log must never block the contractor from
   // actually sending the variation. The record is corroborating evidence, not
@@ -110,22 +118,28 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
     }
   }
 
-  async function copyText() {
+  async function shareLink() {
     try {
       if (!variation.signature_token) {
         console.warn('No signature token available')
         return
       }
 
-      await copyToClipboard(`${shareText}\n\n${signLink}`)
-      setCopied('text')
-      setTimeout(() => setCopied(null), 2000)
-      // Copying the message+link doesn't tell us which app it gets pasted
-      // into, so prompt the contractor to log the actual channel.
-      void recordDelivery('link_copied')
-      setRecordOpen(true)
+      // url is passed separately from text so share targets that support it
+      // (WhatsApp, iMessage, Mail) drop in a real link rather than folding it
+      // into the message body as plain text.
+      await navigator.share({ title: 'Variation for signature', text: shareText, url: signLink })
+      // The Web Share API resolves once the OS share sheet reports success,
+      // but never tells the page which app the contractor picked — that's a
+      // deliberate browser privacy limit, not something we can work around.
+      setShared(true)
+      setTimeout(() => setShared(false), 2000)
+      void recordDelivery('share_sheet')
     } catch (err) {
-      console.error('Failed to copy text:', err)
+      // AbortError just means the contractor closed the share sheet without
+      // picking anything — not a failure worth logging or surfacing.
+      if (err instanceof Error && err.name === 'AbortError') return
+      console.error('Failed to open share sheet:', err)
     }
   }
 
@@ -197,22 +211,25 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
             value={signLink}
             className="flex-1 text-xs bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-gray-500 truncate"
           />
-          <button
-            onClick={copyLink}
-            aria-label="Copy sign link"
-            className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded-lg px-3 py-1.5 hover:bg-blue-100 transition-colors shrink-0"
-          >
-            {copied === 'link' ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
-            {copied === 'link' ? 'Copied' : 'Copy link'}
-          </button>
-          <button
-            onClick={copyText}
-            aria-label="Copy message with link"
-            className="flex items-center gap-1 text-xs bg-gray-100 text-gray-600 rounded-lg px-3 py-1.5 hover:bg-gray-200 transition-colors shrink-0"
-          >
-            {copied === 'text' ? <Check className="w-3.5 h-3.5" /> : <MessageSquare className="w-3.5 h-3.5" />}
-            {copied === 'text' ? 'Copied' : 'Copy text'}
-          </button>
+          {canNativeShare ? (
+            <button
+              onClick={shareLink}
+              aria-label="Share sign link"
+              className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded-lg px-3 py-1.5 hover:bg-blue-100 transition-colors shrink-0"
+            >
+              {shared ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+              {shared ? 'Shared' : 'Share'}
+            </button>
+          ) : (
+            <button
+              onClick={copyLink}
+              aria-label="Copy sign link"
+              className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 rounded-lg px-3 py-1.5 hover:bg-blue-100 transition-colors shrink-0"
+            >
+              {copied === 'link' ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+              {copied === 'link' ? 'Copied' : 'Copy link'}
+            </button>
+          )}
         </div>
       )}
 

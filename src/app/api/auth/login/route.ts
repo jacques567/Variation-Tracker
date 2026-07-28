@@ -4,6 +4,7 @@ import { createClient, createServiceRoleClient } from '@/lib/supabase/server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { extractClientIp } from '@/lib/csrf'
 import { Errors } from '@/lib/errors'
+import { logSecurityEvent } from '@/lib/security-event-logger'
 
 const MAX_LOGIN_ATTEMPTS = 5
 const LOCKOUT_DURATION_MINUTES = 15
@@ -108,6 +109,13 @@ export async function POST(request: NextRequest) {
           })
           .eq('id', contractor.id)
       }
+
+      await logSecurityEvent('auth.login', 'failed', {
+        errorMessage: authError.message,
+        contractorId: contractor?.id ?? null,
+        clientIp: ip,
+        metadata: { email },
+      })
 
       return NextResponse.json(
         { error: 'Invalid email or password' },

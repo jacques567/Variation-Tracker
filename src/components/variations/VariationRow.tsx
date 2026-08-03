@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Link2, Share2, Check, ChevronUp, CheckCircle2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Link2, Share2, Check, ChevronUp, CheckCircle2, X } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 import SignatureRecord from './SignatureRecord'
 import type { Variation, Signature } from '@/types'
 
@@ -28,6 +30,9 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
   const [shared, setShared] = useState(false)
   const [canNativeShare, setCanNativeShare] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelError, setCancelError] = useState<string | null>(null)
+  const router = useRouter()
 
   // Firefox (desktop and Android) and older browsers don't implement the Web
   // Share API — they fall back to the copy-link button below.
@@ -58,6 +63,25 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
       console.error('Failed to record delivery:', err)
       return false
     }
+  }
+
+  // RLS only allows deleting a variation while status <> 'signed', so this
+  // can never remove evidence of something the client already agreed to.
+  async function cancelVariation() {
+    if (!window.confirm('Cancel this variation? This cannot be undone.')) return
+
+    setCancelling(true)
+    setCancelError(null)
+    const supabase = createClient()
+    const { error } = await supabase.from('variations').delete().eq('id', variation.id)
+
+    if (error) {
+      setCancelError(error.message)
+      setCancelling(false)
+      return
+    }
+
+    router.refresh()
   }
 
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== 'undefined')
@@ -158,8 +182,23 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
             </button>
           )}
           <p className="font-semibold text-gray-900">{formatCurrency(variation.cost)}</p>
+          {variation.status !== 'signed' && (
+            <button
+              onClick={cancelVariation}
+              disabled={cancelling}
+              aria-label="Cancel variation"
+              title="Cancel variation"
+              className="text-gray-300 hover:text-red-500 transition-colors disabled:opacity-50"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
+
+      {cancelError && (
+        <p className="text-xs text-red-600 mt-2">Couldn&apos;t cancel: {cancelError}</p>
+      )}
 
       {variation.photo_url && photoOpen && (
         <div className="mt-3 relative">

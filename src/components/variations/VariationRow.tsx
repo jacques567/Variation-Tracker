@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Link2, Share2, Check, ChevronUp, CheckCircle2, Send, X } from 'lucide-react'
+import { Link2, Share2, Check, ChevronUp, CheckCircle2, X } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import SignatureRecord from './SignatureRecord'
@@ -19,14 +19,6 @@ interface Props {
 
 type DeliveryChannel = 'email' | 'whatsapp' | 'sms' | 'share_sheet' | 'link_copied' | 'in_person' | 'other'
 
-const CHANNEL_LABELS: { value: DeliveryChannel; label: string; placeholder: string }[] = [
-  { value: 'whatsapp',  label: 'WhatsApp',  placeholder: 'Mobile number' },
-  { value: 'sms',       label: 'SMS',       placeholder: 'Mobile number' },
-  { value: 'email',     label: 'Email',     placeholder: 'Email address' },
-  { value: 'in_person', label: 'In person', placeholder: 'Who you handed it to' },
-  { value: 'other',     label: 'Other',     placeholder: 'Recipient' },
-]
-
 const statusStyles: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
   pending: 'bg-amber-50 text-amber-700',
@@ -38,10 +30,6 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
   const [shared, setShared] = useState(false)
   const [canNativeShare, setCanNativeShare] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
-  const [recordOpen, setRecordOpen] = useState(false)
-  const [recordChannel, setRecordChannel] = useState<DeliveryChannel>('whatsapp')
-  const [recipient, setRecipient] = useState('')
-  const [recorded, setRecorded] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [cancelError, setCancelError] = useState<string | null>(null)
   const router = useRouter()
@@ -74,15 +62,6 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
     } catch (err) {
       console.error('Failed to record delivery:', err)
       return false
-    }
-  }
-
-  async function submitDeliveryRecord() {
-    const ok = await recordDelivery(recordChannel, recipient.trim() || undefined)
-    if (ok) {
-      setRecorded(true)
-      setRecipient('')
-      setTimeout(() => { setRecorded(false); setRecordOpen(false) }, 1500)
     }
   }
 
@@ -268,52 +247,6 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
               {copied === 'link' ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
               {copied === 'link' ? 'Copied' : 'Copy link'}
             </button>
-          )}
-        </div>
-      )}
-
-      {variation.status !== 'signed' && (
-        <div className="mt-2">
-          {!recordOpen ? (
-            <button
-              onClick={() => setRecordOpen(true)}
-              className="text-xs text-gray-500 hover:text-gray-700 underline underline-offset-2"
-            >
-              Record how you sent this
-            </button>
-          ) : (
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2">
-              <p className="text-xs text-gray-500">
-                Logs a timestamped record of how the link reached your client. Helpful evidence if
-                the variation is ever disputed.
-              </p>
-              <div className="flex items-center gap-2">
-                <select
-                  value={recordChannel}
-                  onChange={(e) => setRecordChannel(e.target.value as DeliveryChannel)}
-                  aria-label="Delivery channel"
-                  className="text-xs border border-gray-300 rounded-lg px-2 py-1.5 bg-white text-gray-700"
-                >
-                  {CHANNEL_LABELS.map(c => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
-                  ))}
-                </select>
-                <input
-                  value={recipient}
-                  onChange={(e) => setRecipient(e.target.value)}
-                  placeholder={CHANNEL_LABELS.find(c => c.value === recordChannel)?.placeholder}
-                  aria-label="Recipient"
-                  className="flex-1 min-w-0 text-xs border border-gray-300 rounded-lg px-2 py-1.5 bg-white text-gray-900"
-                />
-                <button
-                  onClick={submitDeliveryRecord}
-                  className="flex items-center gap-1 text-xs bg-gray-800 text-white rounded-lg px-3 py-1.5 hover:bg-gray-900 transition-colors shrink-0"
-                >
-                  {recorded ? <Check className="w-3.5 h-3.5" /> : <Send className="w-3.5 h-3.5" />}
-                  {recorded ? 'Saved' : 'Save'}
-                </button>
-              </div>
-            </div>
           )}
         </div>
       )}

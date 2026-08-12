@@ -64,6 +64,43 @@ export default function SignatureForm({
     setIsEmpty(true)
   }
 
+  // react-signature-canvas is mounted with clearOnResize={false} so that iOS's
+  // collapsing/expanding address bar (a resize event that only changes height)
+  // doesn't wipe an in-progress signature. But a real rotation changes the
+  // canvas's CSS width too — since the backing pixel buffer is never resized to
+  // match, the browser stretches the old buffer into the new box, warping the
+  // drawing. Only redraw when width actually changes, and preserve the strokes
+  // across it instead of clearing them.
+  useEffect(() => {
+    let lastWidth = sigRef.current?.getCanvas().offsetWidth ?? 0
+
+    function handleResize() {
+      const sigPad = sigRef.current
+      if (!sigPad) return
+      const canvas = sigPad.getCanvas()
+      const newWidth = canvas.offsetWidth
+      if (newWidth === lastWidth || sigPad.isEmpty()) {
+        lastWidth = newWidth
+        return
+      }
+      lastWidth = newWidth
+
+      const data = sigPad.toData()
+      const ratio = Math.max(window.devicePixelRatio || 1, 1)
+      canvas.width = canvas.offsetWidth * ratio
+      canvas.height = canvas.offsetHeight * ratio
+      canvas.getContext('2d')?.scale(ratio, ratio)
+      sigPad.fromData(data)
+    }
+
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('orientationchange', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('orientationchange', handleResize)
+    }
+  }, [])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!clientName.trim()) { setError('Please enter your name'); return }

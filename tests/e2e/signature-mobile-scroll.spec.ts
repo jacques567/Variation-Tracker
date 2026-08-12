@@ -140,6 +140,62 @@ test('signature survives an address-bar resize event mid-scroll', async ({ page 
   await expect(submitButton).toBeEnabled();
 });
 
+test('signature survives an orientation change (width resize)', async ({ page }) => {
+  test.skip(!supabase || !signatureToken, skipReason);
+
+  await page.goto(`/sign/${signatureToken}`);
+
+  const canvas = page.locator('canvas').first();
+  await expect(canvas).toBeVisible();
+
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Signature canvas has no bounding box');
+
+  const startX = box.x + box.width * 0.2;
+  const startY = box.y + box.height * 0.5;
+  const endX = box.x + box.width * 0.8;
+  const endY = box.y + box.height * 0.5;
+
+  await page.touchscreen.tap(startX, startY);
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  await page.mouse.move(endX, endY, { steps: 10 });
+  await page.mouse.up();
+
+  const blank = await blankCanvasDataUrl(page);
+  const dataUrlBeforeRotate = await canvas.evaluate((el: HTMLCanvasElement) => el.toDataURL());
+  expect(dataUrlBeforeRotate).not.toEqual(blank);
+
+  // Portrait -> landscape: a real rotation, not just an address-bar collapse.
+  // The canvas's CSS width changes here, unlike the resize test above — this
+  // is the case clearOnResize={false} alone does not handle, since it skips
+  // the library's resize entirely and leaves the backing buffer stretched
+  // into the new box instead of redrawn to fit it.
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.waitForTimeout(300);
+
+  // The actual glitch this guards against: without a redraw, the canvas's
+  // backing pixel buffer (canvas.width/height) stays sized for the old,
+  // narrower box while its CSS box grows to fill the new landscape width —
+  // the browser then stretches the old raster to fit, warping the signature
+  // and throwing off where new strokes land. When the box did grow, the
+  // buffer should have been resized to track it.
+  const dimensions = await canvas.evaluate((el: HTMLCanvasElement) => ({
+    bufferWidth: el.width,
+    cssWidth: el.offsetWidth,
+  }));
+  if (dimensions.cssWidth > 390) {
+    const ratio = await page.evaluate(() => window.devicePixelRatio || 1);
+    expect(dimensions.bufferWidth).toBeCloseTo(dimensions.cssWidth * ratio, 0);
+  }
+
+  const dataUrlAfterRotate = await canvas.evaluate((el: HTMLCanvasElement) => el.toDataURL());
+  expect(dataUrlAfterRotate).not.toEqual(blank);
+
+  const submitButton = page.locator('button[type="submit"]');
+  await expect(submitButton).toBeEnabled();
+});
+
 async function blankCanvasDataUrl(page: import('@playwright/test').Page): Promise<string> {
   return page.evaluate(() => {
     const c = document.createElement('canvas');

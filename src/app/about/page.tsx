@@ -66,10 +66,7 @@ const faqSchema = {
 export default function AboutPage() {
   return (
     <div className={`${poppins.className} min-h-screen`} style={{ backgroundColor: '#E6EAF0' }}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
 
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-3xl mx-auto px-4 py-4 sm:px-6">

@@ -62,10 +62,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
+        <script type="application/ld+json">{JSON.stringify(organizationSchema)}</script>
         <SkipNav />
         <main id="main">
           {children}

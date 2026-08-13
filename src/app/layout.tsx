@@ -34,6 +34,15 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'VarTracker',
+  url: appUrl,
+  logo: `${appUrl}/VarTrackerLogo3Trans.png`,
+  description: 'Log variations, get client sign-off, export invoices. Built for UK contractors.',
+};
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -53,6 +62,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
         <SkipNav />
         <main id="main">
           {children}

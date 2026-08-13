@@ -46,10 +46,11 @@ Intended typeface: **Poppins** (weights Regular/Medium/Semibold). Poppins isn't 
 
 ## Logo — do not regenerate
 
-The VarTracker logo is a real, hand-designed asset (created in Fresco by Jacques). **Never generate, redraw, or approximate it in Stitch or any AI tool** — this was tried once this session and rejected immediately. Source files:
-- `design/VarTrackerLogo3Trans.png` — transparent PNG, use this
-- `design/archive/VarTrackerNamelogo.svg` — archived vector (auto-traced, not a clean source — prefer the PNG)
-- `VarTrackerName.jpg` (repo root) — source for `public/VarTrackerName.jpg`, already used on the live landing page
+The VarTracker logo is a real, hand-designed asset (created in Fresco by Jacques). **Never generate, redraw, or approximate it in Stitch or any AI tool** — this was tried once this session and rejected immediately. Source files, both in `design/` (gitignored — local originals, not committed; copy into `public/` per-worktree when a build needs them):
+- `design/VarTrackerLogo3Trans.png` — the mark (icon only), transparent PNG. Use for compact/square placements.
+- `design/VarTrackerName3Trans.png` — the full wordmark, transparent PNG. This is the current logo asset for lockup/header placements — supersedes `VarTrackerName.jpg` for anything new.
+- `design/archive/VarTrackerNamelogo.svg` — archived vector (auto-traced, not a clean source — prefer the PNGs)
+- `VarTrackerName.jpg` (repo root) — legacy, opaque background. Still the source for `public/VarTrackerName.jpg` on the live landing page; don't touch that page. Don't use this file for new work — use `VarTrackerName3Trans.png` instead, since it's transparent and composites cleanly onto any background.
 
 Any Stitch screen needing the logo gets a labeled blank placeholder ("Logo goes here") — composite the real file in by hand during actual development.
 

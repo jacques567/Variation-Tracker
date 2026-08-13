@@ -1,9 +1,11 @@
 # VarTracker — Design System
 
-Exported from Stitch design system asset `assets/17479271680059202132` ("VarTracker Design System v3"), locked 2026-08-12. This is the canonical token reference for building VarTracker's UI — implementations should match these values exactly, not the values in earlier/broken Stitch assets (see **Known-bad references** below).
+**This file is the sole exact source of truth for VarTracker's design tokens.** It is hand-authored and lives in the repo — it does not update itself, and Stitch does not update it. Originally exported from Stitch design system asset `assets/17479271680059202132` ("VarTracker Design System v3"), locked 2026-08-12.
+
+⚠️ **Do not trust the live Stitch asset or rendered screens for exact color values.** Confirmed 2026-08-13: Stitch's stored design system asset has been observed drifting to different unrequested primary colors and `colorVariant` settings across multiple correction attempts, including at least one where no rendering call (`apply_design_system`) was involved — this looks like asynchronous server-side regeneration outside client control, not a sequencing mistake. Build against the values documented in this file, not whatever color currently renders in Stitch.
 
 Stitch project: https://stitch.withgoogle.com/projects/12670254359852135253
-Validated screens in that project: "VarTracker Login Modern Minimal 1" (prototype), "VarTracker Component Reference" (component sheet).
+Reference screens in that project: "VarTracker Login Modern Minimal 1" (prototype), "VarTracker Component Reference" (component sheet) — visual layout/structure reference only, colors on these screens may not match this document exactly.
 
 ## Brand
 
@@ -57,8 +59,17 @@ Only the login screen ("VarTracker Login Modern Minimal 1") is a validated proto
 
 ## Known-bad references — do not use
 
-Two earlier Stitch design system assets in the same project are broken due to a platform bug (Stitch's `edit_screens` tool let its internal theme-editing agent rewrite values beyond what was asked, and once forked an entirely unrelated system). Neither is applied to anything live:
+Two earlier Stitch design system assets in the same project are broken due to platform issues (see below). Neither is applied to anything live:
 - `assets/15704262547670023861` — drifted from the intended flat `#0057B8` to `#007afd` with `FIDELITY` color variant
 - `assets/487e9c81c450435897e8b4139620c0f9` ("Reliant Professional") — an unrelated system with Work Sans/Inter/JetBrains Mono fonts, never requested
 
-Only `assets/17479271680059202132` is valid. If rebuilding this system in the future, use only `create_design_system` / `update_design_system` / `apply_design_system` for token-level changes — never `edit_screens`, which is safe only for scoped content edits (text, layout, element swaps), not color/theme changes.
+`assets/17479271680059202132` is the intended asset, but as of 2026-08-13 its live color values also cannot be trusted exactly — see the warning at the top of this file.
+
+## Why colors on the auto-generated Stitch screens don't match this doc exactly
+
+Two separate issues, both confirmed this session:
+
+1. **Stitch auto-generates a full Material Design tonal palette** (secondary, tertiary, a full neutral/surface scale) from just a seed color + `colorVariant` setting — this happens automatically, is not something explicitly requested, and is visible in Stitch's own Design System panel alongside the intentional brand colors documented above. The `tertiary` and extended neutral scale are algorithmic byproducts, not part of VarTracker's brand — nothing in this document or the real app uses them. Ignore them.
+2. **The stored design system asset does not reliably hold explicit values, including via calls previously believed safe.** `apply_design_system` and even standalone `update_design_system` calls have been observed being silently overwritten with different, unrequested primary colors and `colorVariant` settings shortly after being set correctly — confirmed across three consecutive correction attempts on 2026-08-13, each producing a different unrequested result. This does not appear to be caused by call sequencing or tool choice; it looks like asynchronous regeneration on Stitch's backend. No reliable fix was found via the available tools — repeated retries are not expected to help and should not be attempted past one correction pass.
+
+**Practical takeaway:** treat this file as authoritative. Treat any color rendered in Stitch — including the design system panel and generated screens — as an approximate visual reference, not a value to copy exactly into code.

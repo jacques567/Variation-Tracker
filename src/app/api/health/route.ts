@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 interface HealthCheckResult {
@@ -12,7 +13,11 @@ interface HealthCheckResult {
   };
 }
 
-export async function GET(): Promise<Response> {
+export async function GET(request: NextRequest): Promise<Response> {
+  const authHeader = request.headers.get('authorization');
+  const authorized =
+    !!process.env.HEALTH_CHECK_SECRET && authHeader === `Bearer ${process.env.HEALTH_CHECK_SECRET}`;
+
   const result: HealthCheckResult = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -53,7 +58,7 @@ export async function GET(): Promise<Response> {
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
-    const { error } = await supabase.from('profiles').select('id').limit(1);
+    const { error } = await supabase.from('contractors').select('id').limit(1);
 
     if (error) {
       result.checks.database.status = 'fail';
@@ -119,5 +124,12 @@ export async function GET(): Promise<Response> {
   // Set HTTP status code based on health
   const statusCode = result.status === 'healthy' ? 200 : result.status === 'degraded' ? 503 : 500;
 
-  return Response.json(result, { status: statusCode });
+  // Unauthenticated callers only get the overall status — the per-check detail (missing
+  // env var names, raw DB error text, config state) is internal diagnostic info that
+  // shouldn't be handed to anyone who can reach this public endpoint.
+  const body: Partial<HealthCheckResult> = authorized
+    ? result
+    : { status: result.status, timestamp: result.timestamp };
+
+  return Response.json(body, { status: statusCode });
 }

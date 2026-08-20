@@ -1,8 +1,30 @@
 import { test, expect } from '@playwright/test';
 
+// HEALTH_CHECK_SECRET must match the value the dev/CI server is running with —
+// unauthenticated requests only get {status, timestamp}; the full `checks` object
+// with diagnostic detail is gated behind this header so it can't be scraped publicly.
+const authHeader = { Authorization: `Bearer ${process.env.HEALTH_CHECK_SECRET}` };
+
 test.describe('Health Check — Last Line of Defense', () => {
-  test('health endpoint should respond and be structured correctly', async ({ request }) => {
+  test('unauthenticated request only gets overall status, not diagnostic detail', async ({ request }) => {
     const response = await request.get('/api/health');
+
+    // Should respond with 200 (healthy), 503 (degraded), or 500 (error)
+    expect([200, 503]).toContain(response.status());
+
+    const json = await response.json();
+
+    expect(json.status).toMatch(/^(healthy|degraded|unhealthy)$/);
+    expect(json.timestamp).toBeDefined();
+    expect(new Date(json.timestamp)).toBeInstanceOf(Date);
+
+    // No internal diagnostic detail (env var names, DB errors, config state) leaks
+    // to an unauthenticated caller.
+    expect(json.checks).toBeUndefined();
+  });
+
+  test('authorized request should respond and be structured correctly', async ({ request }) => {
+    const response = await request.get('/api/health', { headers: authHeader });
 
     // Should respond with 200 (healthy), 503 (degraded), or 500 (error)
     // We accept 200 and 503, reject 500 or higher
@@ -31,7 +53,7 @@ test.describe('Health Check — Last Line of Defense', () => {
   });
 
   test('environment variables check should report', async ({ request }) => {
-    const response = await request.get('/api/health');
+    const response = await request.get('/api/health', { headers: authHeader });
     const json = await response.json();
 
     // Should have environment check with details
@@ -42,7 +64,7 @@ test.describe('Health Check — Last Line of Defense', () => {
   });
 
   test('all checks should have status field', async ({ request }) => {
-    const response = await request.get('/api/health');
+    const response = await request.get('/api/health', { headers: authHeader });
     const json = await response.json();
 
     // Verify each check has a status
@@ -53,7 +75,7 @@ test.describe('Health Check — Last Line of Defense', () => {
   });
 
   test('security issues should be an array', async ({ request }) => {
-    const response = await request.get('/api/health');
+    const response = await request.get('/api/health', { headers: authHeader });
     const json = await response.json();
 
     const securityCheck = json.checks.security;
@@ -61,7 +83,7 @@ test.describe('Health Check — Last Line of Defense', () => {
   });
 
   test('dependencies should report loaded state', async ({ request }) => {
-    const response = await request.get('/api/health');
+    const response = await request.get('/api/health', { headers: authHeader });
     const json = await response.json();
 
     const depsCheck = json.checks.dependencies;

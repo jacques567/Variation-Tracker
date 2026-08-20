@@ -1,0 +1,49 @@
+name: Health Monitor
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Production
+            url: https://www.vartracker.com/api/health
+          - name: Beta
+            url: https://beta-vartracker.vercel.app/api/health
+    name: "${{ matrix.name }}"
+    steps:
+      - name: Ping health check
+        id: check
+        run: |
+          response=$(curl -sS -w "\n%{http_code}" "${{ matrix.url }}")
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          status=$(echo "$body" | jq -r '.status // "unknown"')
+
+          echo "HTTP $http_code — status: $status"
+          echo "http_code=$http_code" >> "$GITHUB_OUTPUT"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+
+          if [ "$http_code" != "200" ] || [ "$status" != "healthy" ]; then
+            echo "unhealthy=true" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Notify Slack on failure
+        if: failure()
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL secret not set — skipping notification."
+            exit 0
+          fi
+          curl -sf -X POST "$SLACK_WEBHOOK_URL" \
+            -H 'Content-Type: application/json' \
+            -d "{\"text\": \"⚠️ Health check failed for *${{ matrix.name }}* (${{ matrix.url }}) — HTTP ${{ steps.check.outputs.http_code }}, status: ${{ steps.check.outputs.status }}. <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>\"}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

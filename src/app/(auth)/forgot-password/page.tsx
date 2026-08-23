@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { Spinner } from '@/components/ui/Spinner'
 
 export default function ForgotPasswordPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -77,8 +78,9 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
+          {loading && <Spinner />}
           {loading ? 'Sending...' : 'Send reset link'}
         </button>
       </form>

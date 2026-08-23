@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Spinner } from '@/components/ui/Spinner'
 
 export function SubscribeButton() {
   const [loading, setLoading] = useState(false)
@@ -29,8 +30,9 @@ export function SubscribeButton() {
       <button
         onClick={handleSubscribe}
         disabled={loading}
-        className="w-full bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
+        {loading && <Spinner />}
         {loading ? 'Redirecting...' : 'Subscribe now'}
       </button>
       {error && <p className="text-xs text-red-600 text-center">{error}</p>}
@@ -65,8 +67,9 @@ export function ManageSubscriptionButton() {
       <button
         onClick={handleManage}
         disabled={loading}
-        className="w-full bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl py-3 font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
       >
+        {loading && <Spinner />}
         {loading ? 'Opening...' : 'Manage Subscription'}
       </button>
       {error && <p className="text-xs text-red-600 text-center">{error}</p>}

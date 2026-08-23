@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, Plus, Trash2, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { readJobFormDraft, writeJobFormDraft } from '@/lib/jobFormDraft'
+import { CategoryListSkeleton } from '@/components/ui/Skeleton'
 import type { JobCategory } from '@/types'
 
 interface UncategorizedJob {
@@ -323,7 +324,7 @@ export default function CategoriesPage() {
           )}
 
           {loading ? (
-            <p className="text-sm text-gray-500">Loading...</p>
+            <CategoryListSkeleton />
           ) : categories.length === 0 ? (
             <p className="text-sm text-gray-500">No categories yet. Create one to get started!</p>
           ) : (

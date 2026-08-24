@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', system-ui, sans-serif; }
+    a { text-decoration: none; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid #0057B8; outline-offset: 2px; border-radius: 4px; }
+    input::placeholder { color: #6B7280; }
+    input:focus { outline: none; border-color: #0057B8 !important; box-shadow: 0 0 0 3px rgba(0,87,184,0.15); }
+  </style>
+</helmet>
+
+<div style="width:1440px; min-height:820px; position:relative; background-color:#E6EAF0;">
+
+  <img src="bg-app.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.5; z-index:0;">
+
+  <div style="position:relative; z-index:1; display:flex; flex-direction:column; min-height:820px;">
+
+    <!-- NavBar -->
+    <header style="background:#FFFFFF; border-bottom:1px solid #E6EAF0;">
+      <div style="max-width:896px; margin:0 auto; height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 16px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="./logo.png" alt="" width="50" height="50" style="width:50px; height:50px; object-fit:contain;">
+          <span style="font-size:16px; font-weight:700; color:#0F1720; letter-spacing:-0.01em;">VarTracker</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:28px;">
+          <a href="#" style="font-size:14px; color:#0057B8; font-weight:600;">Categories</a>
+          <a href="#" style="font-size:14px; color:#4B5563;">Admin</a>
+          <div style="display:flex; align-items:center; gap:16px;">
+            <span style="font-size:14px; color:#6B7280;">Dave Whitfield</span>
+            <a href="#" style="display:flex; align-items:center; gap:6px; font-size:14px; color:#6B7280;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign out
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1; max-width:896px; margin:0 auto; width:100%; padding:24px 16px 48px;">
+
+      <a href="#" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6B7280; margin-bottom:20px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to jobs
+      </a>
+
+      <h1 style="margin:0 0 22px; font-size:22px; font-weight:600; color:#0F1720;">Job Categories</h1>
+
+      <div style="display:grid; grid-template-columns:280px 1fr; gap:20px; align-items:start;">
+
+        <!-- New Category form -->
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:20px;">
+          <h2 style="margin:0 0 14px; font-size:13.5px; font-weight:600; color:#0F1720;">New Category</h2>
+          <input type="text" placeholder="e.g. March 2025, Manchester projects" style="width:100%; height:42px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:13.5px; color:#0F1720; background:#FFFFFF; margin-bottom:10px;">
+          <button style="width:100%; display:flex; align-items:center; justify-content:center; gap:7px; background:#0057B8; color:#FFFFFF; border:none; border-radius:10px; padding:11px; font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create
+          </button>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:20px;">
+
+          <!-- Assign jobs to categories -->
+          <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:20px;">
+            <h2 style="margin:0 0 14px; font-size:13.5px; font-weight:600; color:#0F1720;">Assign Jobs to Categories (2)</h2>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#F7F9FB; border-radius:10px;">
+                <div>
+                  <p style="margin:0; font-size:13.5px; font-weight:600; color:#0F1720;">Loft Conversion</p>
+                  <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">Priya Patel</p>
+                </div>
+                <button style="background:#0057B8; color:#FFFFFF; border:none; border-radius:8px; padding:7px 14px; font-family:'Poppins',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Assign</button>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#F7F9FB; border-radius:10px;">
+                <div>
+                  <p style="margin:0; font-size:13.5px; font-weight:600; color:#0F1720;">Garden Office Build</p>
+                  <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">Tom Reynolds</p>
+                </div>
+                <button style="background:#0057B8; color:#FFFFFF; border:none; border-radius:8px; padding:7px 14px; font-family:'Poppins',sans-serif; font-size:12.5px; font-weight:600; cursor:pointer;">Assign</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- All categories -->
+          <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:20px;">
+            <h2 style="margin:0 0 14px; font-size:13.5px; font-weight:600; color:#0F1720;">All Categories</h2>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#F7F9FB; border-radius:10px;">
+                <div>
+                  <p style="margin:0; font-size:13.5px; font-weight:600; color:#0F1720;">Kitchens</p>
+                  <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">1 job</p>
+                </div>
+                <button aria-label="Delete Kitchens category" style="background:none; border:none; padding:10px; margin:-10px; cursor:pointer; color:#7C8798;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#F7F9FB; border-radius:10px;">
+                <div>
+                  <p style="margin:0; font-size:13.5px; font-weight:600; color:#0F1720;">Bathrooms</p>
+                  <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">1 job</p>
+                </div>
+                <button aria-label="Delete Bathrooms category" style="background:none; border:none; padding:10px; margin:-10px; cursor:pointer; color:#7C8798;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#F7F9FB; border-radius:10px;">
+                <div>
+                  <p style="margin:0; font-size:13.5px; font-weight:600; color:#0F1720;">Extensions</p>
+                  <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">1 job</p>
+                </div>
+                <button aria-label="Delete Extensions category" style="background:none; border:none; padding:10px; margin:-10px; cursor:pointer; color:#7C8798;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#F7F9FB; border-radius:10px;">
+                <div>
+                  <p style="margin:0; font-size:13.5px; font-weight:600; color:#0F1720;">Garden</p>
+                  <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">1 job</p>
+                </div>
+                <button aria-label="Delete Garden category" style="background:none; border:none; padding:10px; margin:-10px; cursor:pointer; color:#7C8798;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

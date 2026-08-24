@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', system-ui, sans-serif; }
+    a { text-decoration: none; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid #0057B8; outline-offset: 2px; border-radius: 4px; }
+    input::placeholder { color: #6B7280; }
+    input:focus { outline: none; border-color: #0057B8 !important; box-shadow: 0 0 0 3px rgba(0,87,184,0.15); }
+  </style>
+</helmet>
+
+<div style="width:1440px; min-height:1060px; position:relative; background-color:#E6EAF0;">
+
+  <img src="bg-sign.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.5; z-index:0;">
+
+  <div style="position:relative; z-index:1; display:flex; flex-direction:column; min-height:1060px;">
+
+    <!-- Minimal header, no nav (public page) -->
+    <header style="background:#FFFFFF; border-bottom:1px solid #E6EAF0;">
+      <div style="height:64px; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <img src="./logo.png" alt="" width="50" height="50" style="width:50px; height:50px; object-fit:contain;">
+        <span style="font-size:16px; font-weight:700; color:#0F1720; letter-spacing:-0.01em;">VarTracker</span>
+      </div>
+    </header>
+
+    <main style="flex:1; display:flex; justify-content:center; padding:40px 16px;">
+      <div style="width:100%; max-width:460px;">
+
+        <div style="text-align:center; margin-bottom:20px;">
+          <p style="margin:0; font-size:13px; color:#6B7280;">Variation notice for</p>
+          <h1 style="margin:2px 0 0; font-size:19px; font-weight:600; color:#0F1720;">Kitchen Extension &#8212; Oak Street</h1>
+          <p style="margin:2px 0 0; font-size:13px; color:#6B7280;">24 Oak Street, Manchester</p>
+        </div>
+
+        <!-- Variation details -->
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:20px; margin-bottom:16px; box-shadow:0 1px 2px rgba(15,23,32,0.04);">
+          <p style="margin:0 0 4px; font-size:12px; color:#6B7280;">Description of work</p>
+          <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">Relocate socket for island unit</p>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:16px; border-top:1px solid #EEF1F5;">
+            <div>
+              <p style="margin:0; font-size:12px; color:#6B7280;">Date</p>
+              <p style="margin:2px 0 0; font-size:13.5px; color:#0F1720;">21 Jun 2026</p>
+            </div>
+            <div style="text-align:right;">
+              <p style="margin:0; font-size:12px; color:#6B7280;">Additional cost</p>
+              <p style="margin:2px 0 0; font-size:21px; font-weight:700; color:#0F1720;">&#163;320</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Signature form -->
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 1px 2px rgba(15,23,32,0.04);">
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Your full name</label>
+            <input type="text" placeholder="John Smith" style="width:100%; height:42px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+
+          <div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+              <label style="font-size:13px; font-weight:600; color:#0F1720;">Signature</label>
+              <button type="button" style="background:none; border:none; font-size:12px; color:#6B7280; font-family:'Poppins',sans-serif; cursor:pointer;">Clear</button>
+            </div>
+            <div style="border:2px dashed #AEB8C7; border-radius:10px; background:#F7F9FB; height:150px; touch-action:none; display:flex; align-items:center; justify-content:center;">
+              <svg width="220" height="70" viewBox="0 0 220 70" fill="none">
+                <path d="M8 45 C 20 20, 30 20, 38 40 C 44 55, 50 55, 55 35 C 60 15, 68 15, 72 42 L 78 50 C 85 30, 92 25, 98 45 C 104 60, 112 40, 118 30 C 126 18, 136 20, 140 38 C 144 50, 150 32, 158 28 C 168 22, 178 30, 186 42 C 192 50, 200 35, 208 30" stroke="#0F1720" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <p style="margin:6px 0 0; font-size:11.5px; color:#6B7280;">Draw your signature above</p>
+          </div>
+
+          <div style="border:1px solid #FDE68A; background:#FFFBEB; border-radius:10px; padding:12px 14px; font-size:13px; font-weight:500; color:#92400E; line-height:1.5;">
+            By signing, I John Smith confirm I authorise this variation and the additional cost of &#163;320.00.
+          </div>
+
+          <button type="submit" style="width:100%; background:#0057B8; color:#FFFFFF; border:none; border-radius:10px; padding:13px; font-family:'Poppins',sans-serif; font-size:14.5px; font-weight:600; cursor:pointer;">Sign and agree</button>
+
+          <p style="margin:0; font-size:11px; color:#6B7280; text-align:center; line-height:1.5;">Your electronic signature, name, IP address and the time of signing are recorded, and are admissible as evidence under the Electronic Communications Act 2000.</p>
+
+        </div>
+
+        <div style="margin-top:28px; padding-top:16px; border-top:1px solid #D8DEE7;">
+          <p style="margin:0; font-size:11px; color:#6B7280; line-height:1.6; text-align:center;">
+            <strong style="color:#374151;">Privacy notice.</strong> Your name, signature, and IP address are recorded by WildFireCo (trading as Variation Tracker) solely to create a secure, time-stamped record of your approval of this variation. Retained for up to 6 years. You have rights of access, rectification, and erasure under UK GDPR &#8212; contact <a href="#" style="color:#0057B8;">admin@vartracker.com</a>.
+          </p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

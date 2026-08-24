@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', system-ui, sans-serif; }
+    a { text-decoration: none; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #0057B8; outline-offset: 2px; border-radius: 4px; }
+    input::placeholder { color: #6B7280; }
+    input:focus, select:focus { outline: none; border-color: #0057B8 !important; box-shadow: 0 0 0 3px rgba(0,87,184,0.15); }
+  </style>
+</helmet>
+
+<div style="width:834px; min-height:1150px; position:relative; background-color:#E6EAF0;">
+
+  <img src="bg-app.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.5; transform:scale(0.8); transform-origin:center; z-index:0;">
+
+  <div style="position:relative; z-index:1; display:flex; flex-direction:column; min-height:1150px;">
+
+    <!-- NavBar -->
+    <header style="background:#FFFFFF; border-bottom:1px solid #E6EAF0;">
+      <div style="height:60px; display:flex; align-items:center; justify-content:space-between; padding:0 20px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <img src="./logo.png" alt="" width="44" height="44" style="width:44px; height:44px; object-fit:contain;">
+          <span style="font-size:16px; font-weight:700; color:#0F1720; letter-spacing:-0.01em;">VarTracker</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:20px;">
+          <a href="#" style="font-size:14px; color:#4B5563;">Categories</a>
+          <a href="#" style="font-size:14px; color:#4B5563;">Admin</a>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span style="font-size:13px; color:#6B7280;">Dave Whitfield</span>
+            <a href="#" style="display:flex; align-items:center; gap:6px; font-size:13px; color:#6B7280;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign out
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1; width:100%; padding:20px 20px 48px;">
+
+      <a href="#" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6B7280; margin-bottom:18px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to jobs
+      </a>
+
+      <h1 style="margin:0 0 18px; font-size:21px; font-weight:600; color:#0F1720;">New job</h1>
+
+      <div style="max-width:600px; background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:28px; box-shadow:0 1px 2px rgba(15,23,32,0.04);">
+        <form style="display:flex; flex-direction:column; gap:18px;">
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Job name <span style="color:#DC2626;">*</span></label>
+            <input type="text" placeholder="e.g. Kitchen extension &#8211; 14 Maple St" style="width:100%; height:44px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Site address <span style="color:#DC2626;">*</span></label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" placeholder="e.g. SW1A 1AA" style="flex:1; height:44px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+              <button type="button" style="flex-shrink:0; padding:0 18px; height:44px; background:#0F1720; color:#FFFFFF; border:none; border-radius:10px; font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer;">Find address</button>
+            </div>
+            <p style="margin:6px 0 0; font-size:12px; color:#6B7280;">We'll look up the full address from your postcode.</p>
+          </div>
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Original contract value <span style="color:#DC2626;">*</span></label>
+            <div style="position:relative;">
+              <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:14px; color:#6B7280;">&#163;</span>
+              <input type="text" placeholder="5,000.00" style="width:100%; height:44px; padding:0 14px 0 28px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+            </div>
+          </div>
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Category</label>
+            <select style="width:100%; height:44px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+              <option>No category</option>
+              <option>Kitchens</option>
+              <option>Bathrooms</option>
+              <option>Extensions</option>
+              <option>Garden</option>
+            </select>
+            <p style="margin:6px 0 0; font-size:12px;"><a href="#" style="color:#0057B8; font-weight:600;">Manage categories</a></p>
+          </div>
+
+          <hr style="border:none; border-top:1px solid #EEF1F5; margin:4px 0;">
+          <p style="margin:0; font-size:13px; font-weight:600; color:#0F1720;">Client details</p>
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Client name <span style="color:#DC2626;">*</span></label>
+            <input type="text" placeholder="John Smith" style="width:100%; height:44px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Client email <span style="color:#DC2626;">*</span></label>
+            <input type="email" placeholder="john@example.com" style="width:100%; height:44px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Confirm client email</label>
+            <input type="email" placeholder="john@example.com" style="width:100%; height:44px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Client phone</label>
+            <input type="tel" placeholder="07700 900000" style="width:100%; height:44px; padding:0 14px; border:1px solid #AEB8C7; border-radius:10px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+
+          <div style="display:flex; gap:12px; padding-top:4px;">
+            <a href="#" style="flex:1; text-align:center; padding:12px; border:1px solid #AEB8C7; border-radius:10px; font-size:14px; font-weight:600; color:#0F1720;">Cancel</a>
+            <button type="submit" style="flex:1; background:#0057B8; color:#FFFFFF; border:none; border-radius:10px; padding:12px; font-family:'Poppins',sans-serif; font-size:14px; font-weight:600; cursor:pointer;">Create job</button>
+          </div>
+
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

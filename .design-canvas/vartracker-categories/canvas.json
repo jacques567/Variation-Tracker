@@ -1,0 +1,8 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 820, "title": "Desktop" },
+    { "file": "Tablet.dc.html", "x": 1520, "y": 0, "w": 834, "h": 830, "title": "Tablet" },
+    { "file": "Mobile.dc.html", "x": 2440, "y": 0, "w": 390, "h": 940, "title": "Mobile" }
+  ],
+  "launch": { "view": "canvas" }
+}

@@ -23,22 +23,33 @@ Construction-industry variation tracker. Reliable, professional tone — not pla
 
 ### Status colors
 
-**Updated 2026-08-27** — the values below are what's actually shipping across all 13 Claude Design canvas screens (verified in a full WCAG contrast sweep this session). They supersede the earlier green-50/red-100 Tailwind pairing that was never applied to the built screens.
+Two valid sets exist right now, for two different surfaces — reconcile when Forge implements the redesign:
+
+**Currently live** (real Tailwind classes already shipping in the coded app — use exactly these until the redesign ships):
+
+| Status | Background | Text |
+|---|---|---|
+| Signed / success | `#F0FDF4` (green-50) | `#15803D` (green-700) |
+| Pending / warning | `#FFFBEB` (amber-50) | `#92400E` (amber-800) |
+| Expired / error | `#FEE2E2` (red-100) | `#DC2626` (red-600) |
+| Completed / neutral | `#F3F4F6` (gray-100) | `#4B5563` (gray-600) |
+
+**Redesign target** (what's actually shipping across all 13 Claude Design canvas screens, `.design-canvas/vartracker-*/` — verified in a full WCAG contrast sweep 2026-08-27; supersedes the live values above once Forge implements this design):
 
 | Status | Background | Text | Contrast |
 |---|---|---|---|
 | Signed / success | `#ECFDF5` | `#047857` | 5.21:1 |
 | Pending / warning | `#FFFBEB` | `#92400E` (body text) / `#B45309` (pills) | 6.84:1 / 4.84:1 |
-| Past due / error | `#FEF2F2` | `#B91C1C` | 5.91:1 — darkened from `#DC2626` (4.41:1, failed AA) this session |
+| Past due / error | `#FEF2F2` | `#B91C1C` | 5.91:1 — darkened from `#DC2626` (4.41:1, failed AA) |
 | Completed / neutral | `#F3F4F6` | `#4B5563` | 6.87:1 |
 
-Secondary/muted text on light surfaces: `#6B7280` on white (4.83:1) or on `#F7F9FB` (4.58:1) — replaces earlier `#9199A6`/`#9AA6B5`-style grays that failed contrast; those remain valid only for text on the dark `#0F1720` admin nav (7.30:1).
+Secondary/muted text on light surfaces (redesign): `#6B7280` on white (4.83:1) or on `#F7F9FB` (4.58:1) — replaces earlier `#9199A6`/`#9AA6B5`-style grays that failed contrast; those remain valid only for text on the dark `#0F1720` admin nav (7.30:1).
 
 ## Typography
 
 Intended typeface: **Poppins** (weights Regular/Medium/Semibold). Poppins isn't in Stitch's font enum, so **Montserrat** was used as the closest available geometric-sans proxy for previewing in Stitch — the real coded app should load actual Poppins from Google Fonts, not Montserrat.
 
-### Type scale
+### Type scale (redesign target — `.design-canvas/vartracker-*/` only)
 
 **Added 2026-08-27** after `impeccable audit` flagged a systemic "flat type hierarchy" antipattern (near-continuous 11–19px sizes with no real contrast between roles) across 31 of 39 screen files. Fixed via `impeccable typeset`: consolidated to four roles, with page titles / key figures pushed high enough that every screen clears a 2:1 largest-to-smallest ratio.
 
@@ -50,17 +61,17 @@ Intended typeface: **Poppins** (weights Regular/Medium/Semibold). Poppins isn't 
 | Title / key figure | `24px` (data-dense app screens) or `28px` (auth screens, low information density) | Page `<h1>`, prominent money/stat figures, the "VarTracker" wordmark on auth screens |
 
 Differentiate roles within the same size by weight and color (e.g. `font-weight:600` + `#0F1720` for a value vs. `font-weight:400` + `#6B7280` for its label) rather than introducing another 1–2px size step — this was the root cause of the original flat hierarchy.
-
 ## Shape & spacing
 
 - Corner radius: `rounded-xl` (12px) on cards, buttons, inputs
 - Cards: white background, soft border, subtle shadow
-- Background imagery — **superseded 2026-08-27.** The diamond line-pattern below was never built; every shipped screen uses a photographic background instead, rendered as an `<img>` (not CSS `background-image` — that doesn't render in Claude Design canvas) at `opacity:0.5`, scaled down on Tablet/Mobile (`transform:scale(0.8)`/`scale(0.5)`) so it doesn't read as zoomed-in. Assignment per section:
+- Blueprint/architectural diamond line-pattern background — **live today** on the coded marketing pages (e.g. `src/app/about/page.tsx`, `diamondPattern` style object), full intensity per the original spec. Not used anywhere else in the live app yet.
+- **Redesign target (`.design-canvas/vartracker-*/` only) — departs from the diamond pattern.** Every canvas screen uses a photographic background instead, rendered as an `<img>` (not CSS `background-image` — that doesn't render in Claude Design canvas) at `opacity:0.5`, scaled down on Tablet/Mobile (`transform:scale(0.8)`/`scale(0.5)`) so it doesn't read as zoomed-in. Assignment per section:
   - Auth flow (Login, Register, Forgot/Reset Password): `bg-desktop.jpg`
   - Core app (Jobs List, Job Detail, New Job, New Variation, Categories): `bg-app.jpg`
   - Sign Page / Subscribe: `bg-sign.jpg`
   - Admin (Dashboard, Contractors, Contractor Detail): `bg-admin.jpg`, paired with a dark `#0F1720` nav bar (vs. white elsewhere) to signal the elevated/different context
-- ~~Blueprint/architectural diamond line-pattern background~~ — not implemented; superseded by the above
+  - When Forge implements this redesign, decide then whether the diamond pattern survives anywhere (e.g. marketing pages outside this screen set) or is fully retired — not decided as of 2026-08-27.
 
 ## Icons
 
@@ -68,18 +79,19 @@ Differentiate roles within the same size by weight and color (e.g. `font-weight:
 
 ## Logo — do not regenerate
 
-The VarTracker logo is a real, hand-designed asset (created in Fresco by Jacques). **Never generate, redraw, or approximate it in Stitch or any AI tool** — this was tried once this session and rejected immediately. Source files:
-- `design/VarTrackerLogo3Trans.png` — transparent PNG, use this
-- `design/archive/VarTrackerNamelogo.svg` — archived vector (auto-traced, not a clean source — prefer the PNG)
-- `VarTrackerName.jpg` (repo root) — source for `public/VarTrackerName.jpg`, already used on the live landing page
+The VarTracker logo is a real, hand-designed asset (created in Fresco by Jacques). **Never generate, redraw, or approximate it in Stitch or any AI tool** — this was tried once this session and rejected immediately. Source files, both in `design/` (gitignored — local originals, not committed; copy into `public/` per-worktree when a build needs them):
+- `design/VarTrackerLogo3Trans.png` — the mark (icon only), transparent PNG. Use for compact/square placements.
+- `design/VarTrackerName3Trans.png` — the full wordmark, transparent PNG. This is the current logo asset for lockup/header placements — supersedes `VarTrackerName.jpg` for anything new.
+- `design/archive/VarTrackerNamelogo.svg` — archived vector (auto-traced, not a clean source — prefer the PNGs)
+- `VarTrackerName.jpg` (repo root) — legacy, opaque background. Still the source for `public/VarTrackerName.jpg` on the live landing page; don't touch that page. Don't use this file for new work — use `VarTrackerName3Trans.png` instead, since it's transparent and composites cleanly onto any background.
 
 Any Stitch screen needing the logo gets a labeled blank placeholder ("Logo goes here") — composite the real file in by hand during actual development.
 
 ## Validation status
 
-**Updated 2026-08-27.** All 13 planned screens are now built in Claude Design canvas (not Stitch — see note below), each across Desktop/Tablet/Mobile: Login, Register, Forgot Password, Reset Password, Jobs List, New Job, Job Detail, New Variation, Categories, Sign Page, Subscribe, Admin Dashboard, Admin Contractors, Admin Contractor Detail. Checked against `web-design-guidelines` (fixed: wrong placeholder copy on Categories, four touch targets under 44×44px, literal `...` vs `…`) and a full manual WCAG AA contrast sweep (zero failures remaining). Not yet run: a real `impeccable audit`/`critique`/`polish` pass — this file was missing from the design-canvas branch until now, which was the blocker; `ui-ux-pro-max` is a React Native pattern/token database and doesn't apply to this checkable-in-static-markup pass. Also not yet done: `ui-ux-pro-max`'s App UI checklist doesn't apply here (this is a web app, not React Native).
+**Updated 2026-08-27.** All 13 planned screens are now built in Claude Design canvas (not Stitch — see note below), each across Desktop/Tablet/Mobile: Login, Register, Forgot Password, Reset Password, Jobs List, New Job, Job Detail, New Variation, Categories, Sign Page, Subscribe, Admin Dashboard, Admin Contractors, Admin Contractor Detail. Checked against `web-design-guidelines` (fixed: wrong placeholder copy on Categories, four touch targets under 44×44px, literal `...` vs `…`), a full manual WCAG AA contrast sweep (zero failures remaining), and `impeccable audit` + `typeset` (fixed a systemic flat type-hierarchy antipattern, 34 detector findings → 0). Not yet run: `impeccable critique`/`polish`. `ui-ux-pro-max` is a React Native pattern/token database and doesn't apply here (this is a web app, not React Native).
 
-**Note on tooling:** the screens above were built with Claude Design canvas (`.design-canvas/vartracker-*/`), not Stitch — this branch (`claude/vartracker-design-handoff-ce5018`) diverged from the Stitch-based work referenced elsewhere in this document. Treat the Stitch asset IDs and warnings below as historical context for how these tokens were originally derived, not as the live design tool.
+**Note on tooling:** the screens above were built with Claude Design canvas (`.design-canvas/vartracker-*/`), not Stitch — this branch (`claude/vartracker-design-handoff-ce5018`) diverged from the Stitch-based work referenced elsewhere in this document. Treat the Stitch asset IDs and warnings below as historical context for how these tokens were originally derived, not as the live design tool. `main` independently merged an earlier, unreconciled copy of this file from the Stitch branch (via a different PR) — this version is the merge of both, current as of 2026-08-27.
 
 ## Known-bad references — do not use
 

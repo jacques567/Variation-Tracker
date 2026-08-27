@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Spinner } from '@/components/ui/Spinner'
+import { OAuthButtons } from '@/components/auth/OAuthButtons'
 
 /** Clean up Supabase's "field: Message" format and map known errors to user-friendly copy. */
 function parseSignupError(apiError: string | undefined, status: number): string {
@@ -193,11 +195,14 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading || (passwordValue.length > 0 && !requirementsMet)}
-          className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
+          {loading && <Spinner />}
           {loading ? 'Creating account...' : 'Create account'}
         </button>
       </form>
+
+      <OAuthButtons />
 
       <p className="text-sm text-gray-500 text-center mt-6">
         Already have an account?{' '}

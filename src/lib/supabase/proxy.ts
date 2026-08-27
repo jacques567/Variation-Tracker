@@ -43,6 +43,7 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/terms') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/cookies') ||
+    pathname.startsWith('/about') ||
     pathname === '/reset-password'
 
   const isRootRoute = pathname === '/'

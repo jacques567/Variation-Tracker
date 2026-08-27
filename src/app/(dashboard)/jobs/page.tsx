@@ -7,6 +7,7 @@ import { Plus, CheckCircle, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import JobCard from '@/components/jobs/JobCard'
 import PaymentWarning from '@/components/ui/PaymentWarning'
+import { Skeleton, JobListSkeleton } from '@/components/ui/Skeleton'
 import type { JobCategory } from '@/types'
 
 interface Contractor {
@@ -84,7 +85,26 @@ export default function JobsPage() {
     : jobs
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-500">Loading...</div>
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <Skeleton className="h-6 w-16" />
+            <Skeleton className="h-4 w-20 mt-2" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-9 w-36 rounded-lg" />
+            <Skeleton className="h-9 w-24 rounded-lg" />
+          </div>
+        </div>
+        <div className="mb-6 flex flex-wrap gap-2">
+          <Skeleton className="h-9 w-24 rounded-lg" />
+          <Skeleton className="h-9 w-28 rounded-lg" />
+          <Skeleton className="h-9 w-20 rounded-lg" />
+        </div>
+        <JobListSkeleton />
+      </div>
+    )
   }
 
   return (

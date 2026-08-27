@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Spinner } from '@/components/ui/Spinner'
+import { OAuthButtons } from '@/components/auth/OAuthButtons'
 
 function LoginForm() {
   const router = useRouter()
@@ -118,6 +119,8 @@ function LoginForm() {
           {loading ? 'Signing in...' : 'Sign in'}
         </button>
       </form>
+
+      <OAuthButtons next={searchParams.get('next')} />
 
       <p className="text-sm text-gray-500 text-center mt-6">
         Don&apos;t have an account?{' '}

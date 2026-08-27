@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', system-ui, sans-serif; }
+    a { color: #0057B8; text-decoration: none; }
+    a:hover { color: #003D82; text-decoration: underline; }
+    a:focus-visible, button:focus-visible { outline: 2px solid #0057B8; outline-offset: 2px; border-radius: 4px; }
+    input::placeholder { color: #6B7280; }
+    input:focus { outline: none; border-color: #0057B8; box-shadow: 0 0 0 3px rgba(0,87,184,0.15); }
+  </style>
+</helmet>
+
+<div style="width:390px; height:844px; position:relative; background-color:#E6EAF0; display:flex; align-items:center; justify-content:center; overflow:hidden; padding:32px 24px;">
+  <img src="bg-desktop.jpg" alt="" width="390" height="844" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:32% 30%; z-index:0;">
+  <div style="position:relative; z-index:1; width:100%; background:#FFFFFF; border-radius:12px; box-shadow:0 20px 60px rgba(15,23,32,0.14), 0 2px 8px rgba(15,23,32,0.06); overflow:hidden; display:flex; flex-direction:column;">
+
+    <div style="padding:28px 24px 22px 24px; display:flex; flex-direction:column; gap:18px;">
+
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+        <img src="./logo.png" alt="VarTracker" width="51" height="68" style="height:68px; object-fit:contain; width:51px">
+        <span style="font-size:21px; font-weight:700; color:#0F1720; letter-spacing:-0.01em;">VarTracker</span>
+      </div>
+
+      <h1 style="margin:0; text-align:center; font-size:18px; font-weight:600; color:#0057B8;">Set New Password</h1>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label for="rp-password" style="font-size:13px; font-weight:600; color:#0F1720;">New Password</label>
+        <input id="rp-password" type="password" autocomplete="new-password" placeholder="Minimum 8 characters" style="width:100%; height:48px; padding:0 14px; border:1px solid #AEB8C7; border-radius:12px; font-family:'Poppins', sans-serif; font-size:16px; color:#0F1720; background:#FFFFFF;">
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        <label for="rp-confirm" style="font-size:13px; font-weight:600; color:#0F1720;">Confirm New Password</label>
+        <input id="rp-confirm" type="password" autocomplete="new-password" placeholder="Re-enter your password" style="width:100%; height:48px; padding:0 14px; border:1px solid #AEB8C7; border-radius:12px; font-family:'Poppins', sans-serif; font-size:16px; color:#0F1720; background:#FFFFFF;">
+      </div>
+
+      <button type="submit" style="width:100%; height:48px; background:#0F1720; color:#FFFFFF; border:none; border-radius:12px; font-family:'Poppins', sans-serif; font-size:15px; font-weight:600; cursor:pointer;">Set New Password</button>
+
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', system-ui, sans-serif; }
+    a { text-decoration: none; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #0057B8; outline-offset: 2px; border-radius: 4px; }
+    input::placeholder { color: #6B7280; }
+    input:focus, select:focus { outline: none; border-color: #0057B8 !important; box-shadow: 0 0 0 3px rgba(0,87,184,0.15); }
+  </style>
+</helmet>
+
+<div style="width:834px; min-height:620px; position:relative; background-color:#E6EAF0;">
+  <img src="bg-admin.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.5; transform:scale(0.8); transform-origin:center; z-index:0;">
+  <div style="position:relative; z-index:1; display:flex; flex-direction:column; min-height:620px;">
+
+    <header style="background:#0F1720; border-bottom:1px solid #1F2937;">
+      <div style="height:60px; display:flex; align-items:center; justify-content:space-between; padding:0 20px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="./logo.png" alt="" width="30" height="30" style="width:30px; height:30px; object-fit:contain;">
+          <span style="font-size:14px; font-weight:700; color:#FFFFFF;">Admin</span>
+          <nav style="display:flex; align-items:center; gap:18px; margin-left:20px;">
+            <a href="#" style="font-size:14px; color:#9AA6B5;">Dashboard</a>
+            <a href="#" style="font-size:14px; color:#FFFFFF; font-weight:600;">Contractors</a>
+          </nav>
+        </div>
+        <a href="#" style="font-size:14px; color:#9AA6B5; border:1px solid #2C3A4C; border-radius:8px; padding:7px 12px;">Exit Admin</a>
+      </div>
+    </header>
+
+    <main style="flex:1; width:100%; padding:24px 20px 48px;">
+
+      <h1 style="margin:0 0 20px; font-size:24px; font-weight:600; color:#0F1720;">Contractors</h1>
+
+      <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:16px; margin-bottom:16px;">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:600; color:#0F1720; margin-bottom:6px;">Search</label>
+            <input type="text" placeholder="Search by name, email, or company…" style="width:100%; height:40px; padding:0 12px; border:1px solid #AEB8C7; border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+          <div style="display:flex; align-items:end; gap:12px;">
+            <div style="flex:1;">
+              <label style="display:block; font-size:12px; font-weight:600; color:#0F1720; margin-bottom:6px;">Subscription Status</label>
+              <select style="width:100%; height:40px; padding:0 12px; border:1px solid #AEB8C7; border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+                <option>All Status</option><option>Active</option><option>Trialing</option><option>Past Due</option><option>Canceled</option>
+              </select>
+            </div>
+            <p style="margin:0; font-size:14px; color:#6B7280; padding-bottom:9px; white-space:nowrap;">4 of 4</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="min-width:0;">
+            <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">dave@whitfieldbuilds.co.uk</p>
+            <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">WhitfieldBuilds &#183; 4 jobs &#183; last login 2 days ago</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+            <span style="font-size:12px; padding:3px 10px; border-radius:99px; font-weight:600; background:#ECFDF5; color:#047857;">active</span>
+            <a href="#" style="color:#0057B8; font-weight:600; font-size:14px;">View</a>
+          </div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="min-width:0;">
+            <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">sarah@ngconstruction.co.uk</p>
+            <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">Ng Construction &#183; 2 jobs &#183; last login today</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+            <span style="font-size:12px; padding:3px 10px; border-radius:99px; font-weight:600; background:#E5EEFA; color:#0057B8;">trialing</span>
+            <a href="#" style="color:#0057B8; font-weight:600; font-size:14px;">View</a>
+          </div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="min-width:0;">
+            <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">marcus@colesons.co.uk</p>
+            <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">Cole &amp; Sons &#183; 6 jobs &#183; last login 3 weeks ago</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+            <span style="font-size:12px; padding:3px 10px; border-radius:99px; font-weight:600; background:#FEF2F2; color:#B91C1C;">past_due</span>
+            <a href="#" style="color:#0057B8; font-weight:600; font-size:14px;">View</a>
+          </div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="min-width:0;">
+            <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">priya@anandinteriors.co.uk</p>
+            <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">Anand Interiors &#183; 1 job &#183; last login never</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+            <span style="font-size:12px; padding:3px 10px; border-radius:99px; font-weight:600; background:#F3F4F6; color:#4B5563;">canceled</span>
+            <a href="#" style="color:#0057B8; font-weight:600; font-size:14px;">View</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

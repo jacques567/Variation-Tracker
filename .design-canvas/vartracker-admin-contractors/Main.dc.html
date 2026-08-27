@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', system-ui, sans-serif; }
+    a { text-decoration: none; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #0057B8; outline-offset: 2px; border-radius: 4px; }
+    input::placeholder { color: #6B7280; }
+    input:focus, select:focus { outline: none; border-color: #0057B8 !important; box-shadow: 0 0 0 3px rgba(0,87,184,0.15); }
+    tr:hover td { background: #F7F9FB; }
+  </style>
+</helmet>
+
+<div style="width:1440px; min-height:460px; position:relative; background-color:#E6EAF0;">
+  <img src="bg-admin.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.5; z-index:0;">
+  <div style="position:relative; z-index:1; display:flex; flex-direction:column; min-height:460px;">
+
+    <header style="background:#0F1720; border-bottom:1px solid #1F2937;">
+      <div style="max-width:1152px; margin:0 auto; height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="./logo.png" alt="" width="34" height="34" style="width:34px; height:34px; object-fit:contain;">
+          <span style="font-size:16px; font-weight:700; color:#FFFFFF;">Admin</span>
+          <nav style="display:flex; align-items:center; gap:24px; margin-left:28px;">
+            <a href="#" style="font-size:14px; color:#9AA6B5;">Dashboard</a>
+            <a href="#" style="font-size:14px; color:#FFFFFF; font-weight:600;">Contractors</a>
+          </nav>
+        </div>
+        <a href="#" style="font-size:14px; color:#9AA6B5; border:1px solid #2C3A4C; border-radius:8px; padding:8px 14px;">Exit Admin</a>
+      </div>
+    </header>
+
+    <main style="flex:1; max-width:1152px; margin:0 auto; width:100%; padding:28px 16px 48px;">
+
+      <h1 style="margin:0 0 22px; font-size:22px; font-weight:600; color:#0F1720;">Contractors</h1>
+
+      <!-- Search & filter -->
+      <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:18px; margin-bottom:16px;">
+        <div style="display:grid; grid-template-columns:1fr 220px 1fr; gap:16px; align-items:end;">
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Search</label>
+            <input type="text" placeholder="Search by name, email, or company…" style="width:100%; height:40px; padding:0 12px; border:1px solid #AEB8C7; border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Subscription Status</label>
+            <select style="width:100%; height:40px; padding:0 12px; border:1px solid #AEB8C7; border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+              <option>All Status</option><option>Active</option><option>Trialing</option><option>Past Due</option><option>Canceled</option>
+            </select>
+          </div>
+          <p style="margin:0; font-size:13px; color:#6B7280; padding-bottom:9px;">Showing 4 of 4 contractors</p>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse; font-size:14px;">
+          <thead>
+            <tr style="background:#F7F9FB; border-bottom:1px solid #E6EAF0;">
+              <th style="padding:12px 20px; text-align:left; font-weight:600; color:#0F1720;">Email</th>
+              <th style="padding:12px 20px; text-align:left; font-weight:600; color:#0F1720;">Company</th>
+              <th style="padding:12px 20px; text-align:left; font-weight:600; color:#0F1720;">Status</th>
+              <th style="padding:12px 20px; text-align:left; font-weight:600; color:#0F1720;">Jobs</th>
+              <th style="padding:12px 20px; text-align:left; font-weight:600; color:#0F1720;">Last Login</th>
+              <th style="padding:12px 20px; text-align:left; font-weight:600; color:#0F1720;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #EEF1F5;">
+              <td style="padding:14px 20px; color:#0F1720; font-weight:500;">dave@whitfieldbuilds.co.uk</td>
+              <td style="padding:14px 20px; color:#4B5563;">WhitfieldBuilds</td>
+              <td style="padding:14px 20px;"><span style="font-size:11px; padding:3px 10px; border-radius:99px; font-weight:600; background:#ECFDF5; color:#047857;">active</span></td>
+              <td style="padding:14px 20px; color:#0F1720;">4</td>
+              <td style="padding:14px 20px; color:#6B7280; font-size:13px;">2 days ago</td>
+              <td style="padding:14px 20px;"><a href="#" style="color:#0057B8; font-weight:600; font-size:13px;">View</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid #EEF1F5;">
+              <td style="padding:14px 20px; color:#0F1720; font-weight:500;">sarah@ngconstruction.co.uk</td>
+              <td style="padding:14px 20px; color:#4B5563;">Ng Construction</td>
+              <td style="padding:14px 20px;"><span style="font-size:11px; padding:3px 10px; border-radius:99px; font-weight:600; background:#E5EEFA; color:#0057B8;">trialing</span></td>
+              <td style="padding:14px 20px; color:#0F1720;">2</td>
+              <td style="padding:14px 20px; color:#6B7280; font-size:13px;">Today</td>
+              <td style="padding:14px 20px;"><a href="#" style="color:#0057B8; font-weight:600; font-size:13px;">View</a></td>
+            </tr>
+            <tr style="border-bottom:1px solid #EEF1F5;">
+              <td style="padding:14px 20px; color:#0F1720; font-weight:500;">marcus@colesons.co.uk</td>
+              <td style="padding:14px 20px; color:#4B5563;">Cole &amp; Sons</td>
+              <td style="padding:14px 20px;"><span style="font-size:11px; padding:3px 10px; border-radius:99px; font-weight:600; background:#FEF2F2; color:#B91C1C;">past_due</span></td>
+              <td style="padding:14px 20px; color:#0F1720;">6</td>
+              <td style="padding:14px 20px; color:#6B7280; font-size:13px;">3 weeks ago</td>
+              <td style="padding:14px 20px;"><a href="#" style="color:#0057B8; font-weight:600; font-size:13px;">View</a></td>
+            </tr>
+            <tr>
+              <td style="padding:14px 20px; color:#0F1720; font-weight:500;">priya@anandinteriors.co.uk</td>
+              <td style="padding:14px 20px; color:#4B5563;">Anand Interiors</td>
+              <td style="padding:14px 20px;"><span style="font-size:11px; padding:3px 10px; border-radius:99px; font-weight:600; background:#F3F4F6; color:#4B5563;">canceled</span></td>
+              <td style="padding:14px 20px; color:#0F1720;">1</td>
+              <td style="padding:14px 20px; color:#6B7280; font-size:13px;">Never</td>
+              <td style="padding:14px 20px;"><a href="#" style="color:#0057B8; font-weight:600; font-size:13px;">View</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', system-ui, sans-serif; }
+    a { text-decoration: none; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid #0057B8; outline-offset: 2px; border-radius: 4px; }
+    input::placeholder { color: #6B7280; }
+    input:focus { outline: none; border-color: #0057B8 !important; box-shadow: 0 0 0 3px rgba(0,87,184,0.15); }
+  </style>
+</helmet>
+
+<div style="width:1440px; min-height:1080px; position:relative; background-color:#E6EAF0;">
+  <img src="bg-admin.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.5; z-index:0;">
+  <div style="position:relative; z-index:1; display:flex; flex-direction:column; min-height:1080px;">
+
+    <header style="background:#0F1720; border-bottom:1px solid #1F2937;">
+      <div style="max-width:1152px; margin:0 auto; height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="./logo.png" alt="" width="34" height="34" style="width:34px; height:34px; object-fit:contain;">
+          <span style="font-size:16px; font-weight:700; color:#FFFFFF;">Admin</span>
+          <nav style="display:flex; align-items:center; gap:24px; margin-left:28px;">
+            <a href="#" style="font-size:14px; color:#9AA6B5;">Dashboard</a>
+            <a href="#" style="font-size:14px; color:#FFFFFF; font-weight:600;">Contractors</a>
+          </nav>
+        </div>
+        <a href="#" style="font-size:14px; color:#9AA6B5; border:1px solid #2C3A4C; border-radius:8px; padding:8px 14px;">Exit Admin</a>
+      </div>
+    </header>
+
+    <main style="flex:1; max-width:1152px; margin:0 auto; width:100%; padding:28px 16px 48px;">
+
+      <a href="#" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#6B7280; margin-bottom:20px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to contractors
+      </a>
+
+      <!-- Contractor header -->
+      <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:24px; margin-bottom:24px;">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
+          <div>
+            <h1 style="margin:0; font-size:22px; font-weight:600; color:#0F1720;">Dave Whitfield</h1>
+            <p style="margin:4px 0 0; font-size:14px; color:#4B5563;">WhitfieldBuilds</p>
+            <p style="margin:2px 0 0; font-size:13px; color:#6B7280;">dave@whitfieldbuilds.co.uk</p>
+          </div>
+          <div style="text-align:right; flex-shrink:0;">
+            <p style="margin:0; font-size:12px; color:#6B7280;">Subscription</p>
+            <p style="margin:4px 0 0; font-size:14px; font-weight:700; color:#047857;">active</p>
+            <p style="margin:10px 0 0; font-size:12px; color:#6B7280;">Joined 12 Mar 2026</p>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:22px; padding-top:22px; border-top:1px solid #EEF1F5;">
+          <div>
+            <p style="margin:0; font-size:12px; color:#6B7280;">Total Jobs</p>
+            <p style="margin:5px 0 0; font-size:24px; font-weight:700; color:#0F1720;">4</p>
+          </div>
+          <div>
+            <p style="margin:0; font-size:12px; color:#6B7280;">Variation Value</p>
+            <p style="margin:5px 0 0; font-size:24px; font-weight:700; color:#0F1720;">&#163;6,550</p>
+          </div>
+          <div>
+            <p style="margin:0; font-size:12px; color:#6B7280;">Total Revenue</p>
+            <p style="margin:5px 0 0; font-size:24px; font-weight:700; color:#0F1720;">&#163;81,000</p>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="margin:0 0 14px; font-size:17px; font-weight:600; color:#0F1720;">Activity &amp; Jobs</h2>
+
+      <!-- Filters -->
+      <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:12px; padding:16px; margin-bottom:16px;">
+        <div style="display:grid; grid-template-columns:1fr 200px 200px; gap:16px;">
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">Search jobs &amp; events</label>
+            <input type="text" placeholder="Search…" style="width:100%; height:40px; padding:0 12px; border:1px solid #AEB8C7; border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">From Date</label>
+            <input type="text" value="" placeholder="dd/mm/yyyy" style="width:100%; height:40px; padding:0 12px; border:1px solid #AEB8C7; border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#0F1720; margin-bottom:6px;">To Date</label>
+            <input type="text" value="" placeholder="dd/mm/yyyy" style="width:100%; height:40px; padding:0 12px; border:1px solid #AEB8C7; border-radius:9px; font-family:'Poppins',sans-serif; font-size:14px; color:#0F1720; background:#FFFFFF;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px;">
+          <div style="display:flex; align-items:flex-start; gap:11px;">
+            <span style="width:8px; height:8px; border-radius:99px; background:#0EA65C; margin-top:5px; flex-shrink:0;"></span>
+            <div>
+              <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">Add integrated dishwasher &#8212; Signed</p>
+              <p style="margin:3px 0 0; font-size:13px; color:#4B5563;">Signed by Sarah Mitchell</p>
+              <p style="margin:5px 0 0; font-size:12px; color:#6B7280;">18 Jun 2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px;">
+          <div style="display:flex; align-items:flex-start; gap:11px;">
+            <span style="width:8px; height:8px; border-radius:99px; background:#0057B8; margin-top:5px; flex-shrink:0;"></span>
+            <div>
+              <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">Loft Conversion &#8212; Birch Lane</p>
+              <p style="margin:3px 0 0; font-size:13px; color:#4B5563;">Created for Priya Patel</p>
+              <p style="margin:5px 0 0; font-size:12px; color:#6B7280;">15 Jun 2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px;">
+          <div style="display:flex; align-items:flex-start; gap:11px;">
+            <span style="width:8px; height:8px; border-radius:99px; background:#0EA65C; margin-top:5px; flex-shrink:0;"></span>
+            <div>
+              <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">Upgrade worktop to quartz &#8212; Signed</p>
+              <p style="margin:3px 0 0; font-size:13px; color:#4B5563;">Signed by Sarah Mitchell</p>
+              <p style="margin:5px 0 0; font-size:12px; color:#6B7280;">12 Jun 2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px;">
+          <div style="display:flex; align-items:flex-start; gap:11px;">
+            <span style="width:8px; height:8px; border-radius:99px; background:#0057B8; margin-top:5px; flex-shrink:0;"></span>
+            <div>
+              <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">Kitchen Extension &#8212; Oak Street</p>
+              <p style="margin:3px 0 0; font-size:13px; color:#4B5563;">Created for Sarah Mitchell</p>
+              <p style="margin:5px 0 0; font-size:12px; color:#6B7280;">10 Jun 2026</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:10px; padding:14px 16px;">
+          <div style="display:flex; align-items:flex-start; gap:11px;">
+            <span style="width:8px; height:8px; border-radius:99px; background:#0057B8; margin-top:5px; flex-shrink:0;"></span>
+            <div>
+              <p style="margin:0; font-size:14px; font-weight:600; color:#0F1720;">Bathroom Renovation</p>
+              <p style="margin:3px 0 0; font-size:13px; color:#4B5563;">Created for James Cooper</p>
+              <p style="margin:5px 0 0; font-size:12px; color:#6B7280;">2 Jun 2026</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

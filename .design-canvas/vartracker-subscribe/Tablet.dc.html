@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Poppins', system-ui, sans-serif; }
+    a { text-decoration: none; }
+    a:focus-visible, button:focus-visible { outline: 2px solid #0057B8; outline-offset: 2px; border-radius: 4px; }
+  </style>
+</helmet>
+
+<div style="width:834px; height:1194px; position:relative; background-color:#E6EAF0; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+
+  <img src="bg-sign.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.5; transform:scale(0.8); transform-origin:center; z-index:0;">
+
+  <div style="position:relative; z-index:1; width:420px;">
+
+    <div style="text-align:center; margin-bottom:28px;">
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:6px;">
+        <img src="./logo.png" alt="" width="38" height="38" style="width:38px; height:38px; object-fit:contain;">
+        <span style="font-size:23px; font-weight:700; color:#0F1720; letter-spacing:-0.01em;">VarTracker</span>
+      </div>
+      <p style="margin:0; font-size:14px; color:#6B7280;">Variation &amp; Change Order Tracker</p>
+    </div>
+
+    <div style="text-align:center; margin-bottom:24px;">
+      <div style="width:54px; height:54px; border-radius:99px; background:#E5EEFA; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#0057B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h1 style="margin:0; font-size:23px; font-weight:700; color:#0F1720;">Subscribe to VarTracker</h1>
+      <p style="margin:6px 0 0; font-size:14px; color:#6B7280;">&#163;15/month. Cancel any time.</p>
+    </div>
+
+    <div style="background:#FFFFFF; border:1px solid #E6EAF0; border-radius:16px; padding:28px; margin-bottom:20px; box-shadow:0 20px 60px rgba(15,23,32,0.10), 0 2px 8px rgba(15,23,32,0.05);">
+      <div style="display:flex; align-items:flex-end; gap:5px; margin-bottom:20px;">
+        <span style="font-size:40px; font-weight:700; color:#0F1720; line-height:1;">&#163;15</span>
+        <span style="font-size:15px; color:#6B7280; margin-bottom:5px;">/month</span>
+      </div>
+
+      <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:13px;">
+        <li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#374151;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+          Unlimited jobs and variations
+        </li>
+        <li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#374151;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+          Client e-signature via shareable link
+        </li>
+        <li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#374151;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+          Photo proof on every variation
+        </li>
+        <li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#374151;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+          PDF variation notices
+        </li>
+        <li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#374151;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+          Final invoice export with all variations
+        </li>
+        <li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#374151;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+          Running total updated automatically
+        </li>
+      </ul>
+    </div>
+
+    <button type="button" style="width:100%; background:#0057B8; color:#FFFFFF; border:none; border-radius:12px; padding:15px; font-family:'Poppins',sans-serif; font-size:16px; font-weight:600; cursor:pointer;">Subscribe now</button>
+
+    <p style="margin:12px 0 0; font-size:13px; color:#6B7280; text-align:center;">Secure payment via Stripe &#183; Cancel any time</p>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

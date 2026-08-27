@@ -38,6 +38,19 @@ Secondary/muted text on light surfaces: `#6B7280` on white (4.83:1) or on `#F7F9
 
 Intended typeface: **Poppins** (weights Regular/Medium/Semibold). Poppins isn't in Stitch's font enum, so **Montserrat** was used as the closest available geometric-sans proxy for previewing in Stitch — the real coded app should load actual Poppins from Google Fonts, not Montserrat.
 
+### Type scale
+
+**Added 2026-08-27** after `impeccable audit` flagged a systemic "flat type hierarchy" antipattern (near-continuous 11–19px sizes with no real contrast between roles) across 31 of 39 screen files. Fixed via `impeccable typeset`: consolidated to four roles, with page titles / key figures pushed high enough that every screen clears a 2:1 largest-to-smallest ratio.
+
+| Role | Size | Use |
+|---|---|---|
+| Caption / meta | `12px` | Timestamps, helper text, table meta |
+| Body / label | `14px` | Field labels, body copy, secondary values |
+| Subhead | `16px` | Card headers, section labels (where a screen needs a mid-tier) |
+| Title / key figure | `24px` (data-dense app screens) or `28px` (auth screens, low information density) | Page `<h1>`, prominent money/stat figures, the "VarTracker" wordmark on auth screens |
+
+Differentiate roles within the same size by weight and color (e.g. `font-weight:600` + `#0F1720` for a value vs. `font-weight:400` + `#6B7280` for its label) rather than introducing another 1–2px size step — this was the root cause of the original flat hierarchy.
+
 ## Shape & spacing
 
 - Corner radius: `rounded-xl` (12px) on cards, buttons, inputs

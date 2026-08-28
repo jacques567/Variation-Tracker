@@ -63,6 +63,8 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
       emitAddress('', result)
     } catch {
       setError('Address lookup unavailable — please enter manually')
+      setManualValue(postcode)
+      onAddressChange(postcode)
       setMode('manual')
     } finally {
       setLoading(false)
@@ -135,6 +137,7 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
           className={inputClass}
           placeholder="14 Maple Street, Manchester, M1 1AB"
         />
+        {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
         <button
           type="button"
           onClick={switchToLookup}

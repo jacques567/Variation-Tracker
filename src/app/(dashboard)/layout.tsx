@@ -50,7 +50,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <SessionTimeoutManager />
       {!betaMode && <SubscriptionGate isValid={isValid} />}
-      <NavBar contractor={contractor} hasSubscription={isValid} />
+      <NavBar contractor={contractor} hasSubscription={betaMode || isValid} />
       <PaymentWarning
         subscriptionStatus={contractor?.subscription_status ?? null}
         daysRemaining={graceDaysRemaining}

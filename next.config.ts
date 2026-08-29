@@ -12,9 +12,10 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
   "font-src 'self' data:",
-  // Supabase client (auth + realtime) and Sentry error reporting.
+  // Supabase client (auth + realtime), Sentry error reporting, and the
+  // postcodes.io lookup used by PostcodeLookup (src/components/jobs/PostcodeLookup.tsx).
   // Dev also needs ws://localhost for the webpack-hmr dev socket.
-  `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io${isDev ? ' ws://localhost:*' : ''}`,
+  `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://api.postcodes.io${isDev ? ' ws://localhost:*' : ''}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

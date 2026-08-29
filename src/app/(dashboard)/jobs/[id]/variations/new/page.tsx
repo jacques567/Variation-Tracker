@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Upload, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { evaluateSubscription } from '@/lib/subscription-evaluation'
+import { evaluateSubscription, isBetaMode } from '@/lib/subscription-evaluation'
 import { use } from 'react'
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -61,7 +61,7 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
       .single()
 
     const { isValid, reason } = evaluateSubscription(contractor)
-    if (!isValid) {
+    if (!isBetaMode() && !isValid) {
       setError(reason ?? 'Your subscription has expired. Please subscribe to continue.')
       setLoading(false)
       return

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { evaluateSubscription } from '@/lib/subscription-evaluation'
+import { evaluateSubscription, isBetaMode } from '@/lib/subscription-evaluation'
 import PostcodeLookup from '@/components/jobs/PostcodeLookup'
 import { readJobFormDraft, writeJobFormDraft, clearJobFormDraft } from '@/lib/jobFormDraft'
 import type { JobCategory } from '@/types'
@@ -113,7 +113,7 @@ export default function NewJobPage() {
     }
 
     const { isValid, reason } = evaluateSubscription(contractor)
-    if (!isValid) {
+    if (!isBetaMode() && !isValid) {
       setError(reason ?? 'Your subscription has expired. Please subscribe to continue.')
       setLoading(false)
       return

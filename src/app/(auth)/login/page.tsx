@@ -132,7 +132,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-[46px] flex items-center justify-center gap-2 bg-vt-dark text-white rounded-xl text-sm font-semibold hover:bg-[#1a2532] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full h-[46px] flex items-center justify-center gap-2 bg-vt-primary text-white rounded-xl text-sm font-semibold hover:bg-vt-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading && <Spinner />}
             {loading ? 'Signing in…' : 'Log In'}

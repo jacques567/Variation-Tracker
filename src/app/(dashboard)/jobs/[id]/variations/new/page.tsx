@@ -113,76 +113,88 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
     router.refresh()
   }
 
+  const inputClass = 'w-full h-[42px] rounded-[10px] border border-[#AEB8C7] px-3.5 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15'
+  const labelClass = 'block text-sm font-semibold text-vt-dark mb-1.5'
+
   return (
     <div>
-      <Link href={`/jobs/${jobId}`} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6">
+      <Link href={`/jobs/${jobId}`} className="flex items-center gap-1.5 text-sm text-vt-muted hover:text-vt-dark mb-5">
         <ArrowLeft className="w-4 h-4" /> Back to job
       </Link>
 
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">Log variation</h1>
+      <h1 className="text-[28px] font-semibold text-vt-dark mb-5">Log variation</h1>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="max-w-[640px] bg-white rounded-xl border border-vt-border p-8 shadow-[0_1px_2px_rgba(15,23,32,0.04)]">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className={labelClass}>
+              Description <span className="text-vt-error">*</span>
+            </label>
             <textarea name="description" required rows={3}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full rounded-[10px] border border-[#AEB8C7] px-3.5 py-3 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15 resize-none"
               placeholder="e.g. Additional soil removal required due to unexpected rock layer at 1.2m depth" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cost (£)</label>
-              <input name="cost" type="number" step="0.01" required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="350.00" />
+              <label className={labelClass}>
+                Cost <span className="text-vt-error">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-vt-muted">£</span>
+                <input name="cost" type="number" step="0.01" required
+                  className={`${inputClass} pl-7`}
+                  placeholder="350.00" />
+              </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <label className={labelClass}>
+                Date <span className="text-vt-error">*</span>
+              </label>
               <input name="date" type="date" required
                 defaultValue={new Date().toISOString().split('T')[0]}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className={inputClass} />
             </div>
           </div>
 
           {/* Photo upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Photo proof <span className="text-gray-400 font-normal">(optional, max 5MB)</span>
+            <label className={labelClass}>
+              Photo proof <span className="font-normal text-vt-muted">(optional, max 5MB)</span>
             </label>
             {photoPreview ? (
-              <div className="relative w-full rounded-lg overflow-hidden border border-gray-200">
+              <div className="relative w-full rounded-[10px] overflow-hidden border border-[#AEB8C7]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photoPreview} alt="Preview" className="w-full max-h-48 object-contain bg-gray-50" />
+                <img src={photoPreview} alt="Preview" className="w-full max-h-48 object-contain bg-[#F7F9FB]" />
                 <button type="button" onClick={removePhoto}
-                  className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm border border-gray-200 hover:bg-gray-50">
-                  <X className="w-4 h-4 text-gray-600" />
+                  className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm border border-vt-border hover:bg-gray-50">
+                  <X className="w-4 h-4 text-vt-muted" />
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-28 rounded-lg border-2 border-dashed border-gray-300 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
-                <Upload className="w-5 h-5 text-gray-400 mb-1" />
-                <span className="text-sm text-gray-400">Tap to upload photo or receipt</span>
+              <label className="flex flex-col items-center justify-center w-full h-[120px] rounded-[10px] border-2 border-dashed border-[#AEB8C7] cursor-pointer hover:border-vt-primary hover:bg-[#E5EEFA] transition-colors">
+                <Upload className="w-[22px] h-[22px] text-vt-muted mb-1.5" />
+                <span className="text-sm text-vt-muted">Tap to upload photo or receipt</span>
                 <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handlePhotoChange} />
               </label>
             )}
             {photoError && (
-              <p className="text-sm text-red-600 mt-2">{photoError}</p>
+              <p className="text-sm text-vt-error mt-2">{photoError}</p>
             )}
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-sm text-vt-error bg-vt-error-bg rounded-xl px-3 py-2">{error}</p>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-1">
             <Link href={`/jobs/${jobId}`}
-              className="flex-1 text-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              className="flex-1 text-center rounded-[10px] border border-[#AEB8C7] px-4 py-[11px] text-sm font-semibold text-vt-dark hover:bg-gray-50 transition-colors">
               Cancel
             </Link>
             <button type="submit" disabled={loading}
-              className="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
-              {loading ? 'Saving...' : 'Log variation'}
+              className="flex-1 bg-vt-primary text-white rounded-[10px] px-4 py-[11px] text-sm font-semibold hover:bg-vt-primary-hover disabled:opacity-50 transition-colors">
+              {loading ? 'Saving…' : 'Log variation'}
             </button>
           </div>
         </form>

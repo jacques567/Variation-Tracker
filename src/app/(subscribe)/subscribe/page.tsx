@@ -15,6 +15,27 @@ const features = [
 
 const isBetaMode = process.env.NEXT_PUBLIC_BETA_MODE === 'true'
 
+function FeatureList() {
+  return (
+    <div className="bg-white border border-vt-border rounded-[16px] p-[26px] mb-5 shadow-[0_20px_60px_rgba(15,23,32,0.10),0_2px_8px_rgba(15,23,32,0.05)]">
+      <div className="flex items-end gap-[5px] mb-5">
+        <span className="text-[38px] font-bold text-vt-dark leading-none">£15</span>
+        <span className="text-sm text-vt-muted mb-1">/month</span>
+      </div>
+      <ul className="flex flex-col gap-3">
+        {features.map((f) => (
+          <li key={f} className="flex items-center gap-2.5 text-sm text-[#374151]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            {f}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export default async function SubscribePage() {
   if (isBetaMode) {
     return (
@@ -93,25 +114,6 @@ export default async function SubscribePage() {
       </div>
     )
   }
-
-  const FeatureList = () => (
-    <div className="bg-white border border-vt-border rounded-[16px] p-[26px] mb-5 shadow-[0_20px_60px_rgba(15,23,32,0.10),0_2px_8px_rgba(15,23,32,0.05)]">
-      <div className="flex items-end gap-[5px] mb-5">
-        <span className="text-[38px] font-bold text-vt-dark leading-none">£15</span>
-        <span className="text-sm text-vt-muted mb-1">/month</span>
-      </div>
-      <ul className="flex flex-col gap-3">
-        {features.map((f) => (
-          <li key={f} className="flex items-center gap-2.5 text-sm text-[#374151]">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            {f}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
 
   if (status === 'canceled') {
     return (

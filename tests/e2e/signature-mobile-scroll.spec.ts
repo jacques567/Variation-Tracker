@@ -107,6 +107,12 @@ test('signature survives an address-bar resize event mid-scroll', async ({ page 
   const canvas = page.locator('canvas').first();
   await expect(canvas).toBeVisible();
 
+  // The sign page can exceed the iPhone 13 viewport height (844px) when the
+  // variation card has multiple fields, pushing the canvas below the fold.
+  // Scroll it into view before computing the bounding box; raw touchscreen
+  // coordinates are viewport-relative and miss an off-screen canvas silently.
+  await canvas.scrollIntoViewIfNeeded();
+
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Signature canvas has no bounding box');
 
@@ -147,6 +153,8 @@ test('signature survives an orientation change (width resize)', async ({ page })
 
   const canvas = page.locator('canvas').first();
   await expect(canvas).toBeVisible();
+
+  await canvas.scrollIntoViewIfNeeded();
 
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Signature canvas has no bounding box');

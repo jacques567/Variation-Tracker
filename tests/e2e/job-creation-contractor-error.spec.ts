@@ -63,8 +63,11 @@ test.describe('Job creation — contractor lookup failure', () => {
 
     // Generous timeout: CI runners are slower than local dev, and this is
     // waiting on a real round trip to production Supabase before the UI updates.
-    const errorBanner = page.getByText('Unable to verify your account right now', { exact: false })
+    // Scope to <p> to avoid the Next.js dev-overlay <span> that reproduces the
+    // source-code line containing the same text ("setError('Unable to verify...)")
+    // which would cause a strict-mode violation with page.getByText().
+    const errorBanner = page.locator('p').filter({ hasText: 'Unable to verify your account right now' })
     await expect(errorBanner).toBeVisible({ timeout: 20000 })
-    await expect(page.getByText('Contractor not found', { exact: false })).not.toBeVisible()
+    await expect(page.locator('p').filter({ hasText: 'Contractor not found' })).not.toBeVisible()
   })
 })

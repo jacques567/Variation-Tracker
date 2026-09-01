@@ -63,8 +63,8 @@ test.describe('Job creation — contractor lookup failure', () => {
 
     // Generous timeout: CI runners are slower than local dev, and this is
     // waiting on a real round trip to production Supabase before the UI updates.
-    const errorBanner = page.locator('p.bg-red-50', { hasText: 'Unable to verify your account right now' })
+    const errorBanner = page.getByText('Unable to verify your account right now', { exact: false })
     await expect(errorBanner).toBeVisible({ timeout: 20000 })
-    await expect(page.locator('p.bg-red-50')).not.toContainText('Contractor not found')
+    await expect(page.getByText('Contractor not found', { exact: false })).not.toBeVisible()
   })
 })

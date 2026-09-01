@@ -7,16 +7,19 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 
 function SignLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative min-h-screen bg-vt-light overflow-hidden">
-      <Image
-        src="/images/bg-auth.jpg"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover opacity-50"
-      />
-      <div className="relative z-10 flex flex-col min-h-screen">
+    <div className="relative min-h-screen bg-vt-light">
+      {/* Fixed background so content can scroll freely on long forms (mobile sign page) */}
+      <div className="fixed inset-0 -z-10">
+        <Image
+          src="/images/bg-auth.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-50"
+        />
+      </div>
+      <div className="flex flex-col min-h-screen">
         <header className="bg-white border-b border-vt-border">
           <div className="h-16 flex items-center justify-center gap-2">
             <Image src="/VarTrackerLogo3Trans.png" alt="" width={50} height={50} className="h-[50px] w-[50px] object-contain" />

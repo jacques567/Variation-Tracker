@@ -104,6 +104,13 @@ test('signature survives an address-bar resize event mid-scroll', async ({ page 
 
   await page.goto(`/sign/${signatureToken}`);
 
+  // Wait for initial network activity to settle — specifically the CSRF token
+  // fetch that SignatureForm fires in useEffect. The submit button is
+  // disabled={loading || !csrfToken || isEmpty}; if csrfToken hasn't arrived
+  // by the time we check the button, the test fails even though isEmpty is
+  // correctly set to false after drawing.
+  await page.waitForLoadState('networkidle');
+
   const canvas = page.locator('canvas').first();
   await expect(canvas).toBeVisible();
 
@@ -150,6 +157,7 @@ test('signature survives an orientation change (width resize)', async ({ page })
   test.skip(!supabase || !signatureToken, skipReason);
 
   await page.goto(`/sign/${signatureToken}`);
+  await page.waitForLoadState('networkidle');
 
   const canvas = page.locator('canvas').first();
   await expect(canvas).toBeVisible();

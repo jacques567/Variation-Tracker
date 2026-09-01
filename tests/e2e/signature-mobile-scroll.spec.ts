@@ -120,20 +120,31 @@ test('signature survives an address-bar resize event mid-scroll', async ({ page 
   // coordinates are viewport-relative and miss an off-screen canvas silently.
   await canvas.scrollIntoViewIfNeeded();
 
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error('Signature canvas has no bounding box');
+  if (!await canvas.boundingBox()) throw new Error('Signature canvas has no bounding box');
 
-  // Draw a simple stroke via touch, as a real signer would.
-  const startX = box.x + box.width * 0.2;
-  const startY = box.y + box.height * 0.5;
-  const endX = box.x + box.width * 0.8;
-  const endY = box.y + box.height * 0.5;
-
-  await page.touchscreen.tap(startX, startY);
-  await page.mouse.move(startX, startY);
-  await page.mouse.down();
-  await page.mouse.move(endX, endY, { steps: 10 });
-  await page.mouse.up();
+  // Dispatch touch events directly on the canvas element — more reliable in CI
+  // headless than Playwright's touchscreen.tap() + mouse combos, which can
+  // silently miss the canvas when hasTouch is true (touch events prevent mouse
+  // event synthesis, and coordinate translation after scrollIntoViewIfNeeded
+  // is fragile). Direct dispatch uses element-relative coords via
+  // getBoundingClientRect(), so it works regardless of scroll position.
+  await canvas.evaluate((el: HTMLCanvasElement) => {
+    const rect = el.getBoundingClientRect();
+    const sx = rect.left + rect.width * 0.2;
+    const sy = rect.top + rect.height * 0.5;
+    const ex = rect.left + rect.width * 0.8;
+    const ey = sy;
+    const mk = (x: number, y: number) =>
+      new Touch({ identifier: 1, target: el, clientX: x, clientY: y, radiusX: 1, radiusY: 1, force: 1 });
+    el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [mk(sx, sy)], changedTouches: [mk(sx, sy)] }));
+    for (let i = 1; i <= 10; i++) {
+      const x = sx + (ex - sx) * (i / 10);
+      el.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [mk(x, ey)], changedTouches: [mk(x, ey)] }));
+    }
+    el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [], changedTouches: [mk(ex, ey)] }));
+  });
+  // Allow React to flush the state update from onBegin/onEnd before proceeding.
+  await page.waitForTimeout(50);
 
   const dataUrlBeforeResize = await canvas.evaluate((el: HTMLCanvasElement) => el.toDataURL());
   expect(dataUrlBeforeResize).not.toEqual(await blankCanvasDataUrl(page));
@@ -164,19 +175,24 @@ test('signature survives an orientation change (width resize)', async ({ page })
 
   await canvas.scrollIntoViewIfNeeded();
 
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error('Signature canvas has no bounding box');
+  if (!await canvas.boundingBox()) throw new Error('Signature canvas has no bounding box');
 
-  const startX = box.x + box.width * 0.2;
-  const startY = box.y + box.height * 0.5;
-  const endX = box.x + box.width * 0.8;
-  const endY = box.y + box.height * 0.5;
-
-  await page.touchscreen.tap(startX, startY);
-  await page.mouse.move(startX, startY);
-  await page.mouse.down();
-  await page.mouse.move(endX, endY, { steps: 10 });
-  await page.mouse.up();
+  await canvas.evaluate((el: HTMLCanvasElement) => {
+    const rect = el.getBoundingClientRect();
+    const sx = rect.left + rect.width * 0.2;
+    const sy = rect.top + rect.height * 0.5;
+    const ex = rect.left + rect.width * 0.8;
+    const ey = sy;
+    const mk = (x: number, y: number) =>
+      new Touch({ identifier: 1, target: el, clientX: x, clientY: y, radiusX: 1, radiusY: 1, force: 1 });
+    el.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [mk(sx, sy)], changedTouches: [mk(sx, sy)] }));
+    for (let i = 1; i <= 10; i++) {
+      const x = sx + (ex - sx) * (i / 10);
+      el.dispatchEvent(new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [mk(x, ey)], changedTouches: [mk(x, ey)] }));
+    }
+    el.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [], changedTouches: [mk(ex, ey)] }));
+  });
+  await page.waitForTimeout(50);
 
   const blank = await blankCanvasDataUrl(page);
   const dataUrlBeforeRotate = await canvas.evaluate((el: HTMLCanvasElement) => el.toDataURL());

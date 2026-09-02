@@ -163,9 +163,16 @@ export default function NewVariationPage({ params }: { params: Promise<{ id: str
               Photo proof <span className="font-normal text-vt-muted">(optional, max 5MB)</span>
             </label>
             {photoPreview ? (
-              <div className="relative w-full rounded-[10px] overflow-hidden border border-[#AEB8C7]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photoPreview} alt="Preview" className="w-full max-h-48 object-contain bg-[#F7F9FB]" />
+              // overflow-hidden lives on the inner wrapper around the <img> only —
+              // putting it on this outer relative container instead clipped the
+              // corner of the absolutely-positioned remove button against the
+              // rounded border.
+              <div className="relative w-full">
+                <a href={photoPreview} target="_blank" rel="noopener noreferrer"
+                  className="block w-full rounded-[10px] overflow-hidden border border-[#AEB8C7] cursor-zoom-in">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={photoPreview} alt="Preview" className="w-full max-h-48 object-contain bg-[#F7F9FB]" />
+                </a>
                 <button type="button" onClick={removePhoto}
                   className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm border border-vt-border hover:bg-gray-50">
                   <X className="w-4 h-4 text-vt-muted" />

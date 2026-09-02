@@ -201,7 +201,7 @@ export default function JobsPage() {
       {!filteredJobs.length ? (
         <div className="text-center py-16 text-vt-muted">
           <p className="font-medium text-vt-dark">No jobs yet</p>
-          <p className="text-sm mt-1">Create your first job to get started</p>
+          <p className="text-sm mt-1">Create a job to continue</p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">

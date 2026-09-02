@@ -141,7 +141,7 @@ export default function AdminDashboard({
           <p className="text-[26px] font-bold text-vt-primary mt-2">{signedVariations.length}</p>
         </div>
         <div className="bg-white rounded-xl border border-vt-border p-[18px]">
-          <p className="text-[13px] text-vt-muted">Pending Signatures</p>
+          <p className="text-[13px] text-vt-muted">Awaiting Signature</p>
           <p className="text-[26px] font-bold text-[#B45309] mt-2">{pendingVariations.length}</p>
         </div>
       </div>
@@ -170,9 +170,9 @@ export default function AdminDashboard({
           </div>
         </div>
 
-        {/* Pending Signatures */}
+        {/* Awaiting Signature */}
         <div className="bg-white rounded-xl border border-vt-border p-[18px]">
-          <h2 className="text-[14px] font-semibold text-vt-dark mb-[14px]">Pending Signatures ({pendingVariations.length})</h2>
+          <h2 className="text-[14px] font-semibold text-vt-dark mb-[14px]">Awaiting Signature ({pendingVariations.length})</h2>
           <div className="flex flex-col gap-2">
             {pendingVariations.slice(0, 5).map(variation => {
               const job = jobById.get(variation.job_id)
@@ -191,7 +191,7 @@ export default function AdminDashboard({
               )
             })}
             {pendingVariations.length === 0 && (
-              <p className="text-sm text-vt-muted">No pending signatures</p>
+              <p className="text-sm text-vt-muted">No signatures awaiting</p>
             )}
           </div>
         </div>

@@ -10,7 +10,10 @@ function formatCurrency(pence: number): string {
 
 function buildDeclaration(name: string, cost: number): string {
   const who = name.trim() ? ` I ${name.trim()}` : ''
-  return `By signing,${who} confirm I authorise this variation and the additional cost of ${formatCurrency(cost)}.`
+  const costPhrase = cost < 0
+    ? `the resulting reduction of ${formatCurrency(Math.abs(cost))}`
+    : `the additional cost of ${formatCurrency(cost)}`
+  return `By signing,${who} confirm I authorise this variation and ${costPhrase}.`
 }
 
 export default function SignatureForm({
@@ -36,25 +39,30 @@ export default function SignatureForm({
   // from here means the displayed and recorded declarations cannot drift apart.
   const declarationText = buildDeclaration(clientName, cost)
 
-  useEffect(() => {
-    async function fetchCsrfToken() {
-      const cached = typeof window !== 'undefined' ? sessionStorage.getItem('csrfToken') : null
-      if (cached) {
-        setCsrfToken(cached)
-        return
+  // The token is single-use server-side — verifyCsrfToken() marks it consumed
+  // on *any* /api/sign attempt, even one that goes on to fail a later check
+  // (e.g. content_mismatch). Without a refetch, a retry after such a failure
+  // reuses the now-dead cached token and fails again with "Invalid security
+  // token" instead of the real error — so this is pulled out for reuse.
+  async function fetchCsrfToken() {
+    try {
+      const res = await fetch('/api/csrf-token')
+      const data = await res.json()
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('csrfToken', data.csrfToken)
       }
+      setCsrfToken(data.csrfToken)
+    } catch (err) {
+      console.error('Failed to fetch CSRF token:', err)
+      setError('Failed to load security token. Please refresh the page.')
+    }
+  }
 
-      try {
-        const res = await fetch('/api/csrf-token')
-        const data = await res.json()
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('csrfToken', data.csrfToken)
-        }
-        setCsrfToken(data.csrfToken)
-      } catch (err) {
-        console.error('Failed to fetch CSRF token:', err)
-        setError('Failed to load security token. Please refresh the page.')
-      }
+  useEffect(() => {
+    const cached = typeof window !== 'undefined' ? sessionStorage.getItem('csrfToken') : null
+    if (cached) {
+      setCsrfToken(cached)
+      return
     }
     fetchCsrfToken()
   }, [])
@@ -130,6 +138,12 @@ export default function SignatureForm({
       if (!res.ok) {
         setError(data.message || 'Failed to save signature. Please try again.')
         setLoading(false)
+        // The token behind this failed attempt is now consumed server-side
+        // regardless of why it failed — get a fresh one so an immediate retry
+        // doesn't surface an unrelated "Invalid security token" error.
+        if (typeof window !== 'undefined') sessionStorage.removeItem('csrfToken')
+        setCsrfToken(null)
+        fetchCsrfToken()
         return
       }
 
@@ -167,11 +181,21 @@ export default function SignatureForm({
           </button>
         </div>
         <div className="rounded-[10px] border-2 border-dashed border-[#AEB8C7] bg-[#F7F9FB] overflow-hidden" style={{ height: 150 }}>
+          {/*
+            No explicit width/height in canvasProps: react-signature-canvas's
+            _resizeCanvas() only devicePixelRatio-scales a dimension when that
+            dimension is left undefined. Passing height={150} here previously
+            left the canvas's backing-store height unscaled on retina devices
+            while the drawing context was still uniformly scaled by the ratio —
+            so strokes below roughly the top half/third of the box (depending
+            on DPR) were drawn outside the physical backing store and clipped.
+            Letting both axes come from CSS (h-full/w-full on the parent's
+            fixed 150px box) means both get scaled correctly.
+          */}
           <SignatureCanvas
             ref={sigRef}
             canvasProps={{
-              className: 'w-full',
-              height: 150,
+              className: 'w-full h-full',
             }}
             backgroundColor="transparent"
             clearOnResize={false}

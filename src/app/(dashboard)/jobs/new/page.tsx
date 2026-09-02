@@ -151,7 +151,7 @@ export default function NewJobPage() {
 
       <h1 className="text-2xl font-semibold text-vt-dark mb-5">New job</h1>
 
-      <div className="max-w-[640px] bg-white rounded-xl border border-vt-border p-8 shadow-[0_1px_2px_rgba(15,23,32,0.04)]">
+      <div className="max-w-[640px] mx-auto bg-white rounded-xl border border-vt-border p-8 shadow-[0_1px_2px_rgba(15,23,32,0.04)]">
         <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
           <div>
             <label className={labelClass}>

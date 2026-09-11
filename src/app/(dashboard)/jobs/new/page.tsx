@@ -96,9 +96,6 @@ export default function NewJobPage() {
 
     if (!user) { router.push('/login'); return }
 
-    // Subscription check — client-side UX guard. RLS enforces this at the DB
-    // layer regardless, but checking here gives the user a clear error message
-    // instead of a raw Supabase permission error.
     const { data: contractor, error: contractorError } = await supabase
       .from('contractors')
       .select('subscription_status, trial_ends_at, grace_period_expires_at')
@@ -143,28 +140,31 @@ export default function NewJobPage() {
     router.push(`/jobs/${data.id}`)
   }
 
+  const inputClass = 'w-full h-[42px] rounded-[10px] border border-[#AEB8C7] px-3.5 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15'
+  const labelClass = 'block text-sm font-semibold text-vt-dark mb-1.5'
+
   return (
     <div>
-      <Link href="/jobs" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6">
+      <Link href="/jobs" className="flex items-center gap-1.5 text-sm text-vt-muted hover:text-vt-dark mb-5">
         <ArrowLeft className="w-4 h-4" /> Back to jobs
       </Link>
 
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">New job</h1>
+      <h1 className="text-2xl font-semibold text-vt-dark mb-5">New job</h1>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-5">
+      <div className="max-w-[640px] mx-auto bg-white rounded-xl border border-vt-border p-8 shadow-[0_1px_2px_rgba(15,23,32,0.04)]">
+        <form ref={formRef} onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Job name{showValidation && missingFields.has('job_name') && <span className="text-red-600"> *</span>}
+            <label className={labelClass}>
+              Job name{showValidation && missingFields.has('job_name') && <span className="text-vt-error"> *</span>}
             </label>
             <input name="job_name" type="text" value={formData.job_name} onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               placeholder="e.g. Kitchen extension – 14 Maple St" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Site address{showValidation && missingFields.has('address') && <span className="text-red-600"> *</span>}
+            <label className={labelClass}>
+              Site address{showValidation && missingFields.has('address') && <span className="text-vt-error"> *</span>}
             </label>
             {formLoaded && (
               <PostcodeLookup
@@ -179,80 +179,83 @@ export default function NewJobPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Original contract value (£){showValidation && missingFields.has('original_value') && <span className="text-red-600"> *</span>}
+            <label className={labelClass}>
+              Original contract value{showValidation && missingFields.has('original_value') && <span className="text-vt-error"> *</span>}
             </label>
-            <input name="original_value" type="number" min="0" step="0.01" value={formData.original_value} onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="5000.00" />
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-vt-muted">£</span>
+              <input name="original_value" type="number" min="0" step="0.01" value={formData.original_value} onChange={handleInputChange}
+                className={`${inputClass} pl-7`}
+                placeholder="5,000.00" />
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label className={labelClass}>Category</label>
             <select name="category" value={formData.category} onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">-- No category --</option>
+              className={inputClass}>
+              <option value="">No category</option>
               {categories.map(cat => (
                 <option key={cat.id} value={cat.name}>{cat.name}</option>
               ))}
             </select>
-            <p className="text-xs text-gray-500 mt-1">
-              <Link href="/categories?returnTo=/jobs/new" className="text-blue-600 hover:underline">Manage categories</Link>
+            <p className="text-xs text-vt-muted mt-1.5">
+              <Link href="/categories?returnTo=/jobs/new" className="text-vt-primary font-semibold hover:underline">Manage categories</Link>
             </p>
           </div>
 
-          <hr className="border-gray-100" />
-          <p className="text-sm font-medium text-gray-700">Client details</p>
+          <hr className="border-[#EEF1F5] my-1" />
+          <p className="text-sm font-semibold text-vt-dark -mt-3">Client details</p>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Client name{showValidation && missingFields.has('client_name') && <span className="text-red-600"> *</span>}
+            <label className={labelClass}>
+              Client name{showValidation && missingFields.has('client_name') && <span className="text-vt-error"> *</span>}
             </label>
             <input name="client_name" type="text" value={formData.client_name} onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               placeholder="John Smith" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Client email{showValidation && missingFields.has('client_email') && <span className="text-red-600"> *</span>}
+            <label className={labelClass}>
+              Client email{showValidation && missingFields.has('client_email') && <span className="text-vt-error"> *</span>}
             </label>
             <input name="client_email" type="email" value={formData.client_email} onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               placeholder="john@example.com" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm client email</label>
+            <label className={labelClass}>Confirm client email</label>
             <input name="client_email_confirm" type="email" value={formData.client_email_confirm} onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               placeholder="john@example.com" />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Client phone</label>
+            <label className={labelClass}>Client phone</label>
             <input name="client_phone" type="tel" value={formData.client_phone} onChange={handleInputChange}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputClass}
               placeholder="07700 900000" />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-sm text-vt-error bg-vt-error-bg rounded-xl px-3 py-2">{error}</p>
           )}
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-1">
             <Link href="/jobs"
-              className="flex-1 text-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              className="flex-1 text-center rounded-[10px] border border-[#AEB8C7] px-4 py-[11px] text-sm font-semibold text-vt-dark hover:bg-gray-50 transition-colors">
               Cancel
             </Link>
             <button type="submit" disabled={loading}
-              className="flex-1 bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
-              {loading ? 'Creating...' : 'Create job'}
+              className="flex-1 bg-vt-primary text-white rounded-[10px] px-4 py-[11px] text-sm font-semibold hover:bg-vt-primary-hover disabled:opacity-50 transition-colors">
+              {loading ? 'Creating…' : 'Create job'}
             </button>
           </div>
 
           {showValidation && missingFields.size > 0 && (
-            <p className="text-sm text-red-600 text-center">Not all fields are filled in</p>
+            <p className="text-sm text-vt-error text-center">Not all fields are filled in</p>
           )}
         </form>
       </div>

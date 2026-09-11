@@ -40,74 +40,74 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       {/* Flips a variation to Signed the moment the client signs, without a reload */}
       <VariationsLiveUpdater jobId={id} />
 
-      <Link href="/jobs" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6">
-        <ArrowLeft className="w-4 h-4" /> All jobs
+      <Link href="/jobs" className="flex items-center gap-1.5 text-sm text-vt-muted hover:text-vt-dark mb-5">
+        <ArrowLeft className="w-4 h-4" /> Back to jobs
       </Link>
 
       {/* Header */}
       <div className="flex flex-col gap-3 mb-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-semibold text-gray-900 truncate">{job.job_name}</h1>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-[22px] font-semibold text-vt-dark truncate">{job.job_name}</h1>
             {job.category && (
-              <span className="shrink-0 px-2.5 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">
+              <span className="shrink-0 px-2.5 py-[3px] bg-[#E5EEFA] text-vt-primary text-xs font-semibold rounded-md">
                 {job.category}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            <span className="text-sm text-gray-500 break-words">{job.client_name}</span>
-            <span className="text-sm text-gray-300">·</span>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap text-sm text-vt-muted">
+            <span className="break-words">{job.client_name}</span>
+            <span className="text-[#7C8798]">·</span>
             <ClientEmailEdit jobId={job.id} initialEmail={job.client_email} />
-            <span className="text-sm text-gray-300">·</span>
-            <span className="text-sm text-gray-500 break-words">{job.address}</span>
+            <span className="text-[#7C8798]">·</span>
+            <span className="break-words">{job.address}</span>
           </div>
         </div>
         <ExportInvoiceButton jobId={job.id} jobName={job.job_name} />
       </div>
 
       {/* Totals */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 flex items-baseline justify-between gap-3 sm:block">
-          <p className="text-xs text-gray-500 shrink-0">Contract value</p>
-          <p className="text-base sm:text-lg font-semibold text-gray-900 sm:mt-1 tabular-nums">{formatCurrency(job.original_value)}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <div className="bg-white rounded-xl border border-vt-border p-4 flex items-baseline justify-between gap-3 sm:block">
+          <p className="text-xs text-vt-muted shrink-0">Contract value</p>
+          <p className="text-[19px] font-bold text-vt-dark sm:mt-1.5 tabular-nums">{formatCurrency(job.original_value)}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 flex items-baseline justify-between gap-3 sm:block">
-          <p className="text-xs text-gray-500 shrink-0">Signed variations</p>
-          <p className={`text-base sm:text-lg font-semibold sm:mt-1 tabular-nums ${signedTotal >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className="bg-white rounded-xl border border-vt-border p-4 flex items-baseline justify-between gap-3 sm:block">
+          <p className="text-xs text-vt-muted shrink-0">Signed variations</p>
+          <p className={`text-[19px] font-bold sm:mt-1.5 tabular-nums ${signedTotal >= 0 ? 'text-vt-success' : 'text-vt-error'}`}>
             {signedTotal >= 0 ? '+' : ''}{formatCurrency(signedTotal)}
           </p>
         </div>
-        <div className="bg-blue-600 rounded-xl p-3 sm:p-4 flex items-baseline justify-between gap-3 sm:block">
-          <p className="text-xs text-blue-100 shrink-0">Running total</p>
-          <p className="text-base sm:text-lg font-semibold text-white sm:mt-1 tabular-nums">{formatCurrency(grandTotal)}</p>
+        <div className="bg-vt-primary rounded-xl p-4 flex items-baseline justify-between gap-3 sm:block">
+          <p className="text-xs text-[#C7DDF7] shrink-0">Running total</p>
+          <p className="text-[19px] font-bold text-white sm:mt-1.5 tabular-nums">{formatCurrency(grandTotal)}</p>
         </div>
       </div>
 
       {pendingTotal > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800">
+        <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-[10px] px-4 py-[11px] mb-6 text-[13px] text-[#92400E]">
           {formatCurrency(pendingTotal)} in variations awaiting client sign-off
         </div>
       )}
 
       {/* Variations */}
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-medium text-gray-900">Variations</h2>
+        <h2 className="text-base font-semibold text-vt-dark">Variations</h2>
         <Link
           href={`/jobs/${id}/variations/new`}
-          className="flex items-center gap-1.5 text-sm bg-blue-600 text-white rounded-lg px-3 py-1.5 hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-1.5 text-[13px] font-semibold bg-vt-primary text-white rounded-[10px] px-3.5 py-2 hover:bg-vt-primary-hover transition-colors"
         >
           <Plus className="w-3.5 h-3.5" /> Add variation
         </Link>
       </div>
 
       {!variations.length ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400">
+        <div className="bg-white rounded-xl border border-vt-border p-8 text-center text-vt-muted">
           <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
           <p className="text-sm">No variations logged yet</p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2.5">
           {variations.map((v: Variation & { signature: Signature | null }) => (
             <VariationRow
               key={v.id}

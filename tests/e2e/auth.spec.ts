@@ -4,7 +4,7 @@ test.describe('Authentication', () => {
   test('login page loads', async ({ page }) => {
     await page.goto('/login');
     await expect(page).toHaveTitle(/VarTrack/);
-    await expect(page.locator('h2:has-text("Sign in")')).toBeVisible();
+    await expect(page.locator('h2:has-text("Log in to Your Account")')).toBeVisible();
   });
 
   test('register page loads', async ({ page }) => {

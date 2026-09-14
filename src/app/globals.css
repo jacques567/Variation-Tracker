@@ -14,6 +14,29 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* VarTracker redesign tokens — see DESIGN.md. Scoped to rebuilt screens
+     (auth flow, jobs list) via their own font/layout wrappers; not applied
+     globally yet. */
+  --color-vt-primary: #0057b8;
+  --color-vt-primary-hover: #003d82;
+  --color-vt-primary-tint: #e5eefa;
+  --color-vt-dark: #0f1720;
+  --color-vt-light: #e6eaf0;
+  --color-vt-border: #aeb8c7;
+  --color-vt-muted: #6b7280;
+  --color-vt-muted-2: #4b5563;
+  --color-vt-label: #374151;
+  --color-vt-icon: #7c8798;
+  --color-vt-success-bg: #ecfdf5;
+  --color-vt-success: #047857;
+  --color-vt-warning-bg: #fffbeb;
+  --color-vt-warning: #92400e;
+  --color-vt-warning-pill: #b45309;
+  --color-vt-error-bg: #fef2f2;
+  --color-vt-error: #b91c1c;
+  --color-vt-neutral-bg: #f3f4f6;
+  --color-vt-neutral: #4b5563;
 }
 
 @media (prefers-color-scheme: dark) {

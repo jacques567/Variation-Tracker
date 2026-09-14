@@ -10,7 +10,10 @@ const csp = [
   // Dev also needs 'unsafe-eval' for React's dev-mode debugging (never used in production).
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
+  // blob: covers the local file preview shown while a variation photo is
+  // being uploaded (URL.createObjectURL); *.supabase.co covers the photo
+  // once it's stored (variation-photos bucket public URLs).
+  "img-src 'self' data: blob: https://*.supabase.co",
   "font-src 'self' data:",
   // Supabase client (auth + realtime), Sentry error reporting, and the
   // postcodes.io lookup used by PostcodeLookup (src/components/jobs/PostcodeLookup.tsx).

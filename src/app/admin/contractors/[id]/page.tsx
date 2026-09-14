@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { Contractor } from '@/types'
@@ -158,118 +157,114 @@ export default function ContractorDetailPage({ params }: { params: Promise<{ id:
     return <div>Contractor not found</div>
   }
 
+  const subscriptionColor =
+    contractor.subscription_status === 'active' ? 'text-vt-success'
+    : contractor.subscription_status === 'trialing' ? 'text-vt-primary'
+    : 'text-vt-error'
+
+  const inputClass = 'w-full h-[40px] rounded-[9px] border border-[#AEB8C7] px-3 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15'
+  const labelClass = 'block text-[13px] font-semibold text-vt-dark mb-1.5'
+
   return (
     <div>
-      <Link href="/admin/contractors" className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6">
-        <ArrowLeft className="w-4 h-4" /> Back to contractors
+      <Link href="/admin/contractors" className="inline-flex items-center gap-1.5 text-[13px] text-vt-muted hover:text-vt-dark mb-5 transition-colors">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Back to contractors
       </Link>
 
       {/* Contractor Header */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-xl border border-vt-border p-6 mb-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">{contractor.full_name}</h1>
-            <p className="text-gray-600 mt-1">{contractor.company_name || 'No company name'}</p>
-            <p className="text-sm text-gray-500 mt-1">{contractor.email}</p>
+            <h1 className="text-[22px] font-semibold text-vt-dark">{contractor.full_name}</h1>
+            <p className="text-[14px] text-[#4B5563] mt-1">{contractor.company_name || 'No company name'}</p>
+            <p className="text-[13px] text-vt-muted mt-0.5">{contractor.email}</p>
           </div>
-          <div className="text-right">
-            <p className="text-xs text-gray-500">Subscription</p>
-            <p className={`text-sm font-semibold mt-1 ${
-              contractor.subscription_status === 'active'
-                ? 'text-green-600'
-                : contractor.subscription_status === 'trialing'
-                ? 'text-blue-600'
-                : 'text-red-600'
-            }`}>
+          <div className="text-right flex-shrink-0">
+            <p className="text-[12px] text-vt-muted">Subscription</p>
+            <p className={`text-[14px] font-bold mt-1 ${subscriptionColor}`}>
               {contractor.subscription_status || 'none'}
             </p>
-            <p className="text-xs text-gray-500 mt-3">Joined {formatDate(contractor.created_at)}</p>
+            <p className="text-[12px] text-vt-muted mt-2.5">Joined {formatDate(contractor.created_at)}</p>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
+        <div className="grid grid-cols-3 gap-4 mt-[22px] pt-[22px] border-t border-[#EEF1F5]">
           <div>
-            <p className="text-xs text-gray-500">Total Jobs</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{contractor.job_count}</p>
+            <p className="text-[12px] text-vt-muted">Total Jobs</p>
+            <p className="text-[24px] font-bold text-vt-dark mt-1.5">{contractor.job_count}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Variation Value</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{formatCurrency(contractor.variation_total)}</p>
+            <p className="text-[12px] text-vt-muted">Variation Value</p>
+            <p className="text-[24px] font-bold text-vt-dark mt-1.5">{formatCurrency(contractor.variation_total)}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Total Revenue</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">
+            <p className="text-[12px] text-vt-muted">Total Revenue</p>
+            <p className="text-[24px] font-bold text-vt-dark mt-1.5">
               {formatCurrency(jobs.reduce((sum, j) => sum + j.original_value, 0) + contractor.variation_total)}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Activity & Filters */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Activity & Jobs</h2>
+      <h2 className="text-[17px] font-semibold text-vt-dark mb-[14px]">Activity &amp; Jobs</h2>
 
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search jobs & events
-              </label>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search..."
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                From Date
-              </label>
-              <input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                To Date
-              </label>
-              <input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+      {/* Filters */}
+      <div className="bg-white rounded-xl border border-vt-border p-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_200px_200px] gap-4">
+          <div>
+            <label className={labelClass}>Search jobs &amp; events</label>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search…"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>From Date</label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>To Date</label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              className={inputClass}
+            />
           </div>
         </div>
+      </div>
 
-        {/* Events Timeline */}
-        <div className="space-y-2">
-          {events.map(event => (
-            <div key={`${event.type}-${event.id}`} className="bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-300 transition-colors">
-              <div className="flex items-start gap-3">
-                <div className={`w-2 h-2 rounded-full mt-2 ${event.type === 'signature' ? 'bg-green-500' : 'bg-blue-500'}`} />
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{event.title}</p>
-                  <p className="text-sm text-gray-600 mt-0.5">{event.detail}</p>
-                  <p className="text-xs text-gray-500 mt-2">{formatDate(event.date)}</p>
-                </div>
+      {/* Events Timeline */}
+      <div className="flex flex-col gap-2">
+        {events.map(event => (
+          <div key={`${event.type}-${event.id}`} className="bg-white rounded-[10px] border border-vt-border p-[14px_16px]">
+            <div className="flex items-start gap-[11px]">
+              <span className={`w-2 h-2 rounded-full mt-[5px] flex-shrink-0 ${event.type === 'signature' ? 'bg-[#0EA65C]' : 'bg-vt-primary'}`} />
+              <div>
+                <p className="text-[14px] font-semibold text-vt-dark">{event.title}</p>
+                <p className="text-[13px] text-[#4B5563] mt-0.5">{event.detail}</p>
+                <p className="text-[12px] text-vt-muted mt-1.5">{formatDate(event.date)}</p>
               </div>
             </div>
-          ))}
+          </div>
+        ))}
 
-          {!events.length && (
-            <div className="text-center py-12 text-gray-500">
-              <p>No activity found</p>
-            </div>
-          )}
-        </div>
+        {!events.length && (
+          <div className="text-center py-12 text-vt-muted">
+            <p>No activity found</p>
+          </div>
+        )}
       </div>
     </div>
   )

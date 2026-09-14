@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, usePathname } from 'next/navigation'
-import { Briefcase, LogOut } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import type { Contractor } from '@/types'
@@ -34,36 +35,36 @@ export default function NavBar({ contractor, hasSubscription }: { contractor: Co
   }
 
   return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/jobs" className="flex items-center gap-2 font-semibold text-gray-900">
-          <Briefcase className="w-5 h-5 text-blue-600" aria-hidden="true" />
+    <header className="bg-white border-b border-vt-light">
+      <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+        <Link href="/jobs" className="flex items-center gap-2 font-bold text-vt-dark tracking-tight">
+          <Image src="/VarTrackerLogo3Trans.png" alt="" width={40} height={40} className="h-10 w-10 sm:h-[44px] sm:w-[44px] object-contain" />
           VarTracker
         </Link>
 
         <div className="flex items-center gap-6">
-          <Link href="/categories" className="text-sm text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">
+          <Link href="/categories" className="text-sm text-vt-muted-2 hover:text-vt-dark transition-colors hidden sm:block">
             Categories
           </Link>
           {isAdmin && (
-            <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">
+            <Link href="/admin" className="text-sm text-vt-muted-2 hover:text-vt-dark transition-colors hidden sm:block">
               Admin
             </Link>
           )}
           <div className="flex items-center gap-4">
             {!hasSubscription && (
               <Link href="/subscribe"
-                className="text-xs bg-blue-600 text-white rounded-full px-3 py-1 font-medium hover:bg-blue-700 transition-colors">
+                className="text-xs bg-vt-primary text-white rounded-full px-3 py-1 font-medium hover:bg-vt-primary-hover transition-colors">
                 Start free trial
               </Link>
             )}
-            <span className="text-sm text-gray-500 hidden sm:block">
+            <span className="text-sm text-vt-muted hidden sm:block">
               {contractor?.full_name}
             </span>
             <button
               onClick={handleSignOut}
               aria-label="Sign out"
-              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-vt-muted hover:text-vt-dark transition-colors"
             >
               <LogOut className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">Sign out</span>

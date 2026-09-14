@@ -15,15 +15,36 @@ const features = [
 
 const isBetaMode = process.env.NEXT_PUBLIC_BETA_MODE === 'true'
 
+function FeatureList() {
+  return (
+    <div className="bg-white border border-vt-border rounded-[16px] p-[26px] mb-5 shadow-[0_20px_60px_rgba(15,23,32,0.10),0_2px_8px_rgba(15,23,32,0.05)]">
+      <div className="flex items-end gap-[5px] mb-5">
+        <span className="text-[38px] font-bold text-vt-dark leading-none">£15</span>
+        <span className="text-sm text-vt-muted mb-1">/month</span>
+      </div>
+      <ul className="flex flex-col gap-3">
+        {features.map((f) => (
+          <li key={f} className="flex items-center gap-2.5 text-sm text-[#374151]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0EA65C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            {f}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export default async function SubscribePage() {
   if (isBetaMode) {
     return (
-      <div className="max-w-sm mx-auto pt-8 text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
-          <Zap className="w-6 h-6 text-green-600" />
+      <div className="text-center">
+        <div className="inline-flex items-center justify-center w-[52px] h-[52px] bg-[#E5EEFA] rounded-full mb-3.5">
+          <Zap className="w-6 h-6 text-vt-primary" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">You&apos;re on beta access</h1>
-        <p className="text-gray-500 mt-2 text-sm">Full access is included while VarTracker is in beta. No subscription needed yet.</p>
+        <h1 className="text-[22px] font-bold text-vt-dark">You&apos;re on beta access</h1>
+        <p className="text-vt-muted mt-1.5 text-sm">Full access is included while VarTracker is in beta. No subscription needed yet.</p>
       </div>
     )
   }
@@ -56,162 +77,98 @@ export default async function SubscribePage() {
 
   if (isSubscribed && stripeCustomerId) {
     return (
-      <div className="max-w-sm mx-auto pt-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
-            <Check className="w-6 h-6 text-green-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">You&apos;re subscribed</h1>
-          <p className="text-gray-500 mt-2 text-sm">Manage your subscription anytime.</p>
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-[52px] h-[52px] bg-[#ECFDF5] rounded-full mb-3.5">
+          <Check className="w-6 h-6 text-vt-success" />
         </div>
-
-        <ManageSubscriptionButton />
-
-        <p className="text-xs text-gray-400 text-center mt-4">
-          Opens Stripe portal · Secure payment
-        </p>
-      </div>
-    )
-  }
-
-  // Reached only once the grace-period redirect above has ruled out "still valid" —
-  // so the grace period has actually lapsed. The Stripe subscription still exists
-  // (mid-retry), so send them to the billing portal rather than a fresh checkout.
-  // Fresh checkout would 409 (see /api/stripe/checkout's duplicate-subscription guard,
-  // which treats 'past_due' as an existing active subscription).
-  if (status === 'past_due' && stripeCustomerId) {
-    return (
-      <div className="max-w-sm mx-auto pt-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-amber-100 rounded-full mb-4">
-            <AlertTriangle className="w-6 h-6 text-amber-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Payment failed</h1>
-          <p className="text-gray-500 mt-2 text-sm">
-            We couldn&apos;t process your last payment and your grace period has ended.
-            Update your card to restore access — no need to resubscribe.
+        <h1 className="text-[22px] font-bold text-vt-dark">You&apos;re subscribed</h1>
+        <p className="text-vt-muted mt-1.5 text-sm">Manage your subscription anytime.</p>
+        <div className="mt-6">
+          <ManageSubscriptionButton />
+          <p className="text-xs text-vt-muted text-center mt-3">
+            Opens Stripe portal · Secure payment
           </p>
         </div>
-
-        <ManageSubscriptionButton />
-
-        <p className="text-xs text-gray-400 text-center mt-4">
-          Opens Stripe portal · Secure payment
-        </p>
       </div>
     )
   }
 
-  // Subscription was cancelled (either by the contractor or after Stripe gave up
-  // retrying a failed payment). No Stripe subscription exists anymore, so this is
-  // a fresh checkout.
+  // Grace period has lapsed — send to billing portal (not fresh checkout, which would 409)
+  if (status === 'past_due' && stripeCustomerId) {
+    return (
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center w-[52px] h-[52px] bg-amber-100 rounded-full mb-3.5">
+          <AlertTriangle className="w-6 h-6 text-amber-600" />
+        </div>
+        <h1 className="text-[22px] font-bold text-vt-dark">Payment failed</h1>
+        <p className="text-vt-muted mt-1.5 text-sm">
+          We couldn&apos;t process your last payment and your grace period has ended.
+          Update your card to restore access — no need to resubscribe.
+        </p>
+        <div className="mt-6">
+          <ManageSubscriptionButton />
+          <p className="text-xs text-vt-muted text-center mt-3">
+            Opens Stripe portal · Secure payment
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   if (status === 'canceled') {
     return (
-      <div className="max-w-sm mx-auto pt-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-4">
-            <XCircle className="w-6 h-6 text-gray-500" />
+      <>
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-[52px] h-[52px] bg-[#F3F4F6] rounded-full mb-3.5">
+            <XCircle className="w-6 h-6 text-vt-muted" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Subscription cancelled</h1>
-          <p className="text-gray-500 mt-2 text-sm">
+          <h1 className="text-[22px] font-bold text-vt-dark">Subscription cancelled</h1>
+          <p className="text-vt-muted mt-1.5 text-sm">
             Your VarTracker subscription has ended. Resubscribe anytime — your jobs and variations are still here waiting for you.
           </p>
         </div>
-
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-          <div className="flex items-end gap-1 mb-6">
-            <span className="text-4xl font-bold text-gray-900">£15</span>
-            <span className="text-gray-400 mb-1">/month</span>
-          </div>
-
-          <ul className="space-y-3">
-            {features.map((f) => (
-              <li key={f} className="flex items-center gap-2.5 text-sm text-gray-700">
-                <Check className="w-4 h-4 text-green-500 shrink-0" />
-                {f}
-              </li>
-            ))}
-          </ul>
-        </div>
-
+        <FeatureList />
         <SubscribeButton />
-
-        <p className="text-xs text-gray-400 text-center mt-4">
+        <p className="text-xs text-vt-muted text-center mt-3">
           Secure payment via Stripe · Cancel any time
         </p>
-      </div>
+      </>
     )
   }
 
-  // Reached only once the redirect above has ruled out "still valid" — the app-managed
-  // trial has actually run out.
   if (status === 'trialing') {
     return (
-      <div className="max-w-sm mx-auto pt-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
-            <Clock className="w-6 h-6 text-blue-600" />
+      <>
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-[52px] h-[52px] bg-[#E5EEFA] rounded-full mb-3.5">
+            <Clock className="w-6 h-6 text-vt-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Your trial has ended</h1>
-          <p className="text-gray-500 mt-2 text-sm">Subscribe to keep using VarTracker. £15/month, cancel any time.</p>
+          <h1 className="text-[22px] font-bold text-vt-dark">Your trial has ended</h1>
+          <p className="text-vt-muted mt-1.5 text-sm">Subscribe to keep using VarTracker. £15/month, cancel any time.</p>
         </div>
-
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-          <div className="flex items-end gap-1 mb-6">
-            <span className="text-4xl font-bold text-gray-900">£15</span>
-            <span className="text-gray-400 mb-1">/month</span>
-          </div>
-
-          <ul className="space-y-3">
-            {features.map((f) => (
-              <li key={f} className="flex items-center gap-2.5 text-sm text-gray-700">
-                <Check className="w-4 h-4 text-green-500 shrink-0" />
-                {f}
-              </li>
-            ))}
-          </ul>
-        </div>
-
+        <FeatureList />
         <SubscribeButton />
-
-        <p className="text-xs text-gray-400 text-center mt-4">
+        <p className="text-xs text-vt-muted text-center mt-3">
           Secure payment via Stripe · Cancel any time
         </p>
-      </div>
+      </>
     )
   }
 
   return (
-    <div className="max-w-sm mx-auto pt-8">
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
-          <Zap className="w-6 h-6 text-blue-600" />
+    <>
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center justify-center w-[52px] h-[52px] bg-[#E5EEFA] rounded-full mb-3.5">
+          <Zap className="w-6 h-6 text-vt-primary" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Subscribe to VarTracker</h1>
-        <p className="text-gray-500 mt-2 text-sm">£15/month. Cancel any time.</p>
+        <h1 className="text-[22px] font-bold text-vt-dark">Subscribe to VarTracker</h1>
+        <p className="text-vt-muted mt-1.5 text-sm">£15/month. Cancel any time.</p>
       </div>
-
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
-        <div className="flex items-end gap-1 mb-6">
-          <span className="text-4xl font-bold text-gray-900">£15</span>
-          <span className="text-gray-400 mb-1">/month</span>
-        </div>
-
-        <ul className="space-y-3">
-          {features.map((f) => (
-            <li key={f} className="flex items-center gap-2.5 text-sm text-gray-700">
-              <Check className="w-4 h-4 text-green-500 shrink-0" />
-              {f}
-            </li>
-          ))}
-        </ul>
-      </div>
-
+      <FeatureList />
       <SubscribeButton />
-
-      <p className="text-xs text-gray-400 text-center mt-4">
+      <p className="text-xs text-vt-muted text-center mt-3">
         Secure payment via Stripe · Cancel any time
       </p>
-    </div>
+    </>
   )
 }

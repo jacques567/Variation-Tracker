@@ -22,6 +22,7 @@ test.describe('Login Tracking & Rate Limiting', () => {
     await page.locator('input[name="full_name"]').fill('Test User')
     await page.locator('input[name="email"]').fill(testEmail)
     await page.locator('input[name="password"]').fill(testPassword)
+    await page.locator('input[name="accept_terms"]').check()
     await page.locator('button[type="submit"]').click()
 
     // Wait for signup to complete (auto-confirm or email sent)
@@ -32,6 +33,7 @@ test.describe('Login Tracking & Rate Limiting', () => {
     await page.locator('input[name="full_name"]').fill('Another User')
     await page.locator('input[name="email"]').fill(testEmail)
     await page.locator('input[name="password"]').fill(testPassword)
+    await page.locator('input[name="accept_terms"]').check()
     await page.locator('button[type="submit"]').click()
 
     // Expect error message

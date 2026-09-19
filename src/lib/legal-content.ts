@@ -57,7 +57,7 @@ export const privacyPolicy: Policy = {
 • Job and variation data — project names, client names, site addresses, variation descriptions, amounts, and any notes or attachments you upload. This is data you enter yourself.
 • Usage data — pages visited, actions taken within the app, and error logs. This is collected to help us fix bugs and improve the product.
 • Device and connection data — IP address, browser type, and operating system, collected automatically when you use the service.
-• Sign-off records — when your client signs off a variation, we record their name, the date and time, and their IP address. This is kept as evidence that the sign-off took place and is shown to you, the contractor.
+• Sign-off records — when your client signs off a variation, we record their name, signature, the date and time, their IP address, device information (browser and operating system), the declaration text they agreed to, and a content hash (a digital fingerprint of the variation). This is kept as evidence that the sign-off took place and is shown to you, the contractor.
 
 We do not collect payment card details. Any billing is handled by a third-party payment processor (Stripe) under their own privacy policy.`,
     },
@@ -96,7 +96,9 @@ We do not share your data with your clients or any other third party without you
     },
     {
       heading: "How long we keep your data",
-      body: `We retain your account and project data for as long as your account is active. If you close your account, we will delete or anonymise your personal data within 30 days, except where we are required to retain it by law (for example, financial records which may be kept for up to 6 years under UK tax law).`,
+      body: `We retain your account and project data for as long as your account is active. If you close your account, we will delete or anonymise your personal data within 30 days, except where we need to keep it by law. Signed variation records and financial records may be kept for up to 6 years, which reflects the UK Limitation Act 1980 and standard financial record-keeping rules.
+
+Erasure requests and signed records: where you ask us to delete personal data that is not part of a signed variation record (for example your account profile), we will delete it within 30 days. Where the data forms part of a signed variation (the client name, signature, IP address, device information, and declaration text captured at signing), UK GDPR allows us to keep it for the period above even after an erasure request, because it is necessary for the establishment, exercise, or defence of legal claims relating to that contract (Article 17(3)(b) UK GDPR). We will still delete or anonymise anything not needed for that purpose, and once the 6-year period ends, all associated personal data is deleted.`,
     },
     {
       heading: "Your rights",
@@ -104,7 +106,7 @@ We do not share your data with your clients or any other third party without you
 
 • Access — request a copy of the personal data we hold about you.
 • Rectification — ask us to correct inaccurate data.
-• Erasure — ask us to delete your data (subject to legal retention requirements).
+• Erasure — ask us to delete your data (subject to legal retention requirements, including signed variation records — see above).
 • Restriction — ask us to limit how we use your data in certain circumstances.
 • Portability — receive your data in a machine-readable format.
 • Object — object to processing based on legitimate interests.

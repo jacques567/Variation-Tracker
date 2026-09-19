@@ -3,7 +3,7 @@
 
 export const COMPANY_NAME = "VarTracker";
 export const COMPANY_EMAIL = "admin@vartracker.com";
-export const LAST_UPDATED = "April 2026";
+export const LAST_UPDATED = "September 2026";
 
 type PolicySection = {
   heading: string;
@@ -57,6 +57,7 @@ export const privacyPolicy: Policy = {
 • Job and variation data — project names, client names, site addresses, variation descriptions, amounts, and any notes or attachments you upload. This is data you enter yourself.
 • Usage data — pages visited, actions taken within the app, and error logs. This is collected to help us fix bugs and improve the product.
 • Device and connection data — IP address, browser type, and operating system, collected automatically when you use the service.
+• Sign-off records — when your client signs off a variation, we record their name, the date and time, and their IP address. This is kept as evidence that the sign-off took place and is shown to you, the contractor.
 
 We do not collect payment card details. Any billing is handled by a third-party payment processor (Stripe) under their own privacy policy.`,
     },
@@ -86,6 +87,10 @@ We do not sell your data to third parties. We do not use your data for advertisi
 • Supabase — our database and authentication provider. Data is hosted on servers in the EU.
 • Vercel — our hosting provider. Handles request routing and edge functions.
 • Stripe — payment processing (if applicable to your plan).
+• Resend — email delivery (for example password resets and sign-off notifications).
+• Sentry — error monitoring, so we can find and fix bugs.
+
+Some of these providers (for example Vercel and Sentry) may process data outside the UK, including in the United States. Where they do, we rely on the UK's approved safeguards for international transfers, such as the UK International Data Transfer Addendum or an adequacy arrangement.
 
 We do not share your data with your clients or any other third party without your explicit instruction.`,
     },
@@ -147,7 +152,9 @@ We reserve the right to suspend or terminate accounts that breach these rules.`,
     },
     {
       heading: "4. Your data",
-      body: `You own the data you enter into VarTracker. We process it on your behalf to provide the Service. You are responsible for ensuring that any personal data you upload (for example, client contact details) is handled lawfully under UK GDPR. See our Privacy Policy for how we handle your data.`,
+      body: `You own the data you enter into VarTracker. We process it on your behalf to provide the Service. You are responsible for ensuring that any personal data you upload (for example, client contact details) is handled lawfully under UK GDPR. See our Privacy Policy for how we handle your data.
+
+Photos and files you upload must be your own, or you must have permission to use them. If someone tells us that something you uploaded infringes their rights, we will act promptly to remove or disable access to it, as required by [Regulation 19 of the Electronic Commerce (EC Directive) Regulations 2002](https://www.legislation.gov.uk/uksi/2002/2013/regulation/19). To report content, email ${COMPANY_EMAIL}.`,
     },
     {
       heading: "5. Subscription and billing",

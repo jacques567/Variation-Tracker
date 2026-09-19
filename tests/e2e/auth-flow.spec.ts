@@ -12,6 +12,7 @@ test.describe('Authenticated User Flow', () => {
     await page.locator('input[name="full_name"]').fill('Test User');
     await page.locator('input[name="email"]').fill(FIXED_TEST_EMAIL);
     await page.locator('input[name="password"]').fill(FIXED_TEST_PASSWORD);
+    await page.locator('input[name="accept_terms"]').check();
 
     const submitButton = page.locator('button[type="submit"]');
     await expect(submitButton).toBeEnabled();

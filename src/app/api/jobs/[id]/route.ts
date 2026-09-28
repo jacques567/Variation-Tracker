@@ -70,6 +70,11 @@ export async function PATCH(
  *  3. Deletes the job row (DB cascades handle variations + signatures)
  *
  * Only the authenticated contractor who owns the job may delete it.
+ *
+ * A job with any signed variation cannot be hard-deleted — signed records
+ * are retained for 6 years (see the privacy policy's retention section).
+ * We check that up front for a friendly error message; the DB trigger in
+ * 20260928120000_retain_signed_jobs.sql is the backstop for any other path.
  */
 export async function DELETE(
   _request: NextRequest,
@@ -98,10 +103,10 @@ export async function DELETE(
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // Verify ownership and fetch photo URLs in one query
+    // Verify ownership and fetch photo URLs + variation status in one query
     const { data: job, error: jobError } = await serviceClient
       .from('jobs')
-      .select('id, contractor_id, variations(photo_url)')
+      .select('id, contractor_id, variations(photo_url, status)')
       .eq('id', jobId)
       .eq('contractor_id', user.id)
       .single()
@@ -110,8 +115,22 @@ export async function DELETE(
       return NextResponse.json(Errors.notFound('Job').toJSON(), { status: 404 })
     }
 
+    const jobVariations = job.variations as { photo_url: string | null; status: string }[]
+
+    // Signed variations are a retained contractual record (6 years — see the
+    // privacy policy). Deleting the job would destroy them via cascade, so
+    // we steer the user to archiving instead.
+    if (jobVariations.some((v) => v.status === 'signed')) {
+      return NextResponse.json(
+        Errors.conflict(
+          'This job has signed variations, which are kept as a legal record. Archive the job instead of deleting it.'
+        ).toJSON(),
+        { status: 409 }
+      )
+    }
+
     // Delete photos from Storage (best-effort — don't block deletion if storage fails)
-    const photoUrls: string[] = (job.variations as { photo_url: string | null }[])
+    const photoUrls: string[] = jobVariations
       .map((v) => v.photo_url)
       .filter((url): url is string => !!url)
 

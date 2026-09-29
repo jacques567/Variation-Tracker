@@ -96,6 +96,7 @@ test.describe('Login Tracking & Rate Limiting', () => {
     await page.locator('input[name="full_name"]').fill('Test User')
     await page.locator('input[name="email"]').fill(email)
     await page.locator('input[name="password"]').fill(password)
+    await page.locator('input[name="accept_terms"]').check()
     await page.locator('button[type="submit"]').click()
 
     // Wait for auto-confirm or email confirmation
@@ -134,6 +135,7 @@ test.describe('Login Tracking & Rate Limiting', () => {
     await page.locator('input[name="full_name"]').fill('Test User')
     await page.locator('input[name="email"]').fill(email)
     await page.locator('input[name="password"]').fill(password)
+    await page.locator('input[name="accept_terms"]').check()
     await page.locator('button[type="submit"]').click()
 
     await page.waitForURL(/\/(login|jobs)/)

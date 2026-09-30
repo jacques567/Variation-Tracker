@@ -214,6 +214,28 @@ export default function RegisterPage() {
             )}
           </div>
 
+          <div className="flex items-start gap-2">
+            <input
+              id="accept_terms"
+              name="accept_terms"
+              type="checkbox"
+              required
+              disabled={loading}
+              className="mt-0.5 h-4 w-4 rounded border-vt-border text-vt-primary focus:ring-vt-primary/40"
+            />
+            <label htmlFor="accept_terms" className="text-sm text-vt-muted">
+              I am 18 or over and agree to the{' '}
+              <Link href="/terms" target="_blank" className="text-vt-primary hover:underline">
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" target="_blank" className="text-vt-primary hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </label>
+          </div>
+
           {error && (
             <p className="text-sm text-vt-error bg-vt-error-bg rounded-xl px-3 py-2">{error}</p>
           )}

@@ -22,6 +22,7 @@ test.describe('Login Tracking & Rate Limiting', () => {
     await page.locator('input[name="full_name"]').fill('Test User')
     await page.locator('input[name="email"]').fill(testEmail)
     await page.locator('input[name="password"]').fill(testPassword)
+    await page.locator('input[name="accept_terms"]').check()
     await page.locator('button[type="submit"]').click()
 
     // Wait for signup to complete (auto-confirm or email sent)
@@ -32,6 +33,7 @@ test.describe('Login Tracking & Rate Limiting', () => {
     await page.locator('input[name="full_name"]').fill('Another User')
     await page.locator('input[name="email"]').fill(testEmail)
     await page.locator('input[name="password"]').fill(testPassword)
+    await page.locator('input[name="accept_terms"]').check()
     await page.locator('button[type="submit"]').click()
 
     // Expect error message
@@ -54,10 +56,15 @@ test.describe('Login Tracking & Rate Limiting', () => {
     const signupRes = await page.context().request.post(
       `${process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:3000'}/api/auth/signup`,
       {
-        data: { email, password, fullName: 'Test User' },
+        // The signup route's Zod schema requires snake_case full_name — a
+        // camelCase fullName silently fails validation, the contractor row
+        // is never created, and every assertion below then passes for the
+        // wrong reason (generic "Invalid email or password" on every
+        // attempt, including the 6th, since there's no row to lock).
+        data: { email, password, full_name: 'Test User' },
       }
     )
-    // Note: this assumes a signup API exists; adjust if needed
+    expect(signupRes.ok(), `Signup API call failed: ${await signupRes.text()}`).toBeTruthy()
 
     // Attempt 5 wrong passwords
     for (let i = 1; i <= 5; i++) {
@@ -71,10 +78,13 @@ test.describe('Login Tracking & Rate Limiting', () => {
       await expect(errorMsg).toBeVisible({ timeout: 5000 })
     }
 
-    // 6th attempt — account should be locked
+    // 6th attempt — account should be locked. The lockout check runs before
+    // password verification, so any password triggers it — but using the
+    // account's real one (not the outer describe block's unrelated
+    // `testPassword`) keeps this test's intent honest.
     await page.goto('/login')
     await page.locator('input[name="email"]').fill(email)
-    await page.locator('input[name="password"]').fill(testPassword)
+    await page.locator('input[name="password"]').fill(password)
     await page.locator('button[type="submit"]').click()
 
     // Expect lockout message
@@ -94,6 +104,7 @@ test.describe('Login Tracking & Rate Limiting', () => {
     await page.locator('input[name="full_name"]').fill('Test User')
     await page.locator('input[name="email"]').fill(email)
     await page.locator('input[name="password"]').fill(password)
+    await page.locator('input[name="accept_terms"]').check()
     await page.locator('button[type="submit"]').click()
 
     // Wait for auto-confirm or email confirmation
@@ -132,6 +143,7 @@ test.describe('Login Tracking & Rate Limiting', () => {
     await page.locator('input[name="full_name"]').fill('Test User')
     await page.locator('input[name="email"]').fill(email)
     await page.locator('input[name="password"]').fill(password)
+    await page.locator('input[name="accept_terms"]').check()
     await page.locator('button[type="submit"]').click()
 
     await page.waitForURL(/\/(login|jobs)/)

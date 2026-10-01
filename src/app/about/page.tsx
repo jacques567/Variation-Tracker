@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Poppins } from 'next/font/google';
+import { appUrl } from '@/lib/app-url';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -18,10 +19,43 @@ const diamondPattern = {
 
 export const metadata = {
   alternates: { canonical: '/about' },
-  title: 'What is VarTracker? — Variation Order Tracking for Contractors',
+  title: 'VarTracker — Variation Order Tracking App for UK Contractors',
   description:
-    'VarTracker is a variation-tracking app that lets contractors log job variations, notify clients instantly, and collect legally binding electronic sign-off before work proceeds.',
+    'VarTracker is a variation order tracking app for UK contractors. Log extra work on site, send it to the client for electronic sign-off, and export an invoice with every signed variation. £15/month after a 7-day free trial.',
+  openGraph: {
+    title: 'VarTracker — Variation Order Tracking App for UK Contractors',
+    description:
+      'Log variations on site, get client sign-off by link, and export an invoice that includes every signed variation.',
+    url: `${appUrl}/about`,
+    siteName: 'VarTracker',
+    type: 'website',
+  },
 };
+
+const steps = [
+  {
+    title: 'Log the variation',
+    body: 'Add the extra work, the cost and photos from your phone while you are still on site.',
+  },
+  {
+    title: 'Send it to the client',
+    body: 'VarTracker emails the client a link. They open it on their phone or computer, with no app and no account.',
+  },
+  {
+    title: 'Get it signed',
+    body: 'The client signs electronically. The name, time and signature are stored against the job before you start the work.',
+  },
+  {
+    title: 'Invoice it',
+    body: 'Export an invoice showing the original contract value plus every signed variation.',
+  },
+];
+
+const audience = [
+  'Electricians, plumbers, builders, kitchen fitters and other trades working to a fixed price',
+  'Self-employed contractors and small teams in the UK',
+  'Anyone who has done extra work on a job and then struggled to get paid for it',
+];
 
 const faqs = [
   {
@@ -54,7 +88,38 @@ const faqs = [
     answer:
       "No — once a client signs, VarTracker locks the variation so it can't be edited or deleted, and a job holding signed variations can't be hard-deleted either; you archive it instead. Signed variations are kept as a contractual record for up to six years, so if a dispute comes up, the approved wording and signature are still there.",
   },
+  {
+    question: 'Is an electronic sign-off valid evidence in the UK?',
+    answer:
+      'VarTracker records the client\'s electronic signature, name, IP address and the time of signing. Under the Electronic Communications Act 2000 s.7, electronic signatures are admissible as evidence in the UK. The full record is reproduced on the exported variation PDF and invoice. VarTracker is not a law firm, so for a large or contested sum take legal advice.',
+  },
+  {
+    question: 'How much does VarTracker cost?',
+    answer:
+      'VarTracker costs £15 per month after a 7-day free trial. No card is needed to start the trial, and you can cancel any time.',
+  },
+  {
+    question: 'Who is VarTracker for?',
+    answer:
+      'VarTracker is for UK contractors and small construction businesses working to a fixed price, such as electricians, plumbers, builders and kitchen fitters. It is built for use on a phone, on site.',
+  },
 ];
+
+const softwareSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'VarTracker',
+  url: `${appUrl}/about`,
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  description:
+    'Variation order tracking for UK contractors: log variations, collect client electronic sign-off, and export invoices.',
+  offers: {
+    '@type': 'Offer',
+    price: '15.00',
+    priceCurrency: 'GBP',
+  },
+};
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -73,6 +138,7 @@ export default function AboutPage() {
   return (
     <div className={`${poppins.className} min-h-screen`} style={{ backgroundColor: '#E6EAF0' }}>
       <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+      <script type="application/ld+json">{JSON.stringify(softwareSchema)}</script>
 
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-3xl mx-auto px-4 py-4 sm:px-6">
@@ -102,17 +168,62 @@ export default function AboutPage() {
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-semibold mb-4" style={{ color: '#0F1720' }}>
-            What is VarTracker?
+            Variation order tracking for UK contractors
           </h1>
-          <p className="text-lg leading-relaxed" style={{ color: '#0F1720' }}>
-            VarTracker is a variation-tracking app that helps contractors log job variations,
-            notify clients, and collect legally binding electronic sign-off before extra work
-            proceeds.
+          <p className="text-lg leading-relaxed mb-6" style={{ color: '#0F1720' }}>
+            VarTracker is a variation order (change order) tracking app. You log extra work on
+            site, the client signs it off electronically from a link, and you export an invoice
+            that includes every signed variation.
+          </p>
+          <Link
+            href="/register"
+            className="inline-block rounded-lg px-5 py-3 text-base font-medium text-white"
+            style={{ backgroundColor: '#0057B8' }}
+          >
+            Start your 7-day free trial
+          </Link>
+          <p className="text-sm mt-3" style={{ color: '#4B5563' }}>
+            No card needed. £15/month after the trial, cancel any time.
           </p>
         </div>
       </section>
 
       <main className="max-w-3xl mx-auto px-4 py-12 sm:px-6">
+        <h2 className="text-2xl font-semibold mb-6" style={{ color: '#0F1720' }}>
+          How VarTracker works
+        </h2>
+        <ol className="space-y-4 mb-12">
+          {steps.map((step, i) => (
+            <li
+              key={step.title}
+              className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex gap-4"
+            >
+              <span
+                className="flex-none w-8 h-8 rounded-full text-white text-sm font-semibold flex items-center justify-center"
+                style={{ backgroundColor: '#0057B8' }}
+                aria-hidden="true"
+              >
+                {i + 1}
+              </span>
+              <div>
+                <h3 className="text-lg font-semibold mb-1" style={{ color: '#0F1720' }}>
+                  {step.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">{step.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        <h2 className="text-2xl font-semibold mb-4" style={{ color: '#0F1720' }}>
+          Who it is for
+        </h2>
+        <ul className="list-disc pl-6 space-y-2 mb-12 text-gray-600 leading-relaxed">
+          {audience.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+
         <h2 className="text-2xl font-semibold mb-6" style={{ color: '#0F1720' }}>
           Frequently asked questions
         </h2>
@@ -128,6 +239,17 @@ export default function AboutPage() {
               <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
             </section>
           ))}
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/register"
+            className="inline-block rounded-lg px-5 py-3 text-base font-medium text-white"
+            style={{ backgroundColor: '#0057B8' }}
+          >
+            Start your 7-day free trial
+          </Link>
+          <p className="text-sm mt-3 text-gray-600">No card needed. Cancel any time.</p>
         </div>
       </main>
     </div>

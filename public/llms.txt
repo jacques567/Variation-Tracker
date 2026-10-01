@@ -1,0 +1,10 @@
+# VarTracker
+
+> VarTracker is a variation (change order) tracking app for UK contractors and trades. Contractors log job variations, send them to the client, and collect electronic sign-off before extra work goes ahead, then export an invoice that includes every signed variation.
+
+## Pages
+
+- [What is VarTracker? (FAQ)](https://www.vartracker.com/about): what a variation order is, how to track one, how client sign-off works, and how signed variations roll into invoices.
+- [Terms and Conditions](https://www.vartracker.com/terms)
+- [Privacy Policy](https://www.vartracker.com/privacy)
+- [Cookie Policy](https://www.vartracker.com/cookies)

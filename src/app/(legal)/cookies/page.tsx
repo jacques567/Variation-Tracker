@@ -1,6 +1,7 @@
 import { cookiePolicy } from '@/lib/legal-content';
 
 export const metadata = {
+  alternates: { canonical: '/cookies' },
   title: 'Cookie Policy — VarTracker',
   description: 'What cookies VarTracker uses and how to control them.',
 };

@@ -17,6 +17,7 @@ const diamondPattern = {
 };
 
 export const metadata = {
+  alternates: { canonical: '/about' },
   title: 'What is VarTracker? — Variation Order Tracking for Contractors',
   description:
     'VarTracker is a variation-tracking app that lets contractors log job variations, notify clients instantly, and collect legally binding electronic sign-off before work proceeds.',

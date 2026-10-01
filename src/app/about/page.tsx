@@ -84,6 +84,11 @@ const faqs = [
       "Yes — once a variation is signed off, VarTracker rolls its cost into the job's running total, and you can export an invoice that reflects the original contract value plus every signed variation. That way nothing agreed on site gets forgotten or left off the final bill.",
   },
   {
+    question: 'Can a signed variation be changed or deleted afterwards?',
+    answer:
+      "No — once a client signs, VarTracker locks the variation so it can't be edited or deleted, and a job holding signed variations can't be hard-deleted either; you archive it instead. Signed variations are kept as a contractual record for up to six years, so if a dispute comes up, the approved wording and signature are still there.",
+  },
+  {
     question: 'Is an electronic sign-off valid evidence in the UK?',
     answer:
       'VarTracker records the client\'s electronic signature, name, IP address and the time of signing. Under the Electronic Communications Act 2000 s.7, electronic signatures are admissible as evidence in the UK. The full record is reproduced on the exported variation PDF and invoice. VarTracker is not a law firm, so for a large or contested sum take legal advice.',

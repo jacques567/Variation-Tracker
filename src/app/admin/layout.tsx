@@ -1,6 +1,7 @@
-import Link from 'next/link'
+import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import AdminNav from '@/components/admin/AdminNav'
 import ExitAdminButton from '@/components/admin/ExitAdminButton'
 
 export default async function AdminLayout({
@@ -29,26 +30,36 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/admin" className="font-semibold text-gray-900">
-            Admin
-          </Link>
-          <nav className="flex gap-6">
-            <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-900">
-              Dashboard
-            </Link>
-            <Link href="/admin/contractors" className="text-sm text-gray-600 hover:text-gray-900">
-              Contractors
-            </Link>
-          </nav>
-          <ExitAdminButton />
-        </div>
-      </header>
-      <main className="flex-1 max-w-6xl mx-auto px-4 py-8 w-full">
-        {children}
-      </main>
+    <div className="relative min-h-screen bg-vt-light overflow-hidden">
+      <Image
+        src="/images/bg-app.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover opacity-50"
+      />
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <header className="bg-[#0F1720] border-b border-[#1F2937]">
+          <div className="max-w-[1152px] mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Image
+                src="/VarTrackerLogo3Trans.png"
+                alt=""
+                width={34}
+                height={34}
+                className="h-[34px] w-[34px] object-contain"
+              />
+              <span className="text-base font-bold text-white">Admin</span>
+              <AdminNav />
+            </div>
+            <ExitAdminButton />
+          </div>
+        </header>
+        <main className="flex-1 max-w-[1152px] mx-auto px-4 py-7 w-full pb-12">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

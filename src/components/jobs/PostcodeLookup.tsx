@@ -105,7 +105,7 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
     onAddressChange('')
   }
 
-  const inputClass = 'w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500'
+  const inputClass = 'w-full h-[42px] rounded-[10px] border border-[#AEB8C7] px-3.5 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15'
 
   if (USE_IDEAL_POSTCODES && mode !== 'manual') {
     return (
@@ -118,7 +118,7 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
         <button
           type="button"
           onClick={switchToManual}
-          className="mt-1.5 text-xs text-blue-600 hover:underline"
+          className="mt-1.5 text-xs text-vt-primary hover:underline"
         >
           or enter address manually
         </button>
@@ -137,11 +137,11 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
           className={inputClass}
           placeholder="14 Maple Street, Manchester, M1 1AB"
         />
-        {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
+        {error && <p className="mt-1.5 text-xs text-vt-error">{error}</p>}
         <button
           type="button"
           onClick={switchToLookup}
-          className="mt-1.5 text-xs text-blue-600 hover:underline"
+          className="mt-1.5 text-xs text-vt-primary hover:underline"
         >
           Use postcode lookup instead
         </button>
@@ -165,12 +165,12 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
           type="text"
           readOnly
           value={`${postcodeResult.adminDistrict}${postcodeResult.county ? ', ' + postcodeResult.county : ''}, ${postcodeResult.postcode}`}
-          className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm bg-gray-50 text-gray-500 cursor-default"
+          className="w-full h-[42px] rounded-[10px] border border-vt-border px-3.5 text-sm bg-[#F7F9FB] text-vt-muted cursor-default"
         />
         <button
           type="button"
           onClick={switchToManual}
-          className="text-xs text-blue-600 hover:underline"
+          className="text-xs text-vt-primary hover:underline"
         >
           Enter address manually instead
         </button>
@@ -187,23 +187,23 @@ export default function PostcodeLookup({ onAddressChange, initialValue = '' }: P
           value={postcode}
           onChange={e => { setPostcode(e.target.value.toUpperCase()); setError(null) }}
           onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleFind())}
-          className="flex-1 rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+          className={`flex-1 ${inputClass} uppercase`}
           placeholder="e.g. M1 1AB"
         />
         <button
           type="button"
           onClick={handleFind}
           disabled={loading}
-          className="rounded-lg bg-blue-600 text-white px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors whitespace-nowrap"
+          className="rounded-[10px] bg-vt-dark text-white px-4 h-[42px] text-sm font-semibold hover:bg-[#1a2532] disabled:opacity-50 transition-colors whitespace-nowrap"
         >
           {loading ? 'Finding…' : 'Find address'}
         </button>
       </div>
-      {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1.5 text-xs text-vt-error">{error}</p>}
       <button
         type="button"
         onClick={switchToManual}
-        className="mt-1.5 text-xs text-blue-600 hover:underline"
+        className="mt-1.5 text-xs text-vt-primary hover:underline"
       >
         or enter address manually
       </button>

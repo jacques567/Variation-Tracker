@@ -41,7 +41,6 @@ export default function CategoriesPage() {
       if (!user) { router.push('/login'); return }
       setUserId(user.id)
 
-      // Fetch categories
       const { data: cats, error: catsError } = await supabase
         .from('job_categories')
         .select('*')
@@ -50,7 +49,6 @@ export default function CategoriesPage() {
 
       if (catsError) throw catsError
 
-      // Fetch all jobs and count
       const { data: jobs } = await supabase
         .from('jobs')
         .select('id, category, job_name, client_name')
@@ -187,50 +185,52 @@ export default function CategoriesPage() {
     }
   }
 
+  const inputClass = 'w-full h-[42px] rounded-[10px] border border-[#AEB8C7] px-3.5 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15'
+
   return (
     <div>
-      <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-6 bg-none border-none cursor-pointer">
+      <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-vt-muted hover:text-vt-dark mb-5 bg-none border-none cursor-pointer">
         <ArrowLeft className="w-4 h-4" /> Back to jobs
       </button>
 
       {returnTo && (
-        <span className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 rounded-md px-2 py-1 mb-3">
+        <span className="inline-block text-xs font-semibold text-vt-primary bg-[#E5EEFA] rounded-md px-2 py-1 mb-3">
           Continuing job creation
         </span>
       )}
 
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">Job Categories</h1>
+      <h1 className="text-2xl font-semibold text-vt-dark mb-[22px]">Job Categories</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-[280px_1fr] gap-5 items-start">
         {/* Create category form */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">New Category</h2>
-          <form onSubmit={handleCreate} className="space-y-3">
+        <div className="bg-white rounded-xl border border-vt-border p-5">
+          <h2 className="text-sm font-semibold text-vt-dark mb-3.5">New Category</h2>
+          <form onSubmit={handleCreate} className="flex flex-col gap-2.5">
             <input
               type="text"
               value={newCategoryName}
               onChange={(e) => setNewCategoryName(e.target.value)}
-              placeholder="e.g. March 2025, Manchester projects"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. Kitchens, Bathrooms, Extensions"
+              className={inputClass}
             />
             <button
               type="submit"
               disabled={creating || !newCategoryName.trim()}
-              className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-vt-primary text-white rounded-[10px] px-4 py-[11px] text-sm font-semibold hover:bg-vt-primary-hover disabled:opacity-50 transition-colors flex items-center justify-center gap-1.5"
             >
               <Plus className="w-4 h-4" />
-              {creating ? 'Creating...' : 'Create'}
+              {creating ? 'Creating…' : 'Create'}
             </button>
           </form>
 
           {returnTo && categories.length > 0 && (
             <>
-              <hr className="border-gray-100 my-4" />
-              <label className="block text-xs text-gray-500 mb-1.5">Select category to use</label>
+              <hr className="border-vt-border my-4" />
+              <label className="block text-xs text-vt-muted mb-1.5">Select category to use</label>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+                className={`${inputClass} mb-3`}
               >
                 <option value="">-- No category --</option>
                 {categories.map(cat => (
@@ -239,7 +239,7 @@ export default function CategoriesPage() {
               </select>
               <button
                 onClick={confirmAndReturn}
-                className="w-full border border-blue-600 text-blue-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-blue-50 transition-colors"
+                className="w-full border border-vt-primary text-vt-primary rounded-[10px] px-4 py-[11px] text-sm font-semibold hover:bg-[#E5EEFA] transition-colors"
               >
                 Confirm & continue job
               </button>
@@ -247,105 +247,107 @@ export default function CategoriesPage() {
           )}
         </div>
 
-        {/* Uncategorized Jobs section */}
-        {uncategorizedJobs.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">Assign Jobs to Categories ({uncategorizedJobs.length})</h2>
-            <div className="space-y-2">
-              {uncategorizedJobs.map(job => (
-                <div key={job.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{job.job_name}</p>
-                    <p className="text-xs text-gray-500">{job.client_name}</p>
+        <div className="flex flex-col gap-5">
+          {/* Uncategorized Jobs section */}
+          {uncategorizedJobs.length > 0 && (
+            <div className="bg-white rounded-xl border border-vt-border p-5">
+              <h2 className="text-sm font-semibold text-vt-dark mb-3.5">Assign Jobs to Categories ({uncategorizedJobs.length})</h2>
+              <div className="flex flex-col gap-2">
+                {uncategorizedJobs.map(job => (
+                  <div key={job.id} className="flex items-center justify-between p-3 px-3.5 bg-[#F7F9FB] rounded-[10px]">
+                    <div>
+                      <p className="text-sm font-semibold text-vt-dark">{job.job_name}</p>
+                      <p className="text-xs text-vt-muted mt-0.5">{job.client_name}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      {assigningJobId === job.id ? (
+                        <select
+                          autoFocus
+                          onChange={(e) => {
+                            if (e.target.value) {
+                              assignJobToCategory(job.id, e.target.value)
+                            }
+                          }}
+                          className="px-2 py-1 text-xs border border-[#AEB8C7] rounded-lg bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15"
+                        >
+                          <option value="">-- Select category --</option>
+                          {categories.map(cat => (
+                            <option key={cat.id} value={cat.name}>{cat.name}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <button
+                          onClick={() => setAssigningJobId(job.id)}
+                          className="px-3.5 py-1.5 text-sm font-semibold bg-vt-primary text-white rounded-lg hover:bg-vt-primary-hover transition-colors"
+                        >
+                          Assign
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    {assigningJobId === job.id ? (
-                      <select
-                        autoFocus
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            assignJobToCategory(job.id, e.target.value)
-                          }
-                        }}
-                        className="px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">-- Select category --</option>
-                        {categories.map(cat => (
-                          <option key={cat.id} value={cat.name}>{cat.name}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <button
-                        onClick={() => setAssigningJobId(job.id)}
-                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-                      >
-                        Assign
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-      {/* Categories list */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">All Categories</h2>
-
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex gap-2">
-              <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-
-          {deleteWarning && (
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800 mb-3">{deleteWarning}</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setDeleteWarning(null)}
-                  className="px-3 py-1.5 text-sm border border-yellow-300 rounded hover:bg-yellow-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    const cat = categories.find(c => c.job_count > 0)
-                    if (cat) confirmDelete(cat.id)
-                  }}
-                  className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-                >
-                  Delete Anyway
-                </button>
+                ))}
               </div>
             </div>
           )}
 
-          {loading ? (
-            <CategoryListSkeleton />
-          ) : categories.length === 0 ? (
-            <p className="text-sm text-gray-500">No categories yet. Create one to get started!</p>
-          ) : (
-            <div className="space-y-2">
-              {categories.map(cat => (
-                <div key={cat.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{cat.name}</p>
-                    <p className="text-xs text-gray-500">{cat.job_count} job{cat.job_count === 1 ? '' : 's'}</p>
-                  </div>
+          {/* Categories list */}
+          <div className="bg-white rounded-xl border border-vt-border p-5">
+            <h2 className="text-sm font-semibold text-vt-dark mb-3.5">All Categories</h2>
+
+            {error && (
+              <div className="mb-4 p-3 bg-vt-error-bg border border-vt-error/20 rounded-xl flex gap-2">
+                <AlertCircle className="w-4 h-4 text-vt-error flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-vt-error">{error}</p>
+              </div>
+            )}
+
+            {deleteWarning && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+                <p className="text-sm text-yellow-800 mb-3">{deleteWarning}</p>
+                <div className="flex gap-2">
                   <button
-                    onClick={() => handleDelete(cat.id, cat.name, cat.job_count)}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                    title="Delete category"
+                    onClick={() => setDeleteWarning(null)}
+                    className="px-3 py-1.5 text-sm border border-yellow-300 rounded-lg hover:bg-yellow-100"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      const cat = categories.find(c => c.job_count > 0)
+                      if (cat) confirmDelete(cat.id)
+                    }}
+                    className="px-3 py-1.5 text-sm bg-vt-error text-white rounded-lg hover:opacity-90"
+                  >
+                    Delete Anyway
                   </button>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            )}
+
+            {loading ? (
+              <CategoryListSkeleton />
+            ) : categories.length === 0 ? (
+              <p className="text-sm text-vt-muted">No categories yet. Create one to get started!</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {categories.map(cat => (
+                  <div key={cat.id} className="flex items-center justify-between p-3 px-3.5 bg-[#F7F9FB] rounded-[10px] hover:bg-gray-100 transition-colors">
+                    <div>
+                      <p className="text-sm font-semibold text-vt-dark">{cat.name}</p>
+                      <p className="text-xs text-vt-muted mt-0.5">{cat.job_count} job{cat.job_count === 1 ? '' : 's'}</p>
+                    </div>
+                    <button
+                      onClick={() => handleDelete(cat.id, cat.name, cat.job_count)}
+                      className="p-3.5 -m-3.5 text-[#7C8798] hover:text-vt-error hover:bg-red-50 rounded transition-colors"
+                      aria-label={`Delete ${cat.name} category`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

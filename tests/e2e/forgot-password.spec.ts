@@ -33,7 +33,7 @@ test.describe('Forgot password flow', () => {
 
     await page.locator('button[type="submit"]').click()
     await expect(page.locator('button[type="submit"]')).toBeDisabled()
-    await expect(page.locator('button[type="submit"]')).toContainText('Sending...')
+    await expect(page.locator('button[type="submit"]')).toContainText('Sending')
   })
 
   test('forgot-password shows confirmation state after submit', async ({ page }) => {

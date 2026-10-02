@@ -10,7 +10,10 @@ function formatCurrency(pence: number): string {
 
 function buildDeclaration(name: string, cost: number): string {
   const who = name.trim() ? ` I ${name.trim()}` : ''
-  return `By signing,${who} confirm I authorise this variation and the additional cost of ${formatCurrency(cost)}.`
+  const costPhrase = cost < 0
+    ? `the resulting reduction of ${formatCurrency(Math.abs(cost))}`
+    : `the additional cost of ${formatCurrency(cost)}`
+  return `By signing,${who} confirm I authorise this variation and ${costPhrase}.`
 }
 
 export default function SignatureForm({
@@ -36,25 +39,30 @@ export default function SignatureForm({
   // from here means the displayed and recorded declarations cannot drift apart.
   const declarationText = buildDeclaration(clientName, cost)
 
-  useEffect(() => {
-    async function fetchCsrfToken() {
-      const cached = typeof window !== 'undefined' ? sessionStorage.getItem('csrfToken') : null
-      if (cached) {
-        setCsrfToken(cached)
-        return
+  // The token is single-use server-side — verifyCsrfToken() marks it consumed
+  // on *any* /api/sign attempt, even one that goes on to fail a later check
+  // (e.g. content_mismatch). Without a refetch, a retry after such a failure
+  // reuses the now-dead cached token and fails again with "Invalid security
+  // token" instead of the real error — so this is pulled out for reuse.
+  async function fetchCsrfToken() {
+    try {
+      const res = await fetch('/api/csrf-token')
+      const data = await res.json()
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('csrfToken', data.csrfToken)
       }
+      setCsrfToken(data.csrfToken)
+    } catch (err) {
+      console.error('Failed to fetch CSRF token:', err)
+      setError('Failed to load security token. Please refresh the page.')
+    }
+  }
 
-      try {
-        const res = await fetch('/api/csrf-token')
-        const data = await res.json()
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('csrfToken', data.csrfToken)
-        }
-        setCsrfToken(data.csrfToken)
-      } catch (err) {
-        console.error('Failed to fetch CSRF token:', err)
-        setError('Failed to load security token. Please refresh the page.')
-      }
+  useEffect(() => {
+    const cached = typeof window !== 'undefined' ? sessionStorage.getItem('csrfToken') : null
+    if (cached) {
+      setCsrfToken(cached)
+      return
     }
     fetchCsrfToken()
   }, [])
@@ -130,6 +138,12 @@ export default function SignatureForm({
       if (!res.ok) {
         setError(data.message || 'Failed to save signature. Please try again.')
         setLoading(false)
+        // The token behind this failed attempt is now consumed server-side
+        // regardless of why it failed — get a fresh one so an immediate retry
+        // doesn't surface an unrelated "Invalid security token" error.
+        if (typeof window !== 'undefined') sessionStorage.removeItem('csrfToken')
+        setCsrfToken(null)
+        fetchCsrfToken()
         return
       }
 
@@ -146,32 +160,42 @@ export default function SignatureForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-vt-border p-5 flex flex-col gap-3.5 shadow-[0_1px_2px_rgba(15,23,32,0.04)]">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Your full name</label>
+        <label className="block text-sm font-semibold text-vt-dark mb-1.5">Your full name</label>
         <input
           type="text"
           value={clientName}
           onChange={(e) => setClientName(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full h-[42px] rounded-[10px] border border-[#AEB8C7] px-3.5 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15"
           placeholder="John Smith"
           required
         />
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-1">
-          <label className="block text-sm font-medium text-gray-700">Signature</label>
-          <button type="button" onClick={clearSignature} className="text-xs text-gray-400 hover:text-gray-600">
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-sm font-semibold text-vt-dark">Signature</label>
+          <button type="button" onClick={clearSignature} className="text-xs text-vt-muted hover:text-vt-dark py-3.5 px-2 -my-3.5 -mx-2">
             Clear
           </button>
         </div>
-        <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden">
+        <div className="rounded-[10px] border-2 border-dashed border-[#AEB8C7] bg-[#F7F9FB] overflow-hidden" style={{ height: 150 }}>
+          {/*
+            No explicit width/height in canvasProps: react-signature-canvas's
+            _resizeCanvas() only devicePixelRatio-scales a dimension when that
+            dimension is left undefined. Passing height={150} here previously
+            left the canvas's backing-store height unscaled on retina devices
+            while the drawing context was still uniformly scaled by the ratio —
+            so strokes below roughly the top half/third of the box (depending
+            on DPR) were drawn outside the physical backing store and clipped.
+            Letting both axes come from CSS (h-full/w-full on the parent's
+            fixed 150px box) means both get scaled correctly.
+          */}
           <SignatureCanvas
             ref={sigRef}
             canvasProps={{
-              className: 'w-full',
-              height: 160,
+              className: 'w-full h-full',
             }}
             backgroundColor="transparent"
             clearOnResize={false}
@@ -183,30 +207,30 @@ export default function SignatureForm({
             }}
           />
         </div>
-        <p className="text-xs text-gray-400 mt-1">Draw your signature above</p>
+        <p className="text-xs text-vt-muted mt-1.5">Draw your signature above</p>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+        <p className="text-sm text-vt-error bg-vt-error-bg rounded-[10px] px-3 py-2">{error}</p>
       )}
 
       {emailWarning && (
-        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{emailWarning}</p>
+        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-[10px] px-3 py-2">{emailWarning}</p>
       )}
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">
+      <div className="rounded-[10px] border border-[#FDE68A] bg-[#FFFBEB] px-3.5 py-3 text-sm font-medium text-[#92400E] leading-relaxed">
         {declarationText}
       </div>
 
       <button
         type="submit"
         disabled={loading || !csrfToken || isEmpty}
-        className="w-full bg-blue-600 text-white rounded-lg px-4 py-3 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
+        className="w-full bg-vt-primary text-white rounded-[10px] px-4 py-[13px] text-sm font-semibold hover:bg-vt-primary-hover disabled:opacity-50 transition-colors"
       >
-        {loading ? 'Submitting...' : 'Sign and agree'}
+        {loading ? 'Submitting…' : 'Sign and agree'}
       </button>
 
-      <p className="text-xs text-gray-400 text-center">
+      <p className="text-xs text-vt-muted text-center leading-relaxed">
         Your electronic signature, name, IP address and the time of signing are recorded, and are
         admissible as evidence under the Electronic Communications Act 2000.
       </p>

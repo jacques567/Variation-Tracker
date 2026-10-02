@@ -113,16 +113,16 @@ export default function JobsPage() {
         <div
           role="status"
           aria-live="polite"
-          className="mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
+          className="mb-4 bg-vt-success-bg border border-vt-success/20 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
         >
-          <div className="flex items-center gap-2 text-sm text-green-800">
+          <div className="flex items-center gap-2 text-sm text-vt-success">
             <CheckCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
             <span>You&apos;re subscribed. Full access unlocked.</span>
           </div>
           <button
             onClick={() => setShowSubscribedBanner(false)}
             aria-label="Dismiss"
-            className="text-green-600 hover:text-green-800 transition-colors"
+            className="text-vt-success hover:opacity-70 transition-opacity"
           >
             <X className="w-4 h-4" />
           </button>
@@ -130,21 +130,21 @@ export default function JobsPage() {
       )}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Jobs</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{jobs?.length ?? 0} total</p>
+          <h1 className="text-2xl font-semibold text-vt-dark">Jobs</h1>
+          <p className="text-sm text-vt-muted mt-0.5">{jobs?.length ?? 0} total</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <Link
             href="/categories"
-            className="px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 text-sm text-vt-dark border border-vt-border rounded-[10px] bg-white hover:bg-gray-50 transition-colors"
           >
             Manage categories
           </Link>
           <Link
             href="/jobs/new"
-            className="flex items-center gap-2 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1.5 bg-vt-primary text-white rounded-[10px] px-4.5 py-2 text-sm font-semibold hover:bg-vt-primary-hover transition-colors"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4" aria-hidden="true" />
             New job
           </Link>
         </div>
@@ -160,10 +160,10 @@ export default function JobsPage() {
       <div className="mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => router.push('/jobs')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-colors ${
             !selectedCategory
-              ? 'bg-blue-100 text-blue-700'
-              : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+              ? 'bg-vt-primary-tint text-vt-primary'
+              : 'border border-vt-border text-vt-label hover:bg-gray-50'
           }`}
         >
           All Jobs ({jobs.length})
@@ -174,10 +174,10 @@ export default function JobsPage() {
             <button
               key={cat.id}
               onClick={() => router.push(`/jobs?category=${encodeURIComponent(cat.name)}`)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-colors ${
                 selectedCategory === cat.name
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  ? 'bg-vt-primary-tint text-vt-primary'
+                  : 'border border-vt-border text-vt-label hover:bg-gray-50'
               }`}
             >
               {cat.name} ({count})
@@ -187,10 +187,10 @@ export default function JobsPage() {
         {uncategorizedCount > 0 && (
           <button
             onClick={() => router.push('/jobs?category=uncategorized')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-colors ${
               selectedCategory === 'uncategorized'
-                ? 'bg-blue-100 text-blue-700'
-                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'bg-vt-primary-tint text-vt-primary'
+                : 'border border-vt-border text-vt-label hover:bg-gray-50'
             }`}
           >
             Uncategorized ({uncategorizedCount})
@@ -199,12 +199,12 @@ export default function JobsPage() {
       </div>
 
       {!filteredJobs.length ? (
-        <div className="text-center py-16 text-gray-400">
-          <p className="font-medium">No jobs yet</p>
-          <p className="text-sm mt-1">Create your first job to get started</p>
+        <div className="text-center py-16 text-vt-muted">
+          <p className="font-medium text-vt-dark">No jobs yet</p>
+          <p className="text-sm mt-1">Create a job to continue</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {filteredJobs.map((job) => (
             <JobCard key={job.id} job={job} />
           ))}

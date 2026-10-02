@@ -120,60 +120,60 @@ export default function AdminDashboard({
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Dashboard</h1>
+      <h1 className="text-[22px] font-semibold text-vt-dark mb-[22px]">Dashboard</h1>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Total Contractors</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{contractorCount}</p>
+      {/* Metrics Grid — 5 columns */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-[14px] mb-6">
+        <div className="bg-white rounded-xl border border-vt-border p-[18px]">
+          <p className="text-[13px] text-vt-muted">Total Contractors</p>
+          <p className="text-[26px] font-bold text-vt-dark mt-2">{contractorCount}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Active Subscriptions</p>
-          <p className="text-3xl font-bold text-green-600 mt-2">{activeSubscriptions}</p>
+        <div className="bg-white rounded-xl border border-vt-border p-[18px]">
+          <p className="text-[13px] text-vt-muted">Active Subscriptions</p>
+          <p className="text-[26px] font-bold text-vt-success mt-2">{activeSubscriptions}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Total Jobs</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{totalJobs}</p>
+        <div className="bg-white rounded-xl border border-vt-border p-[18px]">
+          <p className="text-[13px] text-vt-muted">Total Jobs</p>
+          <p className="text-[26px] font-bold text-vt-dark mt-2">{totalJobs}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Signed Variations</p>
-          <p className="text-3xl font-bold text-blue-600 mt-2">{signedVariations.length}</p>
+        <div className="bg-white rounded-xl border border-vt-border p-[18px]">
+          <p className="text-[13px] text-vt-muted">Signed Variations</p>
+          <p className="text-[26px] font-bold text-vt-primary mt-2">{signedVariations.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <p className="text-sm text-gray-500">Pending Signatures</p>
-          <p className="text-3xl font-bold text-amber-600 mt-2">{pendingVariations.length}</p>
+        <div className="bg-white rounded-xl border border-vt-border p-[18px]">
+          <p className="text-[13px] text-vt-muted">Awaiting Signature</p>
+          <p className="text-[26px] font-bold text-[#B45309] mt-2">{pendingVariations.length}</p>
         </div>
       </div>
 
       {/* Three-box layout: Recently Created Jobs, Pending Signatures, Recently Signed */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Recent Jobs */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Recently Created Jobs</h2>
-          <div className="space-y-3">
+        <div className="bg-white rounded-xl border border-vt-border p-[18px]">
+          <h2 className="text-[14px] font-semibold text-vt-dark mb-[14px]">Recently Created Jobs</h2>
+          <div className="flex flex-col gap-2">
             {recentJobs.map(job => (
               <Link
                 key={job.id}
                 href={`/admin/contractors/${job.contractor_id}`}
-                className="block p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"
+                className="block px-3 py-[11px] bg-[#F7F9FB] rounded-[9px] hover:bg-[#E5EEFA] transition-colors"
               >
-                <p className="text-sm font-medium text-gray-900">{job.job_name}</p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-[13px] font-semibold text-vt-dark">{job.job_name}</p>
+                <p className="text-[12px] text-vt-muted mt-0.5">
                   {contractorById.get(job.contractor_id)} · {formatDate(job.created_at)}
                 </p>
               </Link>
             ))}
             {recentJobs.length === 0 && (
-              <p className="text-sm text-gray-500">No jobs yet</p>
+              <p className="text-sm text-vt-muted">No jobs yet</p>
             )}
           </div>
         </div>
 
-        {/* Pending Signatures */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Pending Signatures ({pendingVariations.length})</h2>
-          <div className="space-y-3">
+        {/* Awaiting Signature */}
+        <div className="bg-white rounded-xl border border-vt-border p-[18px]">
+          <h2 className="text-[14px] font-semibold text-vt-dark mb-[14px]">Awaiting Signature ({pendingVariations.length})</h2>
+          <div className="flex flex-col gap-2">
             {pendingVariations.slice(0, 5).map(variation => {
               const job = jobById.get(variation.job_id)
               const contractor = job ? contractorById.get(job.contractor_id) : null
@@ -181,39 +181,39 @@ export default function AdminDashboard({
                 <Link
                   key={variation.id}
                   href={`/admin/contractors/${job?.contractor_id}`}
-                  className="block p-3 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors border border-amber-200"
+                  className="block px-3 py-[11px] bg-[#FFFBEB] border border-[#FDE68A] rounded-[9px] hover:bg-[#FEF3C7] transition-colors"
                 >
-                  <p className="text-sm font-medium text-gray-900">{variation.description || job?.job_name}</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-[13px] font-semibold text-vt-dark">{variation.description || job?.job_name}</p>
+                  <p className="text-[12px] text-vt-muted mt-0.5">
                     {contractor} · {formatCurrency(variation.cost)}
                   </p>
                 </Link>
               )
             })}
             {pendingVariations.length === 0 && (
-              <p className="text-sm text-gray-500">No pending signatures</p>
+              <p className="text-sm text-vt-muted">No signatures awaiting</p>
             )}
           </div>
         </div>
 
         {/* Recent Signatures */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="font-semibold text-gray-900 mb-4">Recently Signed</h2>
-          <div className="space-y-3">
+        <div className="bg-white rounded-xl border border-vt-border p-[18px]">
+          <h2 className="text-[14px] font-semibold text-vt-dark mb-[14px]">Recently Signed</h2>
+          <div className="flex flex-col gap-2">
             {recentSignatures.map(sig => {
               const variation = variationById.get(sig.variation_id)
               const job = variation ? jobById.get(variation.job_id) : null
               return (
                 <div
                   key={sig.id}
-                  className="p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors"
+                  className="px-3 py-[11px] bg-[#F7F9FB] rounded-[9px]"
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-[13px] font-semibold text-vt-dark">
                         {job?.job_name || 'Unknown Job'}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-[12px] text-vt-muted mt-0.5">
                         Signed by {sig.client_name} · {formatDate(sig.signed_at)}
                       </p>
                     </div>
@@ -223,7 +223,7 @@ export default function AdminDashboard({
               )
             })}
             {recentSignatures.length === 0 && (
-              <p className="text-sm text-gray-500">No signatures yet</p>
+              <p className="text-sm text-vt-muted">No signatures yet</p>
             )}
           </div>
         </div>

@@ -6,6 +6,8 @@ import { formatCurrency } from '@/lib/utils'
 import VariationRow from '@/components/variations/VariationRow'
 import ExportInvoiceButton from '@/components/variations/ExportInvoiceButton'
 import VariationsLiveUpdater from '@/components/variations/VariationsLiveUpdater'
+import PendingBanner from '@/components/variations/PendingBanner'
+import AnimatedAmount from '@/components/ui/AnimatedAmount'
 import type { Variation, Signature } from '@/types'
 import ClientEmailEdit from '@/components/jobs/ClientEmailEdit'
 
@@ -75,20 +77,16 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         <div className="bg-white rounded-xl border border-vt-border p-4 flex items-baseline justify-between gap-3 sm:block">
           <p className="text-xs text-vt-muted shrink-0">Signed variations</p>
           <p className={`text-[19px] font-bold sm:mt-1.5 tabular-nums ${signedTotal >= 0 ? 'text-vt-success' : 'text-vt-error'}`}>
-            {signedTotal >= 0 ? '+' : ''}{formatCurrency(signedTotal)}
+            <AnimatedAmount value={signedTotal} plusSign />
           </p>
         </div>
         <div className="bg-vt-primary rounded-xl p-4 flex items-baseline justify-between gap-3 sm:block">
           <p className="text-xs text-[#C7DDF7] shrink-0">Running total</p>
-          <p className="text-[19px] font-bold text-white sm:mt-1.5 tabular-nums">{formatCurrency(grandTotal)}</p>
+          <p className="text-[19px] font-bold text-white sm:mt-1.5 tabular-nums"><AnimatedAmount value={grandTotal} /></p>
         </div>
       </div>
 
-      {pendingTotal > 0 && (
-        <div className="bg-[#FFFBEB] border border-[#FDE68A] rounded-[10px] px-4 py-[11px] mb-6 text-[13px] text-[#92400E]">
-          {formatCurrency(pendingTotal)} in variations awaiting client sign-off
-        </div>
-      )}
+      <PendingBanner pendingTotal={pendingTotal} />
 
       {/* Variations */}
       <div className="flex items-center justify-between mb-3">

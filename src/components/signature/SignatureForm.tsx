@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
-import { useRouter } from 'next/navigation'
+import SignedConfirmation from './SignedConfirmation'
 
 function formatCurrency(pence: number): string {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(pence / 100)
@@ -25,7 +25,7 @@ export default function SignatureForm({
   token: string
   cost: number // in pence
 }) {
-  const router = useRouter()
+  const [signedAs, setSignedAs] = useState<string | null>(null)
   const sigRef = useRef<SignatureCanvas>(null)
   const [clientName, setClientName] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -151,12 +151,25 @@ export default function SignatureForm({
         setEmailWarning(data.emailWarning)
       }
 
-      router.refresh()
+      // No router.refresh() here: the server would swap this whole component
+      // for the plain "Already signed" page and the confirmation below would
+      // never be seen. A later visit to the link still lands on that page.
+      setSignedAs(clientName.trim())
     } catch (err) {
       console.error('Signature submission error:', err)
       setError('Failed to save signature. Please try again.')
       setLoading(false)
     }
+  }
+
+  if (signedAs) {
+    return (
+      <SignedConfirmation name={signedAs}>
+        {emailWarning && (
+          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-[10px] px-3 py-2">{emailWarning}</p>
+        )}
+      </SignedConfirmation>
+    )
   }
 
   return (

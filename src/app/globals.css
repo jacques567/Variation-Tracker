@@ -83,6 +83,46 @@ body {
   }
 }
 
+/* Feedback motion (signed tick, pop, toast, row entrance). Every animated class
+   sits inside the no-preference query, so reduced-motion users get the final
+   state instantly with no extra handling in components. */
+@keyframes vt-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes vt-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes vt-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vt-row-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* pathLength="1" on the SVG shapes lets one dash length work for any geometry. */
+.vt-tick-circle,
+.vt-tick-check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .vt-tick-circle { animation: vt-draw 0.5s ease-out both; }
+  .vt-tick-check { animation: vt-draw 0.35s ease-out 0.4s both; }
+  .vt-pop { animation: vt-pop 0.4s ease-out both; }
+  .vt-rise { animation: vt-rise 0.35s ease-out both; }
+  .vt-rise-late { animation: vt-rise 0.35s ease-out 0.3s both; }
+  .vt-row-in { animation: vt-row-in 0.4s ease-out both; }
+}
+
 /* iOS/Android auto-zoom the viewport on focus when a form field's font-size is under 16px. */
 @media (max-width: 767px) {
   input,

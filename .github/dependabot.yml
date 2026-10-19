@@ -1,0 +1,25 @@
+# Keeps pinned GitHub Actions (commit SHAs) and npm packages current, and opens
+# PRs for security fixes. Without this, SHA pins go stale.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # Major versions are upgraded deliberately, not by bot. Several broke CI
+    # on first try (typescript 7, eslint 10, @sentry/nextjs 11, @types/node 26).
+    # Minor/patch bumps and security fixes still arrive as PRs.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]

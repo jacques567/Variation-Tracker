@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Footer from "@/components/ui/Footer";
 import CookieBanner from "@/components/ui/CookieBanner";
 import SkipNav from "@/components/SkipNav";
+import { appUrl } from "@/lib/app-url";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,12 +15,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-const appUrl = process.env.NEXT_PUBLIC_APP_URL
-  ? process.env.NEXT_PUBLIC_APP_URL.startsWith("http")
-    ? process.env.NEXT_PUBLIC_APP_URL
-    : `https://${process.env.NEXT_PUBLIC_APP_URL}`
-  : "https://www.vartracker.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),

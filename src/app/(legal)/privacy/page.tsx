@@ -1,6 +1,7 @@
 import { privacyPolicy } from '@/lib/legal-content';
 
 export const metadata = {
+  alternates: { canonical: '/privacy' },
   title: 'Privacy Policy — VarTracker',
   description: 'How VarTracker collects, uses, and protects your personal data.',
 };

@@ -15,6 +15,7 @@ function renderWithLinks(text: string) {
 }
 
 export const metadata = {
+  alternates: { canonical: '/terms' },
   title: 'Terms and Conditions — VarTracker',
   description: 'Terms and Conditions governing use of the VarTracker service.',
 };

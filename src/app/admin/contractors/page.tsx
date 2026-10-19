@@ -78,33 +78,36 @@ export default function ContractorsPage() {
     return <div className="text-center py-12 text-gray-500">Loading...</div>
   }
 
+  const statusBadge = (status: string | null) => {
+    if (status === 'active') return 'text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#ECFDF5] text-vt-success'
+    if (status === 'trialing') return 'text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#E5EEFA] text-vt-primary'
+    if (status === 'past_due') return 'text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#FEF2F2] text-[#B91C1C]'
+    return 'text-[11px] px-2.5 py-0.5 rounded-full font-semibold bg-[#F3F4F6] text-[#4B5563]'
+  }
+
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Contractors</h1>
+      <h1 className="text-[22px] font-semibold text-vt-dark mb-[22px]">Contractors</h1>
 
       {/* Search & Filter */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="bg-white rounded-xl border border-vt-border p-[18px] mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_220px_1fr] gap-4 items-end">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Search
-            </label>
+            <label className="block text-[13px] font-semibold text-vt-dark mb-1.5">Search</label>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, email, or company..."
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Search by name, email, or company…"
+              className="w-full h-[40px] rounded-[9px] border border-[#AEB8C7] px-3 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Subscription Status
-            </label>
+            <label className="block text-[13px] font-semibold text-vt-dark mb-1.5">Subscription Status</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-[40px] rounded-[9px] border border-[#AEB8C7] px-3 text-sm bg-white text-vt-dark focus:outline-none focus:border-vt-primary focus:ring-4 focus:ring-vt-primary/15"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -113,57 +116,46 @@ export default function ContractorsPage() {
               <option value="canceled">Canceled</option>
             </select>
           </div>
-          <div className="flex items-end">
-            <p className="text-sm text-gray-600">
-              Showing {filtered.length} of {contractors.length} contractors
-            </p>
-          </div>
+          <p className="text-[13px] text-vt-muted pb-[9px]">
+            Showing {filtered.length} of {contractors.length} contractors
+          </p>
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left font-semibold text-gray-900">Email</th>
-              <th className="px-6 py-3 text-left font-semibold text-gray-900">Company</th>
-              <th className="px-6 py-3 text-left font-semibold text-gray-900">Status</th>
-              <th className="px-6 py-3 text-left font-semibold text-gray-900">Jobs</th>
-              <th className="px-6 py-3 text-left font-semibold text-gray-900">Last Login</th>
-              <th className="px-6 py-3 text-left font-semibold text-gray-900">Action</th>
+      <div className="bg-white rounded-xl border border-vt-border overflow-hidden">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="bg-[#F7F9FB] border-b border-vt-border">
+              <th className="px-5 py-3 text-left font-semibold text-vt-dark">Email</th>
+              <th className="px-5 py-3 text-left font-semibold text-vt-dark">Company</th>
+              <th className="px-5 py-3 text-left font-semibold text-vt-dark">Status</th>
+              <th className="px-5 py-3 text-left font-semibold text-vt-dark">Jobs</th>
+              <th className="px-5 py-3 text-left font-semibold text-vt-dark">Last Login</th>
+              <th className="px-5 py-3 text-left font-semibold text-vt-dark">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filtered.map(contractor => (
-              <tr key={contractor.id} className="hover:bg-gray-50 transition-colors">
-                <td className="px-6 py-4 text-gray-900 font-medium">
-                  {contractor.email}
-                </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {contractor.company_name || '—'}
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    contractor.subscription_status === 'active'
-                      ? 'bg-green-100 text-green-700'
-                      : contractor.subscription_status === 'trialing'
-                      ? 'bg-blue-100 text-blue-700'
-                      : contractor.subscription_status === 'past_due'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}>
+          <tbody>
+            {filtered.map((contractor, i) => (
+              <tr
+                key={contractor.id}
+                className={`hover:bg-[#F7F9FB] transition-colors ${i < filtered.length - 1 ? 'border-b border-[#EEF1F5]' : ''}`}
+              >
+                <td className="px-5 py-[14px] text-vt-dark font-medium">{contractor.email}</td>
+                <td className="px-5 py-[14px] text-[#4B5563]">{contractor.company_name || '—'}</td>
+                <td className="px-5 py-[14px]">
+                  <span className={statusBadge(contractor.subscription_status)}>
                     {contractor.subscription_status || 'none'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-gray-900">{contractor.job_count}</td>
-                <td className="px-6 py-4 text-gray-600 text-xs">
+                <td className="px-5 py-[14px] text-vt-dark">{contractor.job_count}</td>
+                <td className="px-5 py-[14px] text-vt-muted text-[13px]">
                   {contractor.last_login_at ? formatDate(contractor.last_login_at) : 'Never'}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-5 py-[14px]">
                   <Link
                     href={`/admin/contractors/${contractor.id}`}
-                    className="text-blue-600 hover:text-blue-700 font-medium text-xs"
+                    className="text-vt-primary font-semibold text-[13px] hover:underline"
                   >
                     View
                   </Link>
@@ -174,7 +166,7 @@ export default function ContractorsPage() {
         </table>
 
         {!filtered.length && (
-          <div className="p-12 text-center text-gray-500">
+          <div className="p-12 text-center text-vt-muted">
             <p>No contractors found</p>
           </div>
         )}

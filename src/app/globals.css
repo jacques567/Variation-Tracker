@@ -68,3 +68,25 @@ body {
     font-size: 16px;
   }
 }
+
+/* Coming soon launch video frame (src/components/ui/LaunchVideo.tsx).
+   Upright phones get the 9:16 cut; everything else gets 16:9. Sized in CSS so the
+   frame is right before the video loads. Keep the media queries in sync with
+   PORTRAIT_QUERY in LaunchVideo.tsx. */
+.launch-video-frame {
+  aspect-ratio: 9 / 16;
+  width: min(100%, calc(64svh * 9 / 16));
+}
+@media (min-width: 640px), (orientation: landscape) {
+  .launch-video-frame {
+    aspect-ratio: 16 / 9;
+    /* Leave room for the Coming Soon text below on laptop-height screens. */
+    width: min(100%, 48rem, calc((100svh - 16rem) * 16 / 9));
+  }
+}
+/* Phones held sideways: the video takes the screen height, the text scrolls below. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .launch-video-frame {
+    width: min(100%, 48rem, calc((100svh - 2rem) * 16 / 9));
+  }
+}

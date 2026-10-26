@@ -14,14 +14,14 @@ const LANDSCAPE: Cut = {
   poster: '/video/vartracker-launch-poster.jpg',
 }
 
-// Matches Tailwind's `sm` breakpoint, which the frame's CSS sizing also switches on.
-const PHONE_QUERY = '(max-width: 639px)'
+// Upright phones only. Must match `.launch-video-frame` in globals.css.
+const PORTRAIT_QUERY = '(max-width: 639px) and (orientation: portrait)'
 
 const controlClass =
   'flex h-11 items-center justify-center gap-2 rounded-full bg-black/70 text-sm font-medium text-white transition-colors hover:bg-black/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
 
 // Autoplays muted (browsers block autoplay with sound) and loops.
-// Phones get the 9:16 cut, everything else the 16:9 cut.
+// Upright phones get the 9:16 cut, everything else (incl. sideways phones) the 16:9 cut.
 // The frame is sized in CSS so it never jumps when the cut is picked after hydration.
 export default function LaunchVideo() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -31,17 +31,17 @@ export default function LaunchVideo() {
   const [playing, setPlaying] = useState(false)
 
   useEffect(() => {
-    const phoneQuery = window.matchMedia(PHONE_QUERY)
+    const portraitQuery = window.matchMedia(PORTRAIT_QUERY)
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     const update = () => {
-      setCut(phoneQuery.matches ? PORTRAIT : LANDSCAPE)
+      setCut(portraitQuery.matches ? PORTRAIT : LANDSCAPE)
       setReducedMotion(motionQuery.matches)
     }
     update()
-    phoneQuery.addEventListener('change', update)
+    portraitQuery.addEventListener('change', update)
     motionQuery.addEventListener('change', update)
     return () => {
-      phoneQuery.removeEventListener('change', update)
+      portraitQuery.removeEventListener('change', update)
       motionQuery.removeEventListener('change', update)
     }
   }, [])
@@ -67,7 +67,7 @@ export default function LaunchVideo() {
   }
 
   return (
-    <div className="relative mx-auto aspect-[9/16] w-[min(100%,calc(64svh*9/16))] overflow-hidden rounded-xl bg-[#0d1b2a] shadow-[0_12px_32px_rgba(0,0,0,0.45)] ring-1 ring-white/10 sm:aspect-video sm:w-[min(100%,48rem,calc((100svh_-_16rem)*16/9))]">
+    <div className="launch-video-frame relative mx-auto overflow-hidden rounded-xl bg-[#0d1b2a] shadow-[0_12px_32px_rgba(0,0,0,0.45)] ring-1 ring-white/10">
       {cut && (
         <video
           key={cut.src}

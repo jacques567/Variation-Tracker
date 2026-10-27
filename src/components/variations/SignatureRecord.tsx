@@ -24,14 +24,19 @@ export default function SignatureRecord({ signature, variationId }: Props) {
       <button
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className="flex items-center gap-1.5 w-full text-left text-xs text-green-700 hover:text-green-800 transition-colors"
+        // Bordered pill instead of plain text: the "Signed by..." line reads
+        // as a status message, not a control, unless it has its own visible
+        // button shape. "View/Hide record" text can disappear on a narrow
+        // card, so the chevron alone (shrink-0, never hidden) carries the
+        // affordance at any width.
+        className="flex items-center gap-1.5 w-full text-left text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg px-2.5 py-2 hover:bg-green-100 hover:border-green-300 active:bg-green-100 transition-colors"
       >
         <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
         <span className="flex-1 min-w-0 truncate">
           Signed by {signature.client_name} on {formatDate(signature.signed_at)}
         </span>
         <span className="flex items-center gap-0.5 shrink-0 text-gray-500">
-          {open ? 'Hide' : 'View'} record
+          <span className="hidden sm:inline">{open ? 'Hide' : 'View'} record</span>
           {open ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         </span>
       </button>

@@ -34,6 +34,25 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
   const [cancelError, setCancelError] = useState<string | null>(null)
   const router = useRouter()
 
+  // Pop the badge only when this row flips to Signed while the page is open,
+  // not on every load of an already-signed row. Adjusting state during render
+  // (rather than in an effect) avoids a frame of the old badge.
+  const [prevStatus, setPrevStatus] = useState(variation.status)
+  const [justSigned, setJustSigned] = useState(false)
+  if (variation.status !== prevStatus) {
+    setPrevStatus(variation.status)
+    setJustSigned(variation.status === 'signed')
+  }
+
+  // Slide in a row that was created moments ago (the contractor has just come
+  // back from "Log variation"). Age is judged on the client clock, so it is
+  // bounded on both sides to cope with skew, and the server/client class can
+  // differ at the edge of the window, hence suppressHydrationWarning below.
+  const [enters] = useState(() => {
+    const age = Date.now() - new Date(variation.created_at).getTime()
+    return age > -5000 && age < 8000
+  })
+
   // Firefox (desktop and Android) and older browsers don't implement the Web
   // Share API — they fall back to the copy-link button below.
   useEffect(() => {
@@ -147,13 +166,16 @@ export default function VariationRow({ variation, jobId, jobName, clientName, co
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
+    <div
+      suppressHydrationWarning
+      className={`bg-white rounded-xl border border-gray-200 p-4 ${enters ? 'vt-row-in' : ''}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="font-medium text-gray-900 text-sm">{variation.description}</p>
             {variation.status === 'signed' ? (
-              <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700">
+              <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-green-50 text-green-700 ${justSigned ? 'vt-pop' : ''}`}>
                 <CheckCircle2 className="w-3 h-3" />
                 Signed
               </span>

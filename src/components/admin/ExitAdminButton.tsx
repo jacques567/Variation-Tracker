@@ -20,7 +20,7 @@ export default function ExitAdminButton() {
     <button
       onClick={handleExit}
       disabled={loading}
-      className="text-sm text-gray-500 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="text-sm text-[#9AA6B5] border border-[#2C3A4C] rounded-lg px-3.5 py-2 hover:text-white hover:border-[#3D5166] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
     >
       {loading ? 'Signing out...' : 'Exit Admin'}
     </button>

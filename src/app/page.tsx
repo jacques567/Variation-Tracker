@@ -1,19 +1,12 @@
-import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import LaunchVideo from '@/components/ui/LaunchVideo'
 
 function LandingPage() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4" style={{ backgroundColor: '#0d1b2a' }}>
-      <div className="flex flex-col items-center text-center max-w-lg w-full gap-8">
-        <Image
-          src="/VarTrackerName3Trans.png"
-          alt="VarTracker"
-          width={1536}
-          height={700}
-          priority
-          className="w-full max-w-sm motion-safe:animate-[float_4.5s_ease-in-out_infinite] drop-shadow-[0_12px_24px_rgba(0,0,0,0.35)]"
-        />
+    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-6" style={{ backgroundColor: '#0d1b2a' }}>
+      <div className="flex flex-col items-center text-center max-w-3xl w-full gap-6">
+        <LaunchVideo />
 
         <div className="space-y-3">
           <h1 className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">

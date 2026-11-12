@@ -14,6 +14,29 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* VarTracker redesign tokens — see DESIGN.md. Scoped to rebuilt screens
+     (auth flow, jobs list) via their own font/layout wrappers; not applied
+     globally yet. */
+  --color-vt-primary: #0057b8;
+  --color-vt-primary-hover: #003d82;
+  --color-vt-primary-tint: #e5eefa;
+  --color-vt-dark: #0f1720;
+  --color-vt-light: #e6eaf0;
+  --color-vt-border: #aeb8c7;
+  --color-vt-muted: #6b7280;
+  --color-vt-muted-2: #4b5563;
+  --color-vt-label: #374151;
+  --color-vt-icon: #7c8798;
+  --color-vt-success-bg: #ecfdf5;
+  --color-vt-success: #047857;
+  --color-vt-warning-bg: #fffbeb;
+  --color-vt-warning: #92400e;
+  --color-vt-warning-pill: #b45309;
+  --color-vt-error-bg: #fef2f2;
+  --color-vt-error: #b91c1c;
+  --color-vt-neutral-bg: #f3f4f6;
+  --color-vt-neutral: #4b5563;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -58,6 +81,46 @@ body {
     animation: none;
     content: none;
   }
+}
+
+/* Feedback motion (signed tick, pop, toast, row entrance). Every animated class
+   sits inside the no-preference query, so reduced-motion users get the final
+   state instantly with no extra handling in components. */
+@keyframes vt-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes vt-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes vt-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vt-row-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* pathLength="1" on the SVG shapes lets one dash length work for any geometry. */
+.vt-tick-circle,
+.vt-tick-check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .vt-tick-circle { animation: vt-draw 0.5s ease-out both; }
+  .vt-tick-check { animation: vt-draw 0.35s ease-out 0.4s both; }
+  .vt-pop { animation: vt-pop 0.4s ease-out both; }
+  .vt-rise { animation: vt-rise 0.35s ease-out both; }
+  .vt-rise-late { animation: vt-rise 0.35s ease-out 0.3s both; }
+  .vt-row-in { animation: vt-row-in 0.4s ease-out both; }
 }
 
 /* iOS/Android auto-zoom the viewport on focus when a form field's font-size is under 16px. */

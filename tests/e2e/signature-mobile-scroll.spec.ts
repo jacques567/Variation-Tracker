@@ -104,23 +104,46 @@ test('signature survives an address-bar resize event mid-scroll', async ({ page 
 
   await page.goto(`/sign/${signatureToken}`);
 
+  // Wait for initial network activity to settle — specifically the CSRF token
+  // fetch that SignatureForm fires in useEffect. The submit button is
+  // disabled={loading || !csrfToken || isEmpty}; if csrfToken hasn't arrived
+  // by the time we check the button, the test fails even though isEmpty is
+  // correctly set to false after drawing.
+  await page.waitForLoadState('networkidle');
+
   const canvas = page.locator('canvas').first();
   await expect(canvas).toBeVisible();
 
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error('Signature canvas has no bounding box');
+  // The sign page can exceed the iPhone 13 viewport height (844px) when the
+  // variation card has multiple fields, pushing the canvas below the fold.
+  // Scroll it into view before computing the bounding box; raw touchscreen
+  // coordinates are viewport-relative and miss an off-screen canvas silently.
+  await canvas.scrollIntoViewIfNeeded();
 
-  // Draw a simple stroke via touch, as a real signer would.
-  const startX = box.x + box.width * 0.2;
-  const startY = box.y + box.height * 0.5;
-  const endX = box.x + box.width * 0.8;
-  const endY = box.y + box.height * 0.5;
+  if (!await canvas.boundingBox()) throw new Error('Signature canvas has no bounding box');
 
-  await page.touchscreen.tap(startX, startY);
-  await page.mouse.move(startX, startY);
-  await page.mouse.down();
-  await page.mouse.move(endX, endY, { steps: 10 });
-  await page.mouse.up();
+  // signature_pad registers both touch AND mouse event listeners unconditionally.
+  // Synthetic TouchEvent.changedTouches is unreliable across headless browsers —
+  // Chromium returns empty changedTouches, Firefox crashes the library's internal
+  // data array. MouseEvent avoids all of that: clientX/clientY are first-class
+  // constructor args, no TouchList involved. The mouseup listener is on document,
+  // so bubbling from the canvas is enough to reach it.
+  await canvas.evaluate((el: HTMLCanvasElement) => {
+    const rect = el.getBoundingClientRect();
+    const sx = rect.left + rect.width * 0.2;
+    const sy = rect.top + rect.height * 0.5;
+    const ex = rect.left + rect.width * 0.8;
+    const mk = (type: string, x: number, y: number) =>
+      new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: 1 });
+    el.dispatchEvent(mk('mousedown', sx, sy));
+    for (let i = 1; i <= 10; i++) {
+      const x = sx + (ex - sx) * (i / 10);
+      el.dispatchEvent(mk('mousemove', x, sy));
+    }
+    el.dispatchEvent(mk('mouseup', ex, sy));
+  });
+  // Allow React to flush the state update from onBegin before proceeding.
+  await page.waitForTimeout(100);
 
   const dataUrlBeforeResize = await canvas.evaluate((el: HTMLCanvasElement) => el.toDataURL());
   expect(dataUrlBeforeResize).not.toEqual(await blankCanvasDataUrl(page));
@@ -144,23 +167,30 @@ test('signature survives an orientation change (width resize)', async ({ page })
   test.skip(!supabase || !signatureToken, skipReason);
 
   await page.goto(`/sign/${signatureToken}`);
+  await page.waitForLoadState('networkidle');
 
   const canvas = page.locator('canvas').first();
   await expect(canvas).toBeVisible();
 
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error('Signature canvas has no bounding box');
+  await canvas.scrollIntoViewIfNeeded();
 
-  const startX = box.x + box.width * 0.2;
-  const startY = box.y + box.height * 0.5;
-  const endX = box.x + box.width * 0.8;
-  const endY = box.y + box.height * 0.5;
+  if (!await canvas.boundingBox()) throw new Error('Signature canvas has no bounding box');
 
-  await page.touchscreen.tap(startX, startY);
-  await page.mouse.move(startX, startY);
-  await page.mouse.down();
-  await page.mouse.move(endX, endY, { steps: 10 });
-  await page.mouse.up();
+  await canvas.evaluate((el: HTMLCanvasElement) => {
+    const rect = el.getBoundingClientRect();
+    const sx = rect.left + rect.width * 0.2;
+    const sy = rect.top + rect.height * 0.5;
+    const ex = rect.left + rect.width * 0.8;
+    const mk = (type: string, x: number, y: number) =>
+      new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, buttons: 1 });
+    el.dispatchEvent(mk('mousedown', sx, sy));
+    for (let i = 1; i <= 10; i++) {
+      const x = sx + (ex - sx) * (i / 10);
+      el.dispatchEvent(mk('mousemove', x, sy));
+    }
+    el.dispatchEvent(mk('mouseup', ex, sy));
+  });
+  await page.waitForTimeout(100);
 
   const blank = await blankCanvasDataUrl(page);
   const dataUrlBeforeRotate = await canvas.evaluate((el: HTMLCanvasElement) => el.toDataURL());
